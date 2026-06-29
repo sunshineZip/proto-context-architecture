@@ -118,10 +118,12 @@ Apply these in every session regardless of project type or how you entered the s
 → If the material produces knowledge worth keeping, promote it into the relevant domain or project output — do not leave it in temp
 
 **I want to start a new project**
+→ Ask the human: what should it be called, and what does done look like?
 → Copy `projects/_template/` to `projects/[project-name]/`
-→ Open `projects/[project-name]/TODO.md` and state the goal
-→ Open `projects/[project-name]/session-log.md` and write Turn 1 as a `[HUMAN]` entry
+→ Write Turn 1 in `projects/[project-name]/session-log.md` from the human's description — the human does not need to format or write this
+→ Update `projects/[project-name]/TODO.md` with the goal and any open items
 → Add a routing row in `ROUTING.md` Step 2
+→ Confirm to the human in plain language that the project is open and ready
 
 **This is a fresh fork with no domains or projects yet — where do I start?**
 

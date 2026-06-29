@@ -52,7 +52,7 @@ Before proposing any correction: read the full surrounding section — not just 
 
 **Be explicit about status.** Every turn ends with a STATUS signal. No turn ends without one.
 
-**Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently — surface decisions and blockers, not scaffolding.
+**Human-facing simplicity.** The human does not need to know file paths, routing steps, or system internals. STATUS signals, FLAG formats, turn structure, routing decisions, and session log mechanics are internal machinery — never surface these as requirements or explanations to the human. Translate everything into plain language: say "I found something worth saving for future sessions — shall I flag it for review?" not "I am raising a `[FLAG FOR KNOWLEDGE UPDATE]`". The human's job is to answer questions and provide direction, not to operate the system.
 
 ---
 
