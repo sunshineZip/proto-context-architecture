@@ -121,6 +121,20 @@ Apply these in every session regardless of project type or how you entered the s
 → Open `projects/[project-name]/session-log.md` and write Turn 1 as a `[HUMAN]` entry
 → Add a routing row in `ROUTING.md` Step 2
 
+**This is a fresh fork with no domains or projects yet — where do I start?**
+
+Follow this sequence. Do not create projects before domains exist — a project without domain knowledge loads nothing useful.
+
+1. **Identify your knowledge domains.** Ask the human: what are the distinct subject areas this initiative needs deep knowledge about? For a securities trading platform these might be: regulatory compliance, market data and feeds, order execution, risk management, platform infrastructure. Each becomes a domain.
+2. **Create each domain.** Copy `knowledge/domains/example-domain/` to `knowledge/domains/[domain-name]/`. Fill in `description.md` (scope, what belongs here, constraints) and stub out `knowledge.md` (Index and Executive Summary — content can be built over time).
+3. **Register each domain** in `knowledge/domains/index.md`.
+4. **Update the routing table** in `ROUTING.md` Step 2 — add one row per domain and one row per initial project.
+5. **Delete the example placeholders** — remove `knowledge/domains/example-domain/` and `projects/example-project/` once your real content exists.
+6. **Create your first project** — copy `projects/_template/`, rename, write Turn 1 in `session-log.md` stating the project goal.
+7. **Now start working** — routing will load the right domain knowledge for each session.
+
+> Domain knowledge documents start thin and grow. A stub with an Executive Summary and a few key facts is enough to begin. The LLM will surface what is missing as it works.
+
 ---
 
 ## Version History
@@ -128,3 +142,4 @@ Apply these in every session regardless of project type or how you entered the s
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Extracted from README.md — routing instructions now live here, README.md reserved for human readers. |
+| 1.1 | 2026-06-29 | Added first-time setup workflow to Quick Task Guide — covers domain-first initialization sequence for fresh forks. |
