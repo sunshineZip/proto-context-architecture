@@ -60,8 +60,7 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
         description.md                ← Domain scope, constraints, when to load
         knowledge.md                  ← Domain reference material
 
-  projects/
-    _template/                        ← Copy this when starting a new project
+  projects/    system/                           <- Pre-created — audit log for structural changes to this system    _template/                        ← Copy this when starting a new project
       session-log.md
       TODO.md
     [project-name]/

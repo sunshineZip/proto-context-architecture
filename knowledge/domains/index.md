@@ -8,6 +8,8 @@ Version 1.0 | 2026-06-29 | Production
 
 Registry of all knowledge domains in this context architecture. Add one entry per domain. The routing table in ROUTING.md Step 2 should have a corresponding row for each domain listed here.
 
+> **Edit guard:** Adding or removing domains is system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing this file.
+
 ---
 
 ## Registered Domains

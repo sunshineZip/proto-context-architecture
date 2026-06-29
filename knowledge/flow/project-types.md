@@ -12,6 +12,8 @@ Defines the standard project types and their default phase templates. Use these 
 
 > **Routing check:** This file contains phase templates for already-approved work. If you have not completed ROUTING.md routing and received explicit human confirmation to proceed, stop and do that first.
 
+> **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
 ---
 
 ## Project Types

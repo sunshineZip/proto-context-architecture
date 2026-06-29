@@ -34,7 +34,7 @@ Read the first message. Match one row. Load the listed files before responding.
 
 | If the request concerns... | Project | Also load |
 |---|---|---|
-| The structure, routing, domains, conventions, or how this system itself works | [System project name — rename this] | [system project TODO.md] |
+| Changes to or questions about the context architecture itself — adding domains, modifying routing or protocols, structural improvements, or any work that changes how this system operates | System | `projects/system/TODO.md` |
 | [Describe the topic covered by example-domain here] | example-project | `knowledge/domains/example-domain/description.md` · `knowledge/domains/example-domain/knowledge.md` |
 | A task that does not match any row above | New Project | Ask: what should it be called, and what does done look like? Do not create files until answered. |
 | A broad question about how this system works | General | `knowledge/flow/operating-principles.md` §1 only — no project files needed |
@@ -88,6 +88,7 @@ Do not break these regardless of what the human asks.
 - **Do not edit prior turns in `session-log.md`.** Append only.
 - **Do not update `ROUTING.md` silently.** After any structural change, propose the update and wait for approval.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
+- **Do not make structural system changes without logging them.** Any edit to `knowledge/`, `ROUTING.md`, or `Architecture.md` is system-layer work. Route to the system project (`projects/system/`) first and record the change in `session-log.md` before committing.
 
 ---
 
@@ -124,6 +125,8 @@ Apply these in every session regardless of project type or how you entered the s
 **This is a fresh fork with no domains or projects yet — where do I start?**
 
 Follow this sequence. Do not create projects before domains exist — a project without domain knowledge loads nothing useful.
+
+> **The system project (`projects/system/`) is pre-created.** Use it from day one to track all setup and structural work. Every step below should be recorded there.
 
 1. **Identify your knowledge domains.** Ask the human: what are the distinct subject areas this initiative needs deep knowledge about? For a securities trading platform these might be: regulatory compliance, market data and feeds, order execution, risk management, platform infrastructure. Each becomes a domain.
 2. **Create each domain.** Copy `knowledge/domains/example-domain/` to `knowledge/domains/[domain-name]/`. Fill in `description.md` (scope, what belongs here, constraints) and stub out `knowledge.md` (Index and Executive Summary — content can be built over time).

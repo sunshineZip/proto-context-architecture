@@ -14,6 +14,8 @@ Defines the structured turn format, STATUS signal vocabulary, and BLOCKED signal
 
 > **Routing check:** This file defines turn format for work that has already been approved. If you have not completed ROUTING.md routing and received explicit human confirmation to proceed, stop and do that first.
 
+> **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
 ---
 
 ## 1. Turn Format

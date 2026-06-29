@@ -12,6 +12,8 @@ Foundational principles for all sessions in this context architecture. Load this
 
 > **Routing check:** This is ROUTING.md Step 1 — load this file first, then complete Steps 2–4 before doing anything else. Loading this file does not authorise you to act.
 
+> **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
 ## Index
 
 1. [What This System Is](#1-what-this-system-is)

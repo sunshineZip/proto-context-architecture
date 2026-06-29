@@ -12,6 +12,8 @@ Defines the routing logic used after each session turn. An operational reference
 
 > **Routing check:** This file describes how turns are routed once work is underway. If you have not completed ROUTING.md routing and received explicit human confirmation to begin work, stop and do that first.
 
+> **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
 ---
 
 ## Routing Inputs

@@ -12,6 +12,8 @@ This document covers knowledge-document-specific rules only. General markdown fo
 
 > **Routing check:** Load this file when a knowledge change has been approved and you are ready to write. Do not begin authoring without completing ROUTING.md routing and receiving explicit human confirmation.
 
+> **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
 > **These are guidelines, not rules.** The guidance here defines sensible defaults. Adapt freely where a different format better serves a specific document's purpose. The following are mandatory for all knowledge documents regardless of type:
 >
 > - **Title and header block** in the format defined in §2

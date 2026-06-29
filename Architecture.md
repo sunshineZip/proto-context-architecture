@@ -77,6 +77,9 @@ The session log only ever grows — no entries are deleted or edited after the f
         knowledge.md                  ← Domain reference material
 
   projects/                           ← One folder per project
+    system/                           ← Pre-created — tracks all structural changes to this system
+      session-log.md                  ← Audit log of architecture decisions and changes
+      TODO.md                         ← Open system work items and setup checklist
     _template/
       session-log.md
       TODO.md
