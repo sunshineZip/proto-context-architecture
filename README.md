@@ -4,7 +4,7 @@
 
 ---
 
-A **context architecture** is a structured knowledge and routing system built on GitHub Copilot. It organises subject-matter knowledge into curated domains, routes the right context to each AI session, and enforces discipline around how knowledge is updated and how work progresses — all through a structured set of files in a Git repo.
+A **context architecture** is a structured knowledge and routing system designed to work with any LLM or AI coding assistant. It organises subject-matter knowledge into curated domains, routes the right context to each AI session, and enforces discipline around how knowledge is updated and how work progresses — all through a structured set of files in a Git repo.
 
 This repo is a generic template. Fork it, rename it, replace the example content with your own domains and projects, and you have a working context architecture for any major initiative.
 
@@ -44,7 +44,8 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
   Architecture.md                     ← System design reference
   MarkdownConventions.md              ← Markdown standards for all files
   .github/
-    copilot-instructions.md           ← VS Code entry point — loads ROUTING.md
+    copilot-instructions.md           <- VS Code + Copilot adapter — loads ROUTING.md
+                                         (for other LLM setups, load ROUTING.md directly)
 
   knowledge/
     flow/

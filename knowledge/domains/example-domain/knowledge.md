@@ -8,6 +8,8 @@ Version 1.0 | 2026-06-29 | Production
 
 Reference knowledge for the Example Domain. Load the Index first — then load only the sections relevant to the current task. Do not load the entire file unless you have confirmed that multiple sections are needed.
 
+> **Routing check:** Load this file only when directed by ROUTING.md Step 4. If you have not completed all four Route steps, do that first.
+
 > **Setup note:** This is a template. Replace all bracketed placeholders with real knowledge. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
 
 ---

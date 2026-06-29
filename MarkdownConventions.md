@@ -10,6 +10,8 @@ Baseline markdown authoring standard for all files in this context architecture.
 
 Document-type-specific rules (e.g. for domain knowledge documents) build on top of this baseline and do not override it.
 
+> **Routing check:** This file defines formatting standards. If you have not read `ROUTING.md` and completed all four Route steps, do that first before making any file changes.
+
 ---
 
 ## Index

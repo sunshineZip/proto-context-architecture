@@ -1,3 +1,7 @@
+> **IDE adapter note:** This file is the VS Code + GitHub Copilot automatic entry mechanism. For other LLM setups (Cursor, Claude Projects, custom system prompts), load `ROUTING.md` directly at session start. The instructions below apply regardless of entry method.
+
+---
+
 You are working in the **[Project Name]** workspace — replace this with a one-line description of your initiative.
 
 **Before responding to anything: read `ROUTING.md` and complete all four Route steps.**

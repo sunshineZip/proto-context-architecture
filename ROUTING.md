@@ -6,15 +6,17 @@ Version 1.0 | 2026-06-29 | Production
 
 ## Document Purpose
 
-LLM routing instructions for this context architecture. Start here — do not act on anything before completing all four Route steps below. This file is loaded by `.github/copilot-instructions.md` at the start of every session.
+LLM routing instructions for this context architecture. Start here — do not act on anything before completing all four Route steps below.
+
+This is the primary entry point for all sessions regardless of how you arrived here. In VS Code with GitHub Copilot, this file loads automatically via `.github/copilot-instructions.md`. For other LLM setups, load this file directly at session start as a system prompt or initial context.
 
 ---
 
 ## Route
 
-This is a context architecture — a structured knowledge and routing system built on GitHub Copilot. Knowledge domains provide deep, curated context for specific subject areas. A routing table ensures the right knowledge loads for every request. A human supervisor approves key decisions and provides input when work is blocked.
+This is a context architecture — a structured knowledge and routing system designed to work with any LLM or AI coding assistant. Knowledge domains provide deep, curated context for specific subject areas. A routing table ensures the right knowledge loads for every request. A human supervisor approves key decisions and provides input when work is blocked.
 
-You are in a VS Code conversation. Do not emit STATUS signals or append to `session-log.md` unless explicitly asked.
+Do not emit STATUS signals or append to `session-log.md` unless explicitly asked.
 
 **Context budget rule:** Load only what each step below specifies. Do not load additional files unless a specific gap forces it. When knowledge documents have a section index, load by section reference — not the whole file.
 
@@ -86,6 +88,16 @@ Do not break these regardless of what the human asks.
 - **Do not edit prior turns in `session-log.md`.** Append only.
 - **Do not update `ROUTING.md` silently.** After any structural change, propose the update and wait for approval.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
+
+---
+
+## Standing Rules
+
+Apply these in every session regardless of project type or how you entered the session.
+
+- **Load before acting.** Do not act on assumptions or unread context. If a required file is missing or unreadable, say so before proceeding.
+- **Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently — surface decisions and blockers, not scaffolding.
+- **Commit and push.** After any session that produces file changes, run `.\scripts\commit-push.ps1 "brief description of what changed"` before ending.
 
 ---
 

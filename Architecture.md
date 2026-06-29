@@ -8,6 +8,8 @@ Version 1.0 | 2026-06-29 | Production
 
 Describes how a context architecture works: the session interface, the file and folder structure, the two-tier knowledge model, knowledge promotion, and dynamic routing. Read this when designing or changing how the system operates, or when setting up a new instance.
 
+> **Routing check:** This is a design reference document. If you have not read `ROUTING.md` and completed all four Route steps, do that first. Reading this file does not authorise you to act.
+
 ---
 
 ## Index
@@ -26,7 +28,7 @@ Describes how a context architecture works: the session interface, the file and 
 
 Each project has a single `session-log.md` file that accumulates entries chronologically. This file is the project's authoritative record — what was done, decided, questioned, and approved.
 
-There is no dedicated application. The interface is the file. Any text editor or VS Code serves equally.
+There is no dedicated application. The interface is the file. Any text editor serves equally.
 
 ### Entry format
 
@@ -167,7 +169,7 @@ Do not act on knowledge-layer or system-layer changes from within another projec
 To fork this template for a new initiative:
 
 1. **Rename** the repo to `[initiative-name]-context-architecture`.
-2. **Update `.github/copilot-instructions.md`** — replace `[Project Name]` with your initiative name.
+2. **Configure your LLM entry point** — in VS Code with GitHub Copilot, update `.github/copilot-instructions.md` and replace `[Project Name]` with your initiative name. For other setups (Cursor, Claude Projects, custom system prompts), load `ROUTING.md` directly at session start through your environment's equivalent mechanism.
 3. **Update `ROUTING.md`** — replace the document purpose, update routing table rows.
 4. **Define your knowledge domains** — copy `knowledge/domains/example-domain/`, rename, fill in `description.md` and `knowledge.md`.
 5. **Register domains** in `knowledge/domains/index.md`.

@@ -25,7 +25,7 @@ Foundational principles for all sessions in this context architecture. Load this
 
 ## 1. What This System Is
 
-This is a **context architecture** — a structured knowledge and routing system running on GitHub Copilot in VS Code. It organises knowledge into curated domains, routes the right context to each session, and enforces discipline around how knowledge is updated and how work progresses.
+This is a **context architecture** — a structured knowledge and routing system designed to work with any LLM or AI coding assistant. It organises knowledge into curated domains, routes the right context to each session, and enforces discipline around how knowledge is updated and how work progresses.
 
 Work is structured around projects. Each project has a `session-log.md` that is the authoritative record of everything done, decided, and approved. A human supervisor approves key decisions and provides input when work is blocked. The LLM acts by appending turns to the session log or by making file changes — never silently.
 
