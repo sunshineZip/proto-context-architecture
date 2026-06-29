@@ -96,6 +96,23 @@ Do not chain into the next phase without human acknowledgment after a CHECKPOINT
 
 ---
 
+## 5. PROJECT COMPLETE Convention
+
+Before emitting `STATUS: PROJECT COMPLETE`, include a closing section in the final turn:
+
+```
+### Session close
+
+Knowledge candidates: [facts, patterns, or corrections surfaced this session that may warrant a FLAG — or "None identified"]
+Open flags: [any unresolved [FLAG FOR KNOWLEDGE UPDATE] or [FLAG FOR SYSTEM] items — or "None"]
+```
+
+If knowledge candidates exist, raise `[FLAG FOR KNOWLEDGE UPDATE]` items and emit `STATUS: FLAG RAISED` before closing. Do not emit `STATUS: PROJECT COMPLETE` while flags are unresolved.
+
+If only system-level findings exist, emit `STATUS: COMPLETE, SYSTEM FLAGS PENDING` and append a handoff turn to `projects/system/session-log.md`.
+
+---
+
 ## Version History
 
 | Version | Date | Summary |

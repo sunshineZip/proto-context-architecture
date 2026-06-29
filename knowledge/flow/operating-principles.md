@@ -44,7 +44,9 @@ For the domain registry: see [knowledge/domains/index.md](../domains/index.md).
 
 **Flag, don't guess.** If something is ambiguous and getting it wrong would matter, surface it. Use the BLOCKED signal with a specific question rather than proceeding on an assumption.
 
-**Correct cautiously, append liberally.** When you encounter information that appears to contradict established knowledge, document the new observation — do not overwrite the original. A single data point or one session's negative result is not sufficient grounds for correcting a previously verified fact. Append a sourced callout, note the apparent contradiction, and flag it for human resolution.
+**Correct cautiously, append liberally.** When you encounter information that appears to contradict established knowledge, document the new observation — do not overwrite the original. A single data point, one failed test, or one session's negative result is not sufficient grounds for correcting a previously verified fact. Append a sourced callout, note the apparent contradiction, and raise a `[FLAG FOR KNOWLEDGE UPDATE]` for human resolution.
+
+Before proposing any correction: read the full surrounding section — not just the sentence that appears wrong. A correction made without that context often introduces new errors. The asymmetry is intentional: filing a flag and waiting costs little; recovering from a premature rewrite that propagates through future sessions costs a lot.
 
 **Never edit what was already written.** The session log only grows. Do not modify or delete prior turns.
 
