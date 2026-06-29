@@ -10,7 +10,7 @@ Defines the routing logic used after each session turn. An operational reference
 
 ---
 
-> **Routing check:** This file describes how turns are routed once work is underway. If you have not completed README.md routing and received explicit human confirmation to begin work, stop and do that first.
+> **Routing check:** This file describes how turns are routed once work is underway. If you have not completed ROUTING.md routing and received explicit human confirmation to begin work, stop and do that first.
 
 ---
 
@@ -43,7 +43,7 @@ Apply rules top-down. First match wins.
 
 ### 1. Human override rule
 
-If a human turn explicitly says what should happen next, follow that instruction unless it violates a hard constraint defined in README.md.
+If a human turn explicitly says what should happen next, follow that instruction unless it violates a hard constraint defined in ROUTING.md.
 
 ### 2. Hard blocker rule
 

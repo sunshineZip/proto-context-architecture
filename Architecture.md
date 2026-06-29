@@ -54,7 +54,8 @@ The session log only ever grows — no entries are deleted or edited after the f
 
 ```
 [repo-name]/
-  README.md                           ← Routing entry point — start here
+  README.md                           <- Human overview — what this is and how to set it up
+  ROUTING.md                          <- LLM routing instructions — Steps 1-4
   Architecture.md                     ← This file
   MarkdownConventions.md              ← Baseline markdown rules for all files
   .github/
@@ -125,7 +126,7 @@ This gate exists because the knowledge layer is loaded by every future session. 
 
 ## 4. Dynamic Routing
 
-Routing is the mechanism by which the system decides what to load and what to do next. It is defined in `README.md` (Steps 1–4) and elaborated in `knowledge/flow/routing-rules.md`.
+Routing is the mechanism by which the system decides what to load and what to do next. It is defined in `ROUTING.md` (Steps 1–4) and elaborated in `knowledge/flow/routing-rules.md`.
 
 ### Routing inputs
 
@@ -167,7 +168,7 @@ To fork this template for a new initiative:
 
 1. **Rename** the repo to `[initiative-name]-context-architecture`.
 2. **Update `.github/copilot-instructions.md`** — replace `[Project Name]` with your initiative name.
-3. **Update `README.md`** — replace the document purpose, update routing table rows.
+3. **Update `ROUTING.md`** — replace the document purpose, update routing table rows.
 4. **Define your knowledge domains** — copy `knowledge/domains/example-domain/`, rename, fill in `description.md` and `knowledge.md`.
 5. **Register domains** in `knowledge/domains/index.md`.
 6. **Create your first project** — copy `projects/_template/`, rename, write Turn 1 in `session-log.md`.

@@ -10,7 +10,7 @@ Defines the structure, naming conventions, content rules, and versioning standar
 
 This document covers knowledge-document-specific rules only. General markdown formatting, versioning conventions, and validity signal formats follow `MarkdownConventions.md`, which is the baseline standard for all files. Where this document and MarkdownConventions.md overlap, this document takes precedence for knowledge documents specifically.
 
-> **Routing check:** Load this file when a knowledge change has been approved and you are ready to write. Do not begin authoring without completing README.md routing and receiving explicit human confirmation.
+> **Routing check:** Load this file when a knowledge change has been approved and you are ready to write. Do not begin authoring without completing ROUTING.md routing and receiving explicit human confirmation.
 
 > **These are guidelines, not rules.** The guidance here defines sensible defaults. Adapt freely where a different format better serves a specific document's purpose. The following are mandatory for all knowledge documents regardless of type:
 >

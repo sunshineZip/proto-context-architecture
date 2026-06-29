@@ -10,7 +10,7 @@ Defines the standard project types and their default phase templates. Use these 
 
 ---
 
-> **Routing check:** This file contains phase templates for already-approved work. If you have not completed README.md routing and received explicit human confirmation to proceed, stop and do that first.
+> **Routing check:** This file contains phase templates for already-approved work. If you have not completed ROUTING.md routing and received explicit human confirmation to proceed, stop and do that first.
 
 ---
 

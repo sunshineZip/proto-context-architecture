@@ -8,11 +8,11 @@ Version 1.0 | 2026-06-29 | Production
 
 Scope and load conditions for the Example Domain. Load this file when working on any project that touches [describe what this domain covers — e.g. "the billing subsystem" or "vendor onboarding processes"].
 
-> **Setup note:** This is a template. Replace all bracketed placeholders with real content for your domain. Rename the folder from `example-domain/` to a meaningful name. Update README.md Step 2 and `knowledge/domains/index.md` accordingly.
+> **Setup note:** This is a template. Replace all bracketed placeholders with real content for your domain. Rename the folder from `example-domain/` to a meaningful name. Update ROUTING.md Step 2 and `knowledge/domains/index.md` accordingly.
 
 ---
 
-> **Routing check:** Load this file only when directed by README.md Step 2 or Step 4. Reading it does not authorise you to begin work — complete all four routing steps first.
+> **Routing check:** Load this file only when directed by ROUTING.md Step 2 or Step 4. Reading it does not authorise you to begin work — complete all four routing steps first.
 
 ---
 

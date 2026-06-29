@@ -6,7 +6,7 @@ Version 1.0 | 2026-06-29 | Production
 
 ## Document Purpose
 
-Registry of all knowledge domains in this context architecture. Add one entry per domain. The routing table in README.md Step 2 should have a corresponding row for each domain listed here.
+Registry of all knowledge domains in this context architecture. Add one entry per domain. The routing table in ROUTING.md Step 2 should have a corresponding row for each domain listed here.
 
 ---
 
@@ -23,7 +23,7 @@ Registry of all knowledge domains in this context architecture. Add one entry pe
 1. Create `knowledge/domains/[domain-name]/description.md` — scope, constraints, when to load.
 2. Create `knowledge/domains/[domain-name]/knowledge.md` — reference material with Index and Executive Summary.
 3. Add a row to this index.
-4. Add a routing row in README.md Step 2.
+4. Add a routing row in ROUTING.md Step 2.
 5. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
 
 ---

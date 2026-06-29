@@ -44,14 +44,14 @@ Write-Host "Committing: $Message"
 $commitOut = & $git -C $repo commit -m $Message 2>&1
 
 if ($commitOut -match "nothing to commit") {
-    Write-Host "Nothing to commit — workspace is already clean."
+    Write-Host "Nothing to commit - workspace is already clean."
     exit 0
 }
 
 $commitOut | ForEach-Object { Write-Host "  $_" }
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Commit failed (exit $LASTEXITCODE)."
+    Write-Error ("Commit failed (exit " + $LASTEXITCODE + ").")
     exit 1
 }
 
@@ -59,7 +59,7 @@ Write-Host "Pushing to origin..."
 & $git -C $repo push 2>&1 | ForEach-Object { Write-Host "  $_" }
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Push failed (exit $LASTEXITCODE)."
+    Write-Error ("Push failed (exit " + $LASTEXITCODE + ").")
     exit 1
 }
 

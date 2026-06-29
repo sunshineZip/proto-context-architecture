@@ -6,11 +6,11 @@ Version 1.0 | 2026-06-29 | Production
 
 ## Document Purpose
 
-Foundational principles for all sessions in this context architecture. Load this file first (README.md Step 1) before any other file. Defines core principles, the knowledge layer boundary, knowledge promotion flags, and the signal vocabulary shared across all work.
+Foundational principles for all sessions in this context architecture. Load this file first (ROUTING.md Step 1) before any other file. Defines core principles, the knowledge layer boundary, knowledge promotion flags, and the signal vocabulary shared across all work.
 
 ---
 
-> **Routing check:** This is README.md Step 1 — load this file first, then complete Steps 2–4 before doing anything else. Loading this file does not authorise you to act.
+> **Routing check:** This is ROUTING.md Step 1 — load this file first, then complete Steps 2–4 before doing anything else. Loading this file does not authorise you to act.
 
 ## Index
 

@@ -12,7 +12,7 @@ Defines the structured turn format, STATUS signal vocabulary, and BLOCKED signal
 
 ---
 
-> **Routing check:** This file defines turn format for work that has already been approved. If you have not completed README.md routing and received explicit human confirmation to proceed, stop and do that first.
+> **Routing check:** This file defines turn format for work that has already been approved. If you have not completed ROUTING.md routing and received explicit human confirmation to proceed, stop and do that first.
 
 ---
 

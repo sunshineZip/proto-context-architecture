@@ -28,7 +28,7 @@ Write-Host "Root: $repoRoot"
 Write-Host ""
 
 # --- Required root files ---
-foreach ($file in @("README.md", "Architecture.md", "MarkdownConventions.md")) {
+foreach ($file in @("README.md", "ROUTING.md", "Architecture.md", "MarkdownConventions.md")) {
     if (-not (Test-Path (Join-Path $repoRoot $file))) {
         Add-ValidationError "Missing root file: $file"
     }
