@@ -10,6 +10,8 @@ Defines the structure, naming conventions, content rules, and versioning standar
 
 This document covers knowledge-document-specific rules only. General markdown formatting, versioning conventions, and validity signal formats follow `MarkdownConventions.md`, which is the baseline standard for all files. Where this document and MarkdownConventions.md overlap, this document takes precedence for knowledge documents specifically.
 
+**Edit ceremony for `knowledge.md` files:** Appending new facts or sections to an existing `knowledge.md` requires a `[FLAG FOR KNOWLEDGE UPDATE]` and human confirmation — no system project entry needed. Structural changes (adding a new domain, changing a domain's scope, removing a domain, reorganising a knowledge document) route through `projects/system/` first.
+
 > **Routing check:** Load this file when a knowledge change has been approved and you are ready to write. Do not begin authoring without completing ROUTING.md routing and receiving explicit human confirmation.
 
 > **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.

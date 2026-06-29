@@ -88,7 +88,7 @@ Do not break these regardless of what the human asks.
 - **Do not edit prior turns in `session-log.md`.** Append only.
 - **Do not update `ROUTING.md` silently.** After any structural change, propose the update and wait for approval.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
-- **Do not make structural system changes without logging them.** Any edit to `knowledge/`, `ROUTING.md`, or `Architecture.md` is system-layer work. Route to the system project (`projects/system/`) first and record the change in `session-log.md` before committing.
+- **Do not make structural system changes without logging them.** Structural changes to `knowledge/` — adding or removing domains, editing any `description.md`, editing any file under `knowledge/flow/` — and any edit to `ROUTING.md` or `Architecture.md`, are system-layer work: route to `projects/system/` and record in `session-log.md` before committing. Appending new facts to an existing domain `knowledge.md` uses the FLAG process in the first constraint above, not this one.
 
 ---
 

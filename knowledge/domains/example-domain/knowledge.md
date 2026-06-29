@@ -10,6 +10,8 @@ Reference knowledge for the Example Domain. Load the Index first — then load o
 
 > **Routing check:** Load this file only when directed by ROUTING.md Step 4. If you have not completed all four Route steps, do that first.
 
+> **Edit guide:** To append new knowledge to this file, raise a `[FLAG FOR KNOWLEDGE UPDATE]` in your current session turn and wait for human confirmation — no system project entry needed. To change this domain's scope, rename it, or remove it entirely, route to `projects/system/` instead.
+
 > **Setup note:** This is a template. Replace all bracketed placeholders with real knowledge. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
 
 ---
