@@ -98,6 +98,15 @@ The Executive Summary gives an LLM the critical facts it needs before reading an
 
 ## 4. Content Rules per Section Type
 
+### Token efficiency
+
+Every word in a knowledge document is a recurring cost — it loads on every future session that reads this file. Write for density.
+
+- **Tables over prose.** A fact in a table row costs a fraction of the tokens of the same fact in a paragraph. If it fits in a table, it belongs in a table.
+- **Sections must be independently loadable.** A routing LLM may load only one or two sections. Every section must make sense on its own — never rely on context established in a prior section that may not have been loaded.
+- **The Executive Summary is the primary token optimisation.** It must contain the facts needed in 80% of sessions. A well-written Executive Summary means most sessions never need to load the full document.
+- **Lead each section with the most operationally relevant fact.** Background and rationale belong at the end of a section, not the beginning.
+
 ### Domain sections
 
 - One topic per section. Do not merge distinct subjects just because they seem related.
@@ -194,6 +203,7 @@ Before submitting any knowledge document for human approval:
 - [ ] No empty table cells (use N/A or TBC)
 - [ ] All cross-domain references use relative links
 - [ ] Validity signals applied to unverified or contradicted claims
+- [ ] Sections are independently loadable — no critical fact depends on a prior section that may not be loaded
 - [ ] Version History row added for this edit
 
 ---

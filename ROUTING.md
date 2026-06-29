@@ -72,7 +72,15 @@ After confirmation (or for any non-Q&A request type once intent is clear): load 
 
 ### Step 4 — Load domain knowledge
 
-Identify which knowledge domains the task touches. Load only those domains' `description.md`. If the task requires deep domain knowledge, also load the relevant sections of `knowledge.md`. Each knowledge document has a numbered Index with section descriptions — read the Index first and load only the sections relevant to the task, not the whole file.
+Identify which knowledge domains the task touches. Apply this loading hierarchy — each level is a gate, not a default progression. Stop at the earliest level that satisfies the task.
+
+1. **`description.md` only** — does this domain actually apply? Can the task be answered from the scope description alone? If yes, stop here.
+2. **Index only** — scan section titles and descriptions. Identify which sections are relevant. For broad questions, the Index and Executive Summary together are often sufficient.
+3. **Executive Summary** — load when domain context is needed but full section detail is not required.
+4. **Named sections** — load only the sections whose Index descriptions match the task. Name them explicitly before loading; do not load adjacent sections speculatively.
+5. **Full file** — last resort only, when multiple sections are deeply interdependent and cannot be understood in isolation.
+
+When multiple domains are relevant, apply the hierarchy independently for each. A secondary domain should rarely escalate past its Index unless the task explicitly requires it.
 
 Which domains exist and what they cover: `knowledge/domains/index.md`
 

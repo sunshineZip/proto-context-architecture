@@ -14,6 +14,8 @@ Scope and load conditions for the Example Domain. Load this file when working on
 
 > **Routing check:** Load this file only when directed by ROUTING.md Step 2 or Step 4. Reading it does not authorise you to begin work — complete all four routing steps first.
 
+> **Brevity constraint:** This file loads on every request matched to this domain. Keep it under one page. Its job is to answer two questions: does this domain apply, and which `knowledge.md` sections are likely relevant? Knowledge belongs in `knowledge.md`, not here.
+
 ---
 
 ## Domain Scope
