@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.1 | 2026-07-15 | Production
+Version 1.2 | 2026-07-15 | Production
 
 ---
 
@@ -150,6 +150,7 @@ This allows future sessions to locate the original context if the fact needs to 
 - When you observe something that contradicts existing content: append a `[CONTRADICTS]` callout, note the source, and raise a `[FLAG FOR KNOWLEDGE UPDATE]`.
 - Rewriting established content requires full context of the surrounding section and explicit human approval.
 - The asymmetry is intentional: it is cheaper to investigate a flag than to recover from a premature rewrite.
+- When a flagged correction is approved, check `knowledge/domains/index.md`'s References column and any project `context/` notes for the same fact restated elsewhere. The own-vs-reference rule (§4) prevents *new* duplication, but doesn't retroactively catch a value that was copied before a document adopted the convention — a correction with no backlink check can leave a stale copy uncorrected indefinitely.
 
 ---
 
@@ -160,6 +161,7 @@ When a knowledge document refers to content in another domain:
 - Use a relative file link: `[description.md](../other-domain/description.md)`
 - Add a `> **See also:**` callout at the point of reference naming the other domain and what it covers.
 - Do not duplicate content from another domain — reference it instead.
+- Register the cross-reference in `knowledge/domains/index.md` (Registered Domains → References column), and check whether the referenced domain should reference this one back. A reference that only points one way is a common source of silent drift as the domain family grows — nothing else catches it.
 
 ---
 
@@ -200,6 +202,8 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] Confirm the Executive Summary still reflects the most operationally critical facts — move anything it has outgrown into the relevant domain section
 - [ ] If the domain has separate Known Gaps and Open Items sections (§3), confirm they haven't been conflated
 - [ ] Compact fully-resolved entries: once something is no longer actionable, collapse it to a one-line outcome and date rather than keeping the full history
+- [ ] Confirm `knowledge/domains/index.md`'s References column still matches the actual `> See also:` callouts in this domain's `knowledge.md` — a one-directional reference that should be reciprocal is exactly the kind of drift this pass exists to catch
+- [ ] Consider whether this domain should split in two: warning signs are routinely needing the Full file (ROUTING.md §4, level 5) because sections are too interdependent to load separately, or two sections that are never needed by the same task. There's no fixed size threshold — judge by whether a task ever needs the whole document versus consistently needing only one part of it
 
 ---
 
@@ -238,3 +242,4 @@ Before submitting any knowledge document for human approval:
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Adapted from NightCrew Knowledge Base Authoring Guidelines, terminology updated for domain model. |
 | 1.1 | 2026-07-15 | Added Maintenance Pass (§8, subsequent sections renumbered), own-vs-reference rule for within-document facts (§4), optional Known Gaps/Open Items section pattern (§3), supersede rule (§7), and matching `[TIME-SENSITIVE]`/`[SENSITIVE]` signal rows (§6). |
+| 1.2 | 2026-07-15 | Added cross-reference reciprocity registration (§5), a correction backlink check for facts copied before the own-vs-reference convention existed (§4), and a when-to-split heuristic (§8) — prompted by a review of known pitfalls in a larger, organically-grown document family. |
