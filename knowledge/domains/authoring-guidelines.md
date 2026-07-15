@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-15 | Production
 
 ---
 
@@ -35,8 +35,9 @@ This document covers knowledge-document-specific rules only. General markdown fo
 5. [Cross-References Between Domains](#5-cross-references-between-domains)
 6. [Validity and Confidence Signals](#6-validity-and-confidence-signals)
 7. [Versioning](#7-versioning)
-8. [What Does Not Belong in a Knowledge Document](#8-what-does-not-belong-in-a-knowledge-document)
-9. [Quick Checklist](#9-quick-checklist)
+8. [Maintenance Pass](#8-maintenance-pass)
+9. [What Does Not Belong in a Knowledge Document](#9-what-does-not-belong-in-a-knowledge-document)
+10. [Quick Checklist](#10-quick-checklist)
 
 ---
 
@@ -80,6 +81,13 @@ Version [X.Y] | [YYYY-MM-DD] | [Status]
 4. **Domain sections** — one section per major subject area; ordered by operational frequency (most-used first)
 5. **Version History** — always the last section
 
+### Optional sections
+
+Add these only if the domain genuinely needs them:
+
+- **Known Gaps / Open Questions** — things that are genuinely unresolved or contradictory about the domain itself, not yet actionable.
+- **Open Items / Next Actions** — concrete tasks. Keep this separate from Known Gaps: conflating the two causes a settled-but-unresolved question to be re-litigated as if it were a fresh task.
+
 ### Index entries
 
 Each index entry must name the key concepts covered in that section — not just the section title. The Index is the primary mechanism by which a routing LLM decides which sections to load.
@@ -113,6 +121,7 @@ Every word in a knowledge document is a recurring cost — it loads on every fut
 - Lead with the most operationally relevant fact, not with background.
 - Prefer tables over prose for structured facts (mappings, inventories, configurations).
 - End domain sections with a `> **Note:**` callout if there is a critical caveat that applies to the whole section.
+- Every fact has exactly one owning section. If it's also relevant elsewhere in the same document, cross-reference it (§X.Y) instead of restating it — a restated fact drifts out of sync the moment one copy is updated and the other isn't.
 
 ### Procedures
 
@@ -164,8 +173,10 @@ Use the signals defined in `MarkdownConventions.md` §8 to qualify claims:
 | `[UNVERIFIED]` | Not yet confirmed — treat as hypothesis |
 | `[CONTRADICTS: source]` | Conflicts with another documented fact |
 | `[OUTDATED: date]` | Known to be stale as of the given date |
+| `[TIME-SENSITIVE: source type]` | Sourced from third-party/public material that can change without notice — re-verify before relying on it for a decision |
+| `[SENSITIVE]` | Handle with care if this document is ever shared, quoted, or copied elsewhere |
 
-Apply signals at the claim level, not the section level. A section can contain both verified and unverified claims.
+Apply signals at the claim level, not the section level. A section can contain both verified and unverified claims. `[TIME-SENSITIVE]` and `[SENSITIVE]` describe a different axis than the other four and can stack with them — a claim can be both `[VERIFIED: source]` and `[TIME-SENSITIVE: source type]` at once.
 
 ---
 
@@ -176,10 +187,23 @@ Follow `MarkdownConventions.md` §2. Additionally for knowledge documents:
 - Increment version on every edit, including single-fact additions.
 - The Version History row should name the section changed, not just "updated."
 - When a section is significantly restructured, increment major version and note the old structure briefly in the Version History row.
+- If this document replaces older files or notes, name them explicitly in the Document Purpose and state that they should not be loaded independently once this document exists. Keep the superseded files in the repo for history and audit — not for reading.
 
 ---
 
-## 8. What Does Not Belong in a Knowledge Document
+## 8. Maintenance Pass
+
+A structural health check, distinct from the per-edit updates above. Per-edit updates keep a single change correct; a Maintenance Pass catches drift that accumulates silently across many small edits over time. Run it periodically — on request, or when a domain's Index and content have visibly diverged — not on every edit.
+
+- [ ] Confirm every Index entry (§3) still points to a section that exists, under the correct number
+- [ ] Check for the same fact stated in two places with different confidence signals (§6); consolidate under one owning section per the rule in §4
+- [ ] Confirm the Executive Summary still reflects the most operationally critical facts — move anything it has outgrown into the relevant domain section
+- [ ] If the domain has separate Known Gaps and Open Items sections (§3), confirm they haven't been conflated
+- [ ] Compact fully-resolved entries: once something is no longer actionable, collapse it to a one-line outcome and date rather than keeping the full history
+
+---
+
+## 9. What Does Not Belong in a Knowledge Document
 
 | Does not belong | Belongs instead |
 |---|---|
@@ -191,7 +215,7 @@ Follow `MarkdownConventions.md` §2. Additionally for knowledge documents:
 
 ---
 
-## 9. Quick Checklist
+## 10. Quick Checklist
 
 Before submitting any knowledge document for human approval:
 
@@ -202,7 +226,7 @@ Before submitting any knowledge document for human approval:
 - [ ] No blank lines between table rows
 - [ ] No empty table cells (use N/A or TBC)
 - [ ] All cross-domain references use relative links
-- [ ] Validity signals applied to unverified or contradicted claims
+- [ ] Validity signals applied to unverified or contradicted claims, and time-sensitive or sensitive facts carry the appropriate signal (§6)
 - [ ] Sections are independently loadable — no critical fact depends on a prior section that may not be loaded
 - [ ] Version History row added for this edit
 
@@ -213,3 +237,4 @@ Before submitting any knowledge document for human approval:
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Adapted from NightCrew Knowledge Base Authoring Guidelines, terminology updated for domain model. |
+| 1.1 | 2026-07-15 | Added Maintenance Pass (§8, subsequent sections renumbered), own-vs-reference rule for within-document facts (§4), optional Known Gaps/Open Items section pattern (§3), supersede rule (§7), and matching `[TIME-SENSITIVE]`/`[SENSITIVE]` signal rows (§6). |

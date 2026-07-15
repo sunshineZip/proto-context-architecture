@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-15 | Production
 
 ---
 
@@ -184,8 +184,10 @@ Use these inline signals to flag the reliability of specific claims:
 | `[UNVERIFIED]` | Not yet confirmed — treat as hypothesis |
 | `[CONTRADICTS: source]` | Conflicts with another documented fact — do not resolve without human review |
 | `[OUTDATED: date]` | Known to be stale as of the given date |
+| `[TIME-SENSITIVE: source type]` | Sourced from third-party/public material (pricing page, vendor docs, FAQ) that can change without notice — re-verify before relying on it for a decision |
+| `[SENSITIVE]` | Handle with care if this document is ever shared, quoted, or copied elsewhere |
 
-Place signals immediately after the claim they qualify, in square brackets.
+Place signals immediately after the claim they qualify, in square brackets. The first four signals describe a claim's current confidence state and are mutually exclusive. `[TIME-SENSITIVE]` and `[SENSITIVE]` describe a different axis and can stack with any of the four — a claim can be both `[VERIFIED: source]` and `[TIME-SENSITIVE: source type]` at once.
 
 ---
 
@@ -204,3 +206,4 @@ Place signals immediately after the claim they qualify, in square brackets.
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic markdown conventions adapted from NightCrew baseline. |
+| 1.1 | 2026-07-15 | Added `[TIME-SENSITIVE: source type]` and `[SENSITIVE]` signals to §8 — durability and sensitivity are separate axes from confidence and can stack with the existing four signals. |
