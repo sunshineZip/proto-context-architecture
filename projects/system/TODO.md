@@ -1,8 +1,10 @@
 # System — TODO
 
-Version 1.0 | 2026-06-29 | Active
+Version 1.1 | 2026-07-15 | Active
 
 > **Routing check:** This is a task tracking file, not a work queue. Do not start work on any item here unless you have completed ROUTING.md routing and received explicit human confirmation for this session.
+
+> **Push policy:** Nearly every change made while working in this project must be committed and pushed (`.\scripts\commit-push.ps1`) — see `ROUTING.md` Standing Rules for cadence guidance. If a push is deferred until a work segment finishes, flag it explicitly to the human before the turn ends; the human may end the session at any point.
 
 ---
 

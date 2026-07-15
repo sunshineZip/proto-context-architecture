@@ -107,7 +107,8 @@ Apply these in every session regardless of project type or how you entered the s
 
 - **Load before acting.** Do not act on assumptions or unread context. If a required file is missing or unreadable, say so before proceeding.
 - **Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently — surface decisions and blockers, not scaffolding.
-- **Commit and push.** After any session that produces file changes, run `.\scripts\commit-push.ps1 "brief description of what changed"` before ending.
+- **Commit and push, almost always.** This is a personal working repo, not shared infrastructure with a review gate — nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either.
+- **Never leave a push silently pending.** If you defer pushing until a segment finishes rather than after every increment, say so explicitly to the human before the turn ends — e.g. "changes are saved locally but not yet pushed." The human may end the session at any point; an unflagged pending push risks losing untracked work.
 
 ---
 
@@ -157,3 +158,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Extracted from README.md — routing instructions now live here, README.md reserved for human readers. |
 | 1.1 | 2026-06-29 | Added first-time setup workflow to Quick Task Guide — covers domain-first initialization sequence for fresh forks. |
+| 1.2 | 2026-07-15 | Expanded the Commit and push standing rule with cadence guidance (per-increment vs per-segment) and an explicit requirement to flag the human when a push is deferred. |

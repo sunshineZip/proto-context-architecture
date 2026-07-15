@@ -1,6 +1,6 @@
 # Turn Protocol
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-15 | Production
 
 ---
 
@@ -90,9 +90,12 @@ STATUS: CHECKPOINT
 Completed: [What was done in this turn]
 Next: [What the next phase or action is]
 Waiting for: [Human confirmation / specific input / nothing — proceed when ready]
+Push status: [Pushed / Pending — will push after [reason for deferring]]
 ```
 
 Do not chain into the next phase without human acknowledgment after a CHECKPOINT.
+
+Nearly every file change in this repository should be pushed (see `ROUTING.md` Standing Rules) — push after each increment, or at minimum after finishing a segment of work, using judgement on which cadence fits the session. If `Push status` is `Pending`, say so plainly to the human in the turn itself as well — do not rely on the human reading this field. The human may end the session before the next turn, so an unflagged pending push is a silent risk of lost work.
 
 ---
 
@@ -105,9 +108,12 @@ Before emitting `STATUS: PROJECT COMPLETE`, include a closing section in the fin
 
 Knowledge candidates: [facts, patterns, or corrections surfaced this session that may warrant a FLAG — or "None identified"]
 Open flags: [any unresolved [FLAG FOR KNOWLEDGE UPDATE] or [FLAG FOR SYSTEM] items — or "None"]
+Push status: [Pushed — all changes committed and pushed / N/A, no file changes this session]
 ```
 
 If knowledge candidates exist, raise `[FLAG FOR KNOWLEDGE UPDATE]` items and emit `STATUS: FLAG RAISED` before closing. Do not emit `STATUS: PROJECT COMPLETE` while flags are unresolved.
+
+All file changes must be committed and pushed (`.\scripts\commit-push.ps1`) before emitting `STATUS: PROJECT COMPLETE` — a project is not complete while local changes are unpushed.
 
 If only system-level findings exist, emit `STATUS: COMPLETE, SYSTEM FLAGS PENDING` and append a handoff turn to `projects/system/session-log.md`.
 
@@ -118,3 +124,4 @@ If only system-level findings exist, emit `STATUS: COMPLETE, SYSTEM FLAGS PENDIN
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic turn protocol adapted from NightCrew agent-turn-protocol.md, migration signals removed. |
+| 1.1 | 2026-07-15 | Added a `Push status` field to the CHECKPOINT (§4) and Session close/PROJECT COMPLETE (§5) formats, and made explicit that a project cannot be marked complete with unpushed changes. |

@@ -63,3 +63,27 @@ STATUS: CHECKPOINT
 Completed: Root-caused and fixed the false-positive push error in `commit-push.ps1`; verified with a real push.
 Next: None planned — awaiting further direction.
 Waiting for: Nothing — fix is committed and pushed.
+
+---
+
+## [Copilot] — Turn 4 | 2026-07-15
+
+Human confirmed the Turn 3 push succeeded, then asked for a standing policy: nearly every change to this repository should be pushed, with the LLM using judgement on whether to push after each increment or after finishing a segment of work — but if deferring, the human must be told explicitly that a push is outstanding, since the human can end the session at any moment.
+
+Made the following changes:
+
+- `ROUTING.md` Standing Rules — expanded "Commit and push" into two rules: cadence guidance (per-increment vs. per-segment, use judgement) and an explicit "never leave a push silently pending" requirement.
+- `.github/copilot-instructions.md` — mirrored the same expanded rule (this file duplicates ROUTING.md's Standing Rules by design, as the VS Code entry adapter).
+- `knowledge/flow/turn-protocol.md` — added a `Push status` field to the CHECKPOINT format (§4) and to the Session close/PROJECT COMPLETE block (§5), with a rule that a project cannot be marked complete while changes are unpushed. This makes the push-pending flag a structural part of every checkpoint turn, not just a verbal aside that could be forgotten.
+- `projects/system/TODO.md` — added an explicit push-policy callout, per the human's request that this subproject state the expectation clearly.
+
+### Session close
+
+Knowledge candidates: None — policy/protocol change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged.
+
+STATUS: CHECKPOINT
+Completed: Established and documented a repo-wide push policy (cadence guidance + mandatory flagging of deferred pushes) across ROUTING.md, copilot-instructions.md, turn-protocol.md, and the system TODO.
+Next: None planned — awaiting further direction.
+Waiting for: Nothing further — pushing this now.

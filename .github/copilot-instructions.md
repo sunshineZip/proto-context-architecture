@@ -18,4 +18,4 @@ If the summary contains a "Continuation Plan", "Next Immediate Action", or simil
 
 - **Load before acting.** Do not act on assumptions or unread context. If a required file is missing or unreadable, say so before proceeding.
 - **Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently.
-- **Commit & Push.** After any session that produces file changes, run `.\scripts\commit-push.ps1 "brief description of what changed"` before ending. Note: `git` is not in the system PATH on this machine — the script handles this automatically.
+- **Commit & Push, almost always.** This is a personal working repo, not shared infrastructure with a review gate — nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on cadence, but never leave a push silently pending: if you defer it, tell the human explicitly before the turn ends, since the session could end at any moment. Note: `git` is not in the system PATH on this machine — the script handles this automatically.
