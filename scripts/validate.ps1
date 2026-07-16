@@ -95,6 +95,15 @@ foreach ($projectDir in $projectDirs) {
     }
 }
 
+# --- Shared helper: strip fenced code blocks before scanning prose for
+#     headings/fields/links, so a documentation *example* embedded in a
+#     ``` fence (e.g. the template block in library/reference-index.md
+#     itself) is never mistaken for a real entry or a real citation. ---
+function Remove-CodeFences {
+    param([string]$Text)
+    return [regex]::Replace($Text, '(?s)```.*?```', '')
+}
+
 # --- knowledge/domains/*/sources/ — evidentiary source manifests ---
 # See knowledge/domains/authoring-guidelines.md §9.1.
 function Get-ManifestTableFirstColumn {
@@ -122,7 +131,7 @@ foreach ($domainDir in $domainDirs) {
         continue
     }
 
-    $manifestText = Get-Content -Path $manifestPath -Raw
+    $manifestText = Remove-CodeFences -Text (Get-Content -Path $manifestPath -Raw)
     $manifestFiles = Get-ManifestTableFirstColumn -Text $manifestText
 
     $actualFiles = Get-ChildItem -Path $sourcesPath -File -ErrorAction SilentlyContinue |
@@ -148,7 +157,7 @@ $deepWellsPath = Join-Path $libraryPath "deep-wells"
 $storedLocations = @()
 
 if (Test-Path $refIndexPath) {
-    $refText = Get-Content -Path $refIndexPath -Raw
+    $refText = Remove-CodeFences -Text (Get-Content -Path $refIndexPath -Raw)
     $entryBlocks = [regex]::Split($refText, '(?m)^## ')
 
     foreach ($block in $entryBlocks) {
@@ -192,7 +201,7 @@ if (Test-Path $refIndexPath) {
 # --- Referential integrity: links from domain files into sources/ or library/reference-index.md ---
 $refIndexHeadings = @()
 if (Test-Path $refIndexPath) {
-    $refText = Get-Content -Path $refIndexPath -Raw
+    $refText = Remove-CodeFences -Text (Get-Content -Path $refIndexPath -Raw)
     $refIndexHeadings = [regex]::Matches($refText, '(?m)^## (.+)$') | ForEach-Object { $_.Groups[1].Value.Trim() }
 }
 
@@ -200,7 +209,7 @@ foreach ($domainDir in $domainDirs) {
     foreach ($fileName in @("knowledge.md", "description.md")) {
         $filePath = Join-Path $domainDir.FullName $fileName
         if (-not (Test-Path $filePath)) { continue }
-        $text = Get-Content -Path $filePath -Raw
+        $text = Remove-CodeFences -Text (Get-Content -Path $filePath -Raw)
 
         $linkMatches = [regex]::Matches($text, '\]\(([^)]+)\)')
         foreach ($m in $linkMatches) {
