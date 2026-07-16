@@ -59,8 +59,18 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
       [domain-name]/
         description.md                ← Domain scope, constraints, when to load
         knowledge.md                  ← Domain reference material
+        sources/                      ← Evidentiary source files (only if this domain has any)
+          manifest.md                 ← Registry of the raw files in this folder
 
-  projects/    system/                           <- Pre-created — audit log for structural changes to this system    _template/                        ← Copy this when starting a new project
+  library/                            ← Cross-domain deep-well registry
+    reference-index.md                ← Registry of every deep well, stored or not
+    deep-wells/                       ← Physical files for cornerstone-status deep wells only
+
+  projects/
+    system/                           ← Pre-created — audit log for structural changes to this system
+      session-log.md
+      TODO.md
+    _template/                        ← Copy this when starting a new project
       session-log.md
       TODO.md
     [project-name]/
@@ -84,3 +94,4 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic context architecture template. |
 | 1.1 | 2026-06-29 | Rewritten as human-readable document. LLM routing instructions moved to ROUTING.md. |
+| 1.2 | 2026-07-16 | Added `library/` (cross-domain deep-well registry) and the per-domain `sources/` folder to the folder structure diagram — see `knowledge/domains/authoring-guidelines.md` §9. Also fixed a pre-existing formatting break in the `projects/` block of this same diagram (missing line breaks had collapsed three tree rows onto one line). |

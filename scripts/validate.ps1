@@ -21,6 +21,7 @@ function Add-ValidationWarning {
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $projectsPath = Join-Path $repoRoot "projects"
 $knowledgePath = Join-Path $repoRoot "knowledge"
+$libraryPath = Join-Path $repoRoot "library"
 $copilotInstructionsPath = Join-Path $repoRoot ".github\copilot-instructions.md"
 
 Write-Host "Context Architecture - Repo Validation"
@@ -90,6 +91,138 @@ foreach ($projectDir in $projectDirs) {
         $todoText = Get-Content -Path $todoPath -Raw
         if ($todoText -match '(?mi)^Version\s+.+\|\s+\d{4}-\d{2}-\d{2}\s+\|\s+Active\s*$') {
             $activeProjects += $projectDir.Name
+        }
+    }
+}
+
+# --- knowledge/domains/*/sources/ — evidentiary source manifests ---
+# See knowledge/domains/authoring-guidelines.md §9.1.
+function Get-ManifestTableFirstColumn {
+    param([string]$Text)
+    $values = @()
+    foreach ($line in ($Text -split "`r?`n")) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed.StartsWith("|")) { continue }
+        $cells = $trimmed.Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
+        if ($cells.Count -eq 0) { continue }
+        $first = $cells[0]
+        if ($first -eq "" -or $first -eq "File" -or $first -match '^-+$') { continue }
+        $values += $first
+    }
+    return $values
+}
+
+foreach ($domainDir in $domainDirs) {
+    $sourcesPath = Join-Path $domainDir.FullName "sources"
+    if (-not (Test-Path $sourcesPath)) { continue }
+
+    $manifestPath = Join-Path $sourcesPath "manifest.md"
+    if (-not (Test-Path $manifestPath)) {
+        Add-ValidationError "Domain '$($domainDir.Name)' has a sources/ folder but no sources/manifest.md"
+        continue
+    }
+
+    $manifestText = Get-Content -Path $manifestPath -Raw
+    $manifestFiles = Get-ManifestTableFirstColumn -Text $manifestText
+
+    $actualFiles = Get-ChildItem -Path $sourcesPath -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -ne "manifest.md" } |
+        Select-Object -ExpandProperty Name
+
+    foreach ($mf in $manifestFiles) {
+        if ($actualFiles -notcontains $mf) {
+            Add-ValidationError "'$($domainDir.Name)/sources/manifest.md' lists '$mf' but that file does not exist in sources/"
+        }
+    }
+    foreach ($af in $actualFiles) {
+        if ($manifestFiles -notcontains $af) {
+            Add-ValidationWarning "'$($domainDir.Name)/sources/$af' exists but is not listed in manifest.md (orphan source file)"
+        }
+    }
+}
+
+# --- library/ — deep-well registry vs. stored files ---
+# See knowledge/domains/authoring-guidelines.md §9.2-9.3.
+$refIndexPath = Join-Path $libraryPath "reference-index.md"
+$deepWellsPath = Join-Path $libraryPath "deep-wells"
+$storedLocations = @()
+
+if (Test-Path $refIndexPath) {
+    $refText = Get-Content -Path $refIndexPath -Raw
+    $entryBlocks = [regex]::Split($refText, '(?m)^## ')
+
+    foreach ($block in $entryBlocks) {
+        if ($block.Trim() -eq "") { continue }
+        $slugLine = ($block -split "`r?`n")[0].Trim()
+        if ($slugLine -eq "") { continue }
+
+        $storedMatch = [regex]::Match($block, '(?mi)^\s*-\s*\*\*Stored:\*\*\s*(yes|no)')
+        if (-not $storedMatch.Success) { continue }
+
+        if ($storedMatch.Groups[1].Value.ToLower() -eq "yes") {
+            $locationMatch = [regex]::Match($block, '(?m)^\s*-\s*\*\*Location:\*\*\s*(\S+)')
+            if (-not $locationMatch.Success) {
+                Add-ValidationError "library/reference-index.md entry '$slugLine' is Stored: yes but has no Location field"
+                continue
+            }
+            $location = $locationMatch.Groups[1].Value
+            $storedLocations += $location
+            $fullPath = Join-Path $repoRoot $location
+            if (-not (Test-Path $fullPath)) {
+                Add-ValidationError "library/reference-index.md entry '$slugLine' points Location at '$location', which does not exist"
+            }
+        }
+    }
+
+    if (Test-Path $deepWellsPath) {
+        $actualDeepWellFiles = Get-ChildItem -Path $deepWellsPath -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -notlike "*-manifest.md" } |
+            ForEach-Object { "library/deep-wells/$($_.Name)" }
+
+        foreach ($f in $actualDeepWellFiles) {
+            if ($storedLocations -notcontains $f) {
+                Add-ValidationWarning "'$f' exists in library/deep-wells/ but no reference-index.md entry claims it via Location (orphan deep-well file)"
+            }
+        }
+    }
+} elseif (Test-Path $deepWellsPath) {
+    Add-ValidationError "library/deep-wells/ exists but library/reference-index.md is missing"
+}
+
+# --- Referential integrity: links from domain files into sources/ or library/reference-index.md ---
+$refIndexHeadings = @()
+if (Test-Path $refIndexPath) {
+    $refText = Get-Content -Path $refIndexPath -Raw
+    $refIndexHeadings = [regex]::Matches($refText, '(?m)^## (.+)$') | ForEach-Object { $_.Groups[1].Value.Trim() }
+}
+
+foreach ($domainDir in $domainDirs) {
+    foreach ($fileName in @("knowledge.md", "description.md")) {
+        $filePath = Join-Path $domainDir.FullName $fileName
+        if (-not (Test-Path $filePath)) { continue }
+        $text = Get-Content -Path $filePath -Raw
+
+        $linkMatches = [regex]::Matches($text, '\]\(([^)]+)\)')
+        foreach ($m in $linkMatches) {
+            $target = $m.Groups[1].Value
+            $anchor = $null
+            if ($target -match '^(.*?)(#[^#]*)$') {
+                $target = $Matches[1]
+                $anchor = $Matches[2]
+            }
+            if ($target -notmatch '^(sources/|(\.\./){3}library/)') { continue }
+
+            $resolvedPath = [System.IO.Path]::GetFullPath((Join-Path $domainDir.FullName $target))
+            if (-not (Test-Path $resolvedPath)) {
+                Add-ValidationError "'$($domainDir.Name)/$fileName' links to '$target', which does not resolve to a real file"
+                continue
+            }
+            if ($anchor -and $target -like "*reference-index.md") {
+                $slug = $anchor.TrimStart('#')
+                if ($refIndexHeadings -notcontains $slug) {
+                    Add-ValidationWarning "'$($domainDir.Name)/$fileName' links to reference-index.md#$slug, which has no matching '## $slug' heading"
+                }
+            }
         }
     }
 }

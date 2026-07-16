@@ -115,3 +115,43 @@ STATUS: CHECKPOINT
 Completed: Adopted three of seven reviewed pitfalls (manifest enrichment + cross-domain recipes, reference reciprocity, correction backlink check, split heuristic); explicitly declined two as not applicable to this architecture.
 Next: None planned — awaiting further direction.
 Waiting for: Nothing further — pushing this now.
+
+---
+
+## [Claude] — Turn 6 | 2026-07-16
+
+Human relayed a design worked out in a separate conversation for storing raw evidentiary sources (insurance policies, contracts) and deep wells (textbooks, manuals) alongside domain knowledge — neither previously had a home in this architecture. Assessed it against `ROUTING.md`, `Architecture.md`, `MarkdownConventions.md`, and `knowledge/domains/authoring-guidelines.md` before building, per the proposal's own request, and presented a phased plan first (system-layer work touching 4 files, per the Plan-first rule).
+
+**Structure adopted, close to the proposal as written:**
+
+- Per-domain `knowledge/domains/[name]/sources/` (evidentiary sources — small, definitive, always stored) with a `manifest.md` registry, created only for domains that actually have sources.
+- Top-level `library/` (deep wells — large, incrementally mined, possibly cross-domain) with `reference-index.md` as an always-populated registry and `deep-wells/` for the physical files of cornerstone-status works only.
+- The cornerstone-promotion decision (store the physical file, or registry-only) is human-gated, reusing the existing knowledge-promotion flag pattern (`operating-principles.md` §5) rather than inventing new machinery.
+- Citing either kind of source uses a plain relative link plus the existing `[VERIFIED: source]` signal — no new link syntax or signal, per `MarkdownConventions.md` §7–8 as already written.
+
+**Two corrections made against the proposal's own draft**, surfaced to the human rather than silently fixed:
+1. Its `library/reference-index.md` citation example (`../../library/reference-index.md`) was one directory level short — from `knowledge/domains/[name]/knowledge.md`, the correct relative path is `../../../library/reference-index.md` (name → domains → knowledge → repo root). Verified against the existing `../other-domain/description.md` cross-domain link example in `authoring-guidelines.md` §5 to confirm the level-counting.
+2. `README.md`'s existing folder-structure code block had a pre-existing formatting break in the `projects/` tree (three rows collapsed onto one line, missing newlines) — fixed in the same edit since it sat directly in the block being extended.
+
+**Files changed:**
+
+- `knowledge/domains/authoring-guidelines.md` (1.2 → 1.3) — new §9 "Evidentiary Sources & Deep Wells" (§9.1 sources, §9.2 deep wells, §9.3 cornerstone rule, §9.4 referential-integrity tooling), inserted before "What Does Not Belong" per the existing Maintenance Pass precedent — old §9 → §10, old §10 → §11. Index updated to match. Added a `sources/` check to the Maintenance Pass (§8) and a source/deep-well resolution line to the Quick Checklist (§11).
+- `ROUTING.md` (1.3 → 1.4) — Step 4 now excludes `sources/` and `library/deep-wells/` from routine routing (opened only when a task names the specific file); Hard Constraints gained the cornerstone-confirmation rule next to the existing "do not edit `knowledge/` directly" line; Quick Task Guide gained an entry for adding a source or deep well.
+- `Architecture.md` (1.0 → 1.1) — §2 File Structure diagram and §3 Two-Tier Knowledge Model updated for `sources/` and `library/`; knowledge-promotion procedure notes the additional cornerstone gate.
+- `README.md` (1.1 → 1.2) — folder-structure diagram updated to match, plus the formatting fix above.
+- `library/reference-index.md` — new file, empty registry (no deep wells registered yet), same pattern as `knowledge/domains/index.md` existing before any real domains do.
+
+**Referential-integrity tooling (proposal's open question, resolved this turn):** asked the human to choose between extending `validate.ps1` (PowerShell, consistent with existing tooling) or a separate Python script. Human wanted a solution that works both from Claude Code on the web and from Copilot locally in VS Code. Rather than maintaining two parallel implementations, extended `validate.ps1` — the existing tooling language — and closed the environment gap instead: added `.claude/hooks/session-start.sh` (registered via `.claude/settings.json`) that installs PowerShell (via Microsoft's official apt repo) on Claude Code web/remote sessions only (`$CLAUDE_CODE_REMOTE` gate), idempotently, and no-ops locally where Windows PowerShell is already native. Both the hook and the extended script were tested end-to-end in this session: the hook was run from a clean state (PowerShell fully removed) and completed a real install in ~17s, and from an already-installed state it no-ops in ~2ms; `validate.ps1`'s new checks were run against a fixture directory covering every case (missing manifest, orphan file on disk, orphan manifest row, broken source link, broken deep-well `Location`, orphan deep-well file, broken reference-index anchor) and correctly flagged each one with zero false positives on the matching clean fixture.
+
+`validate.ps1` additions: for each domain with a `sources/` folder, cross-checks `manifest.md` rows against the files actually on disk in both directions; for `library/reference-index.md`, checks every `Stored: yes` entry's `Location` resolves to a real file and every file in `library/deep-wells/` is claimed by some entry; for every domain's `knowledge.md`/`description.md`, checks that relative links into `sources/` or `library/reference-index.md` resolve to a real file or a real heading.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added the evidentiary-sources/deep-wells convention (`sources/`, `library/`, cornerstone rule) across `authoring-guidelines.md`, `ROUTING.md`, `Architecture.md`, and `README.md`; created the empty `library/reference-index.md` registry; extended `scripts/validate.ps1` with referential-integrity checks and added a `.claude` session-start hook so the same PowerShell tooling runs identically from Claude Code on the web and from local VS Code + Copilot.
+Next: None planned — awaiting further direction.
+Waiting for: Nothing further — pushed this turn.
