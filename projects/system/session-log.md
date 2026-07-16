@@ -155,3 +155,24 @@ STATUS: CHECKPOINT
 Completed: Added the evidentiary-sources/deep-wells convention (`sources/`, `library/`, cornerstone rule) across `authoring-guidelines.md`, `ROUTING.md`, `Architecture.md`, and `README.md`; created the empty `library/reference-index.md` registry; extended `scripts/validate.ps1` with referential-integrity checks and added a `.claude` session-start hook so the same PowerShell tooling runs identically from Claude Code on the web and from local VS Code + Copilot.
 Next: None planned — awaiting further direction.
 Waiting for: Nothing further — pushed this turn.
+
+---
+
+## [Claude] — Turn 7 | 2026-07-16
+
+Follow-up fix, no new content from the human this turn. After Turn 6 was pushed, ran `validate.ps1` against a fresh clone of the actual pushed repo as a final end-to-end sanity check (beyond the fixture-based testing already done in Turn 6) — it failed with a false positive: `library/reference-index.md entry '<slug-in-kebab-case>' points Location at 'library/deep-wells/<filename>', which does not exist`.
+
+Root cause: `library/reference-index.md`'s own "Registered Deep Wells" section documents the entry template as an illustrative example inside a fenced ` ``` ` code block (per `authoring-guidelines.md` §9.2's own spec for this file). The script's heading/field regexes had no way to distinguish that documentation example from a real registered entry — it parsed `## <slug-in-kebab-case>` and `**Stored:** yes / no` (matching on the literal leading "yes") as if they were live registry content.
+
+Fixed `scripts/validate.ps1`: added a `Remove-CodeFences` helper (strips ` ``` `-fenced blocks via a non-greedy regex) and applied it before all four places that scan markdown prose for headings, `**Stored:**`/`**Location:**` fields, table rows, or links — `sources/manifest.md` tables, `reference-index.md` entry-block parsing, `reference-index.md` heading collection (for anchor-checking), and domain `knowledge.md`/`description.md` link scanning. This is the general fix — the same class of false positive would otherwise recur for any domain's `knowledge.md` that includes a fenced-code documentation example referencing `sources/` or `reference-index.md` syntax, not just this one file. Re-verified clean (0 errors, 0 warnings) against both the existing fixture (no regression) and a fresh clone of this repo.
+
+### Session close
+
+Knowledge candidates: None — tooling/script fix, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Fixed a code-fence false positive in the Turn 6 `validate.ps1` extension, caught via real-repo end-to-end testing rather than fixture testing alone; verified with a clean re-run.
+Next: None planned — awaiting further direction.
+Waiting for: Nothing further — pushed this turn.
