@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-16 | Production
 
 ---
 
@@ -75,6 +75,12 @@ The session log only ever grows — no entries are deleted or edited after the f
       [domain-name]/
         description.md                ← Scope, constraints, when to load
         knowledge.md                  ← Domain reference material
+        sources/                      ← Evidentiary source files — only if this domain has any
+          manifest.md                 ← Registry of the raw files in this folder
+
+  library/                            ← Cross-domain deep-well registry — see authoring-guidelines.md §9.2
+    reference-index.md                ← Registry of every deep well ever touched, stored or not
+    deep-wells/                       ← Physical files for cornerstone-status deep wells only
 
   projects/                           ← One folder per project
     system/                           ← Pre-created — tracks all structural changes to this system
@@ -108,6 +114,8 @@ Contains what the system knows regardless of which project is active. Changes to
 - **`knowledge/flow/turn-protocol.md`** — turn format, STATUS signal vocabulary, BLOCKED format.
 - **`knowledge/domains/[name]/description.md`** — domain scope, constraints, and load conditions.
 - **`knowledge/domains/[name]/knowledge.md`** — domain reference material. Each has a numbered Index — entries name key concepts so a routing LLM can decide which sections to load without reading the whole file.
+- **`knowledge/domains/[name]/sources/`** — evidentiary source files a domain's knowledge cites back to, plus a `manifest.md` registry. Present only for domains that have them. See `knowledge/domains/authoring-guidelines.md` §9.1.
+- **`library/`** — cross-domain deep-well registry (`reference-index.md`) and, for cornerstone-status works only, the physical files themselves (`deep-wells/`). See `knowledge/domains/authoring-guidelines.md` §9.2–9.3.
 
 ### Project layer — append freely
 
@@ -125,7 +133,7 @@ When something discovered during a project should update the knowledge layer —
 3. The flag is reviewed by the human, who approves, edits, or rejects it.
 4. Only after approval is the change committed to `knowledge/`.
 
-This gate exists because the knowledge layer is loaded by every future session. An incorrect or premature update propagates everywhere.
+This gate exists because the knowledge layer is loaded by every future session. An incorrect or premature update propagates everywhere. The same gate applies, with one addition, to promoting a deep well from registry-only to physically stored in `library/deep-wells/` — the cornerstone rule (`knowledge/domains/authoring-guidelines.md` §9.3) requires explicit human confirmation before the file is stored.
 
 ---
 
@@ -187,3 +195,4 @@ To fork this template for a new initiative:
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic context architecture system design document. |
+| 1.1 | 2026-07-16 | §2 File Structure and §3 Two-Tier Knowledge Model updated for the new `sources/` per-domain folder and top-level `library/` deep-well registry, and a cornerstone-promotion note added to the knowledge promotion procedure (§3). See `knowledge/domains/authoring-guidelines.md` §9. |

@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.4 | 2026-07-16 | Production
 
 ---
 
@@ -82,6 +82,8 @@ Identify which knowledge domains the task touches. Apply this loading hierarchy 
 
 When multiple domains are relevant, apply the hierarchy independently for each. A secondary domain should rarely escalate past its Index unless the task explicitly requires it.
 
+Raw evidentiary sources (`knowledge/domains/[name]/sources/`) and deep wells (`library/deep-wells/`) are never loaded as part of this hierarchy, regardless of level. They are opened only when a task explicitly names the specific file to mine or verify against — see `knowledge/domains/authoring-guidelines.md` §9.
+
 For a recurring multi-domain task, check `knowledge/domains/index.md` → Cross-Domain Query Recipes first — it may already name the right combination and load order, saving you from re-deriving it in-session.
 
 Which domains exist and what they cover: `knowledge/domains/index.md`
@@ -93,6 +95,7 @@ Which domains exist and what they cover: `knowledge/domains/index.md`
 Do not break these regardless of what the human asks.
 
 - **Do not edit `knowledge/` files directly.** Changes to the knowledge layer require human approval. Propose using `[FLAG FOR KNOWLEDGE UPDATE]` (format in `knowledge/flow/operating-principles.md` §5).
+- **Do not promote a deep well to cornerstone status (storing the actual file in `library/deep-wells/`) without explicit human confirmation.** Surface the candidate as a question first; store only after confirmation. See `knowledge/domains/authoring-guidelines.md` §9.3.
 - **Do not act on files listed as "(planned)" in the Folder Map.** They do not exist. Do not create them without explicit instruction.
 - **Do not invent content from files you have not read.** If a file is relevant and unreadable, say so.
 - **Do not edit prior turns in `session-log.md`.** Append only.
@@ -123,6 +126,10 @@ Apply these in every session regardless of project type or how you entered the s
 → Register the domain in `knowledge/domains/index.md`
 → Add a routing row in `ROUTING.md` Step 2
 → Markdown rules: `MarkdownConventions.md`
+
+**I want to add a raw reference source or deep well**
+→ Evidentiary source (proves one specific claim, small): store it in `knowledge/domains/[name]/sources/`, add a `manifest.md` row, cite it with a relative link from `knowledge.md`. Use the normal knowledge-update flag.
+→ Deep well (large, possibly cross-domain, mined incrementally): always add an entry to `library/reference-index.md`. Only store the actual file in `library/deep-wells/` if it clears the cornerstone bar (`knowledge/domains/authoring-guidelines.md` §9.3) — confirm with the human first.
 
 **I want to pass working material between sessions**
 → Drop it in `temp/` — this is the designated handoff zone for transient artifacts
@@ -162,3 +169,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.1 | 2026-06-29 | Added first-time setup workflow to Quick Task Guide — covers domain-first initialization sequence for fresh forks. |
 | 1.2 | 2026-07-15 | Expanded the Commit and push standing rule with cadence guidance (per-increment vs per-segment) and an explicit requirement to flag the human when a push is deferred. |
 | 1.3 | 2026-07-15 | Step 4 now points to the new Cross-Domain Query Recipes section in `knowledge/domains/index.md` for recurring multi-domain tasks. |
+| 1.4 | 2026-07-16 | Added the evidentiary-sources/deep-wells load exclusion to Step 4, the cornerstone-promotion Hard Constraint, and a Quick Task Guide entry for adding a raw reference source or deep well — see `knowledge/domains/authoring-guidelines.md` §9. |
