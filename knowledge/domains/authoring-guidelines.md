@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.2 | 2026-07-15 | Production
+Version 1.3 | 2026-07-16 | Production
 
 ---
 
@@ -36,8 +36,9 @@ This document covers knowledge-document-specific rules only. General markdown fo
 6. [Validity and Confidence Signals](#6-validity-and-confidence-signals)
 7. [Versioning](#7-versioning)
 8. [Maintenance Pass](#8-maintenance-pass)
-9. [What Does Not Belong in a Knowledge Document](#9-what-does-not-belong-in-a-knowledge-document)
-10. [Quick Checklist](#10-quick-checklist)
+9. [Evidentiary Sources & Deep Wells](#9-evidentiary-sources--deep-wells)
+10. [What Does Not Belong in a Knowledge Document](#10-what-does-not-belong-in-a-knowledge-document)
+11. [Quick Checklist](#11-quick-checklist)
 
 ---
 
@@ -204,10 +205,128 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] Compact fully-resolved entries: once something is no longer actionable, collapse it to a one-line outcome and date rather than keeping the full history
 - [ ] Confirm `knowledge/domains/index.md`'s References column still matches the actual `> See also:` callouts in this domain's `knowledge.md` — a one-directional reference that should be reciprocal is exactly the kind of drift this pass exists to catch
 - [ ] Consider whether this domain should split in two: warning signs are routinely needing the Full file (ROUTING.md §4, level 5) because sections are too interdependent to load separately, or two sections that are never needed by the same task. There's no fixed size threshold — judge by whether a task ever needs the whole document versus consistently needing only one part of it
+- [ ] If this domain has a `sources/` folder, run `scripts/validate.ps1` and confirm it reports no referential-integrity issues for this domain (§9.4)
 
 ---
 
-## 9. What Does Not Belong in a Knowledge Document
+## 9. Evidentiary Sources & Deep Wells
+
+Raw material a domain's knowledge is actually built from — an insurance policy PDF, a medical journal, a contract — has no home in `description.md` or `knowledge.md`. Two categories, handled differently based on size and reusability.
+
+### 9.1 Evidentiary Sources
+
+An evidentiary source is finite, definitive, and proves one specific claim (a policy clause, a contract term). It is small enough that storage is never a real cost — always store it.
+
+Location: `knowledge/domains/[name]/sources/`. Only create this folder for a domain that actually has evidentiary sources — not a default empty folder in every domain.
+
+```
+knowledge/domains/[name]/
+  description.md
+  knowledge.md
+  sources/
+    manifest.md
+    <raw-file-1>.pdf
+    <raw-file-2>.pdf
+```
+
+`sources/manifest.md` follows the standard file header (`MarkdownConventions.md` §1), since it's a file in this repo like any other:
+
+```
+# [Domain Name] — Source Manifest
+
+Version 1.0 | YYYY-MM-DD | Production
+
+---
+
+## Document Purpose
+
+Registry of evidentiary source documents for the [Domain Name] domain —
+raw files that specific claims in knowledge.md cite back to.
+
+---
+
+| File | Type | Effective date | Acquired | Supersedes | Status |
+|---|---|---|---|---|---|
+| home-policy-2026.pdf | Insurance policy | 2026-01-01 | 2026-01-15 | home-policy-2025.pdf | Current |
+
+---
+
+## Version History
+
+| Version | Date | Summary |
+|---|---|---|
+| 1.0 | YYYY-MM-DD | Initial creation. |
+```
+
+Cite a source from `knowledge.md` with a standard relative link, consistent with `MarkdownConventions.md` §7 — no new link syntax:
+
+```
+The policy excludes water damage above the 2nd floor
+([home-policy-2026.pdf](sources/home-policy-2026.pdf), §4.2). [VERIFIED: home-policy-2026.pdf]
+```
+
+The existing `[VERIFIED: source]` signal (§6) already carries the provenance confidence state — the link supplies the "where," the signal supplies the "how sure." No new signal is needed.
+
+**Edit ceremony:** adding a source and a manifest row is a knowledge-layer content addition — treat it exactly like appending a fact to `knowledge.md` (`[FLAG FOR KNOWLEDGE UPDATE]`, human confirms, then commit). It does not need system-project routing on its own — only introducing or restructuring the `sources/` convention itself (this section) is system-layer work.
+
+### 9.2 Deep Wells
+
+A deep well is large, mined incrementally, and possibly relevant to more than one domain — a textbook, a manual. It is always registered; it is only physically stored if it clears the cornerstone bar (§9.3).
+
+Location: `library/`, a top-level folder sibling to `knowledge/` and `projects/`.
+
+```
+library/
+  reference-index.md
+  deep-wells/
+    <cornerstone-work>.pdf
+    <cornerstone-work>-manifest.md
+```
+
+`library/reference-index.md` is a cross-domain registry of every deep well ever touched, stored or not. One heading per entry; the heading text is the citation slug:
+
+```
+## <slug-in-kebab-case>
+
+- **Title:**
+- **Format:**
+- **Stored:** yes / no — if no, note how to reacquire it (ISBN, URL)
+- **Location:** library/deep-wells/<filename> (only if Stored: yes)
+- **Referenced by domains:** <domain-name>
+- **Cornerstone status:** Yes/No — one line why
+- **Extraction log:**
+  - YYYY-MM-DD: <what was mined> → appended to <domain>/knowledge.md, per [VERIFIED: <slug>]
+```
+
+For a stored cornerstone work, `library/deep-wells/<work>-manifest.md` holds the detailed extraction log (table of contents, what's mined, what isn't), so `reference-index.md` can stay a short summary that links to it.
+
+Citing a registry-only (not physically stored) deep well from a domain, from `knowledge/domains/[name]/knowledge.md`:
+
+```
+See [Gray's Anatomy, 43rd ed., ch. 12](../../../library/reference-index.md#grays-anatomy-2023) [VERIFIED: grays-anatomy-2023]
+```
+
+### 9.3 The Cornerstone Rule
+
+A deep well's physical file goes into `library/deep-wells/` only if any one of these holds:
+
+- More than one domain draws on it, or is likely to.
+- It's not trivially reacquirable (out of print, a personal scan, paid for and not worth repurchasing).
+- A subproject will mine it incrementally over months and reacquisition friction would slow that down.
+
+Otherwise: registry entry only, no physical file.
+
+This decision is never made unilaterally by the LLM — same pattern as the existing knowledge-promotion flag (`operating-principles.md` §5): surface it as a one-line question in the next CHECKPOINT turn, wait for human confirmation, only then store the file and write the manifest. This is a Hard Constraint — see `ROUTING.md`.
+
+### 9.4 Referential Integrity
+
+`scripts/validate.ps1` checks that source and deep-well references stay consistent: every `sources/manifest.md` row resolves to a real file and vice versa (orphan detection both directions), every `reference-index.md` entry marked `Stored: yes` resolves to a real file in `library/deep-wells/` and vice versa, and relative links from a domain's `description.md`/`knowledge.md` into `sources/` or `library/reference-index.md` resolve to a real file or a real heading. Run it after adding, removing, or renaming a source or deep well.
+
+> **Note:** Raw evidentiary sources and deep-well files are never loaded as part of routine domain-knowledge routing (`ROUTING.md` §4) — they are opened only when a task explicitly names the specific file to mine or verify against.
+
+---
+
+## 10. What Does Not Belong in a Knowledge Document
 
 | Does not belong | Belongs instead |
 |---|---|
@@ -219,7 +338,7 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 
 ---
 
-## 10. Quick Checklist
+## 11. Quick Checklist
 
 Before submitting any knowledge document for human approval:
 
@@ -232,6 +351,7 @@ Before submitting any knowledge document for human approval:
 - [ ] All cross-domain references use relative links
 - [ ] Validity signals applied to unverified or contradicted claims, and time-sensitive or sensitive facts carry the appropriate signal (§6)
 - [ ] Sections are independently loadable — no critical fact depends on a prior section that may not be loaded
+- [ ] Evidentiary sources have a manifest.md; every source cited from knowledge.md resolves to a real file or a real reference-index.md heading (§9)
 - [ ] Version History row added for this edit
 
 ---
@@ -243,3 +363,4 @@ Before submitting any knowledge document for human approval:
 | 1.0 | 2026-06-29 | Initial creation. Adapted from NightCrew Knowledge Base Authoring Guidelines, terminology updated for domain model. |
 | 1.1 | 2026-07-15 | Added Maintenance Pass (§8, subsequent sections renumbered), own-vs-reference rule for within-document facts (§4), optional Known Gaps/Open Items section pattern (§3), supersede rule (§7), and matching `[TIME-SENSITIVE]`/`[SENSITIVE]` signal rows (§6). |
 | 1.2 | 2026-07-15 | Added cross-reference reciprocity registration (§5), a correction backlink check for facts copied before the own-vs-reference convention existed (§4), and a when-to-split heuristic (§8) — prompted by a review of known pitfalls in a larger, organically-grown document family. |
+| 1.3 | 2026-07-16 | Added new §9 "Evidentiary Sources & Deep Wells" (evidentiary sources in per-domain `sources/`, deep wells in top-level `library/`, the human-gated cornerstone rule, and referential-integrity tooling) — subsequent sections renumbered (old §9→10, §10→11). Added a `sources/` validation step to the Maintenance Pass (§8) and a source/deep-well resolution check to the Quick Checklist (§11). |
