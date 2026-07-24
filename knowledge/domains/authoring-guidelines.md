@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.3 | 2026-07-16 | Production
+Version 1.4 | 2026-07-16 | Production
 
 ---
 
@@ -69,6 +69,8 @@ Version [X.Y] | [YYYY-MM-DD] | [Status]
 
 [One to two sentences: what domain this covers and what the LLM can do with this knowledge.]
 ```
+
+Both `description.md` and `knowledge.md` also require the frontmatter block defined in `MarkdownConventions.md` §1 — `type: domain` and `domain: [name]` — placed *before* this header, not instead of it. `scripts/validate.ps1` checks the `domain:` value matches the folder name.
 
 ---
 
@@ -162,7 +164,7 @@ When a knowledge document refers to content in another domain:
 - Use a relative file link: `[description.md](../other-domain/description.md)`
 - Add a `> **See also:**` callout at the point of reference naming the other domain and what it covers.
 - Do not duplicate content from another domain — reference it instead.
-- Register the cross-reference in `knowledge/domains/index.md` (Registered Domains → References column), and check whether the referenced domain should reference this one back. A reference that only points one way is a common source of silent drift as the domain family grows — nothing else catches it.
+- Register the cross-reference in `knowledge/domains/index.md` (Registered Domains → References column), and check whether the referenced domain should reference this one back. A reference that only points one way is a common source of silent drift as the domain family grows — nothing else catches it. `scripts/validate.ps1` now checks this mechanically (§8) by scanning for the actual links rather than the index summary — treat its warning the same as a Maintenance Pass finding, not as a new rule.
 
 ---
 
@@ -203,9 +205,10 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] Confirm the Executive Summary still reflects the most operationally critical facts — move anything it has outgrown into the relevant domain section
 - [ ] If the domain has separate Known Gaps and Open Items sections (§3), confirm they haven't been conflated
 - [ ] Compact fully-resolved entries: once something is no longer actionable, collapse it to a one-line outcome and date rather than keeping the full history
-- [ ] Confirm `knowledge/domains/index.md`'s References column still matches the actual `> See also:` callouts in this domain's `knowledge.md` — a one-directional reference that should be reciprocal is exactly the kind of drift this pass exists to catch
+- [ ] Confirm `knowledge/domains/index.md`'s References column still matches the actual `> See also:` callouts in this domain's `knowledge.md` — a one-directional reference that should be reciprocal is exactly the kind of drift this pass exists to catch. `scripts/validate.ps1` now flags this mechanically (§5) — run it as part of this check rather than eyeballing the column by hand.
 - [ ] Consider whether this domain should split in two: warning signs are routinely needing the Full file (ROUTING.md §4, level 5) because sections are too interdependent to load separately, or two sections that are never needed by the same task. There's no fixed size threshold — judge by whether a task ever needs the whole document versus consistently needing only one part of it
 - [ ] If this domain has a `sources/` folder, run `scripts/validate.ps1` and confirm it reports no referential-integrity issues for this domain (§9.4)
+- [ ] Confirm `description.md` and `knowledge.md` both have correct frontmatter (`MarkdownConventions.md` §1) — `scripts/validate.ps1` checks this on every run, but worth a manual glance if either file was ever created by copying another domain's files rather than the template
 
 ---
 
@@ -229,9 +232,14 @@ knowledge/domains/[name]/
     <raw-file-2>.pdf
 ```
 
-`sources/manifest.md` follows the standard file header (`MarkdownConventions.md` §1), since it's a file in this repo like any other:
+`sources/manifest.md` follows the standard file header (`MarkdownConventions.md` §1), since it's a file in this repo like any other — including its own frontmatter (`type: source-manifest`, `domain: [name]`):
 
 ```
+---
+type: source-manifest
+domain: [name]
+---
+
 # [Domain Name] — Source Manifest
 
 Version 1.0 | YYYY-MM-DD | Production
@@ -342,6 +350,7 @@ This decision is never made unilaterally by the LLM — same pattern as the exis
 
 Before submitting any knowledge document for human approval:
 
+- [ ] Frontmatter present and correct (`type`, `domain`) — `MarkdownConventions.md` §1
 - [ ] Header block present with version, date, and status
 - [ ] Document Purpose is one to two sentences
 - [ ] Index is present with descriptive entries and working anchor links
@@ -364,3 +373,4 @@ Before submitting any knowledge document for human approval:
 | 1.1 | 2026-07-15 | Added Maintenance Pass (§8, subsequent sections renumbered), own-vs-reference rule for within-document facts (§4), optional Known Gaps/Open Items section pattern (§3), supersede rule (§7), and matching `[TIME-SENSITIVE]`/`[SENSITIVE]` signal rows (§6). |
 | 1.2 | 2026-07-15 | Added cross-reference reciprocity registration (§5), a correction backlink check for facts copied before the own-vs-reference convention existed (§4), and a when-to-split heuristic (§8) — prompted by a review of known pitfalls in a larger, organically-grown document family. |
 | 1.3 | 2026-07-16 | Added new §9 "Evidentiary Sources & Deep Wells" (evidentiary sources in per-domain `sources/`, deep wells in top-level `library/`, the human-gated cornerstone rule, and referential-integrity tooling) — subsequent sections renumbered (old §9→10, §10→11). Added a `sources/` validation step to the Maintenance Pass (§8) and a source/deep-well resolution check to the Quick Checklist (§11). |
+| 1.4 | 2026-07-16 | Cross-referenced the new frontmatter convention from §2 and the source-manifest template (§9.1); noted that `scripts/validate.ps1` now mechanically checks cross-reference reciprocity (§5, §8) rather than relying on manual review alone. |
