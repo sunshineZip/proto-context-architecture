@@ -1,6 +1,11 @@
+---
+type: domain
+domain: example-domain
+---
+
 # Example Domain — Knowledge
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-16 | Production
 
 ---
 
@@ -12,7 +17,7 @@ Reference knowledge for the Example Domain. Load the Index first — then load o
 
 > **Edit guide:** To append new knowledge to this file, raise a `[FLAG FOR KNOWLEDGE UPDATE]` in your current session turn and wait for human confirmation — no system project entry needed. To change this domain's scope, rename it, or remove it entirely, route to `projects/system/` instead.
 
-> **Setup note:** This is a template. Replace all bracketed placeholders with real knowledge. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
+> **Setup note:** This is a template. Replace all bracketed placeholders with real knowledge, including the `domain:` value in the frontmatter above. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
 
 ---
 
@@ -63,3 +68,4 @@ Reference knowledge for the Example Domain. Load the Index first — then load o
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Placeholder knowledge document template. |
+| 1.1 | 2026-07-16 | Added frontmatter (`type: domain`, `domain: example-domain`) per `MarkdownConventions.md` §1. |

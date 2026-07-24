@@ -1,6 +1,11 @@
+---
+type: domain
+domain: example-domain
+---
+
 # Example Domain — Description
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-16 | Production
 
 ---
 
@@ -8,7 +13,7 @@ Version 1.0 | 2026-06-29 | Production
 
 Scope and load conditions for the Example Domain. Load this file when working on any project that touches [describe what this domain covers — e.g. "the billing subsystem" or "vendor onboarding processes"].
 
-> **Setup note:** This is a template. Replace all bracketed placeholders with real content for your domain. Rename the folder from `example-domain/` to a meaningful name. Update ROUTING.md Step 2 and `knowledge/domains/index.md` accordingly.
+> **Setup note:** This is a template. Replace all bracketed placeholders with real content for your domain, including the `domain:` value in the frontmatter above. Rename the folder from `example-domain/` to a meaningful name. Update ROUTING.md Step 2 and `knowledge/domains/index.md` accordingly.
 
 ---
 
@@ -69,3 +74,4 @@ When working in this domain, apply these constraints:
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Placeholder example domain description template. |
+| 1.1 | 2026-07-16 | Added frontmatter (`type: domain`, `domain: example-domain`) per `MarkdownConventions.md` §1. |

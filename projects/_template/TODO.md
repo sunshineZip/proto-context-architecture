@@ -1,3 +1,8 @@
+---
+type: project
+project: [project-name]
+---
+
 # [Project Name] — TODO
 
 Version 1.0 | YYYY-MM-DD | Active
