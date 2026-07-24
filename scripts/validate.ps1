@@ -104,6 +104,80 @@ function Remove-CodeFences {
     return [regex]::Replace($Text, '(?s)```.*?```', '')
 }
 
+# --- Shared helper: parse a minimal YAML frontmatter block (key: value
+#     pairs only, no nesting) from the very start of a file. Anchored to
+#     the true start of the string so a document's own "---" section
+#     separators are never mistaken for a frontmatter delimiter. ---
+function Get-Frontmatter {
+    param([string]$Text)
+    $result = @{}
+    $m = [regex]::Match($Text, '\A---\r?\n(.*?)\r?\n---\r?\n', 'Singleline')
+    if (-not $m.Success) { return $result }
+    foreach ($line in ($m.Groups[1].Value -split "`r?`n")) {
+        $kv = [regex]::Match($line, '^([a-zA-Z0-9_-]+):\s*(.+?)\s*$')
+        if ($kv.Success) {
+            $result[$kv.Groups[1].Value] = $kv.Groups[2].Value
+        }
+    }
+    return $result
+}
+
+# --- Frontmatter: domain files ---
+# See MarkdownConventions.md §1 (Frontmatter).
+foreach ($domainDir in $domainDirs) {
+    foreach ($fileName in @("description.md", "knowledge.md")) {
+        $filePath = Join-Path $domainDir.FullName $fileName
+        if (-not (Test-Path $filePath)) { continue }
+
+        $fm = Get-Frontmatter -Text (Get-Content -Path $filePath -Raw)
+        if ($fm.Count -eq 0) {
+            Add-ValidationError "'$($domainDir.Name)/$fileName' is missing frontmatter (expected type: domain, domain: $($domainDir.Name))"
+            continue
+        }
+        if ($fm['type'] -ne 'domain') {
+            Add-ValidationError "'$($domainDir.Name)/$fileName' frontmatter has type: $($fm['type']), expected 'domain'"
+        }
+        if ($fm['domain'] -ne $domainDir.Name) {
+            Add-ValidationError "'$($domainDir.Name)/$fileName' frontmatter has domain: $($fm['domain']), expected '$($domainDir.Name)' (folder name mismatch)"
+        }
+    }
+
+    $sourcesManifestPath = Join-Path (Join-Path $domainDir.FullName "sources") "manifest.md"
+    if (Test-Path $sourcesManifestPath) {
+        $fm = Get-Frontmatter -Text (Get-Content -Path $sourcesManifestPath -Raw)
+        if ($fm.Count -eq 0) {
+            Add-ValidationError "'$($domainDir.Name)/sources/manifest.md' is missing frontmatter (expected type: source-manifest, domain: $($domainDir.Name))"
+        } else {
+            if ($fm['type'] -ne 'source-manifest') {
+                Add-ValidationError "'$($domainDir.Name)/sources/manifest.md' frontmatter has type: $($fm['type']), expected 'source-manifest'"
+            }
+            if ($fm['domain'] -ne $domainDir.Name) {
+                Add-ValidationError "'$($domainDir.Name)/sources/manifest.md' frontmatter has domain: $($fm['domain']), expected '$($domainDir.Name)' (folder name mismatch)"
+            }
+        }
+    }
+}
+
+# --- Frontmatter: project files ---
+foreach ($projectDir in $projectDirs) {
+    foreach ($fileName in @("TODO.md", "session-log.md")) {
+        $filePath = Join-Path $projectDir.FullName $fileName
+        if (-not (Test-Path $filePath)) { continue }
+
+        $fm = Get-Frontmatter -Text (Get-Content -Path $filePath -Raw)
+        if ($fm.Count -eq 0) {
+            Add-ValidationError "'$($projectDir.Name)/$fileName' is missing frontmatter (expected type: project, project: $($projectDir.Name))"
+            continue
+        }
+        if ($fm['type'] -ne 'project') {
+            Add-ValidationError "'$($projectDir.Name)/$fileName' frontmatter has type: $($fm['type']), expected 'project'"
+        }
+        if ($fm['project'] -ne $projectDir.Name) {
+            Add-ValidationError "'$($projectDir.Name)/$fileName' frontmatter has project: $($fm['project']), expected '$($projectDir.Name)' (folder name mismatch)"
+        }
+    }
+}
+
 # --- knowledge/domains/*/sources/ — evidentiary source manifests ---
 # See knowledge/domains/authoring-guidelines.md §9.1.
 function Get-ManifestTableFirstColumn {
@@ -232,6 +306,41 @@ foreach ($domainDir in $domainDirs) {
                     Add-ValidationWarning "'$($domainDir.Name)/$fileName' links to reference-index.md#$slug, which has no matching '## $slug' heading"
                 }
             }
+        }
+    }
+}
+
+# --- Cross-domain reference reciprocity (warning only) ---
+# See knowledge/domains/authoring-guidelines.md §5 and §8. Ground truth is
+# the actual links inside each domain's own files, not index.md's prose
+# References column — that column is a human-authored summary and could
+# itself drift from the real links.
+$domainNames = $domainDirs | ForEach-Object { $_.Name }
+$domainLinkMap = @{}
+
+foreach ($domainDir in $domainDirs) {
+    $linkedDomains = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($fileName in @("description.md", "knowledge.md")) {
+        $filePath = Join-Path $domainDir.FullName $fileName
+        if (-not (Test-Path $filePath)) { continue }
+        $text = Remove-CodeFences -Text (Get-Content -Path $filePath -Raw)
+
+        $siblingMatches = [regex]::Matches($text, '\]\(\.\./([a-zA-Z0-9_-]+)/')
+        foreach ($m in $siblingMatches) {
+            $target = $m.Groups[1].Value
+            if ($target -ne $domainDir.Name -and ($domainNames -contains $target)) {
+                [void]$linkedDomains.Add($target)
+            }
+        }
+    }
+    $domainLinkMap[$domainDir.Name] = $linkedDomains
+}
+
+foreach ($from in $domainLinkMap.Keys) {
+    foreach ($to in $domainLinkMap[$from]) {
+        $backLinked = $domainLinkMap.ContainsKey($to) -and $domainLinkMap[$to].Contains($from)
+        if (-not $backLinked) {
+            Add-ValidationWarning "'$from' links to '$to', but '$to' does not link back to '$from' (one-directional cross-reference — confirm this is intentional, see authoring-guidelines.md §5)"
         }
     }
 }
