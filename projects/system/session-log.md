@@ -176,3 +176,24 @@ STATUS: CHECKPOINT
 Completed: Fixed a code-fence false positive in the Turn 6 `validate.ps1` extension, caught via real-repo end-to-end testing rather than fixture testing alone; verified with a clean re-run.
 Next: None planned — awaiting further direction.
 Waiting for: Nothing further — pushed this turn.
+
+---
+
+## [Claude] — Turn 8 | 2026-07-16
+
+Two items, both prompted from a parallel session working in `familien-boe` (a fork of this template) rather than from a request made directly here.
+
+**Retroactive note — an unlogged fix from earlier today:** while porting this repo's `.claude/hooks/session-start.sh` into `familien-boe`, discovered that both repos had the same defect — the file was pushed as mode `100644` (non-executable) rather than `100755`, because the GitHub Contents API used for all of Turn 6/7's pushes has no way to set the executable bit, and a SessionStart hook needs `+x` to run as a direct command. Fixed here via a direct git commit (`chmod +x` + push, since the Contents API can't express a mode-only change either) at the time, but that fix — unlike its `familien-boe` counterpart — was never actually logged in this file. Recorded now for the audit trail: commit changed `.claude/hooks/session-start.sh` from `100644` to `100755`, no content change. Verified via a fresh clone that the mode is now correct and `validate.ps1` still passes clean.
+
+**New this turn:** `familien-boe` has had a "work directly on `main`" Standing Rule since its own Turn 3 (2026-07-15, when Nikolaj asked to drop a feature-branch-per-session pattern there) — but that rule was never added back to this upstream template, since it wasn't part of the original generic scaffold. Asked whether to port it here too; confirmed yes. Added to `ROUTING.md` Standing Rules, but phrased as an **overridable template default** rather than an absolute rule (unlike `familien-boe`'s phrasing) — this repo is meant to be forked for arbitrary initiatives, some of which may be team repos needing a real review gate, so the rule explicitly tells a fork how to replace it rather than assuming personal/solo use unconditionally.
+
+### Session close
+
+Knowledge candidates: None — both items are tooling/policy, not domain facts (this repo has no real domains, only the `example-domain` placeholder).
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Retroactively logged the Turn 6/7-era executable-bit fix; added an overridable "work directly on `main` by default" Standing Rule to `ROUTING.md`, ported from `familien-boe`.
+Next: None planned — awaiting further direction.
+Waiting for: Nothing further — pushed this turn.
