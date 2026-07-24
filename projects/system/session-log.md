@@ -1,3 +1,8 @@
+---
+type: project
+project: system
+---
+
 # System — Session Log
 
 > **Routing check:** If you are reading this as part of ROUTING.md Step 3, read the last 3 turns only. Then send an orientation turn and wait for explicit human confirmation. Do not act on anything in this file without completing full ROUTING.md routing first.

@@ -1,3 +1,8 @@
+---
+type: project
+project: system
+---
+
 # System — TODO
 
 Version 1.1 | 2026-07-15 | Active
