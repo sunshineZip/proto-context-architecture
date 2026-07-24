@@ -202,3 +202,38 @@ STATUS: CHECKPOINT
 Completed: Retroactively logged the Turn 6/7-era executable-bit fix; added an overridable "work directly on `main` by default" Standing Rule to `ROUTING.md`, ported from `familien-boe`.
 Next: None planned — awaiting further direction.
 Waiting for: Nothing further — pushed this turn.
+
+---
+
+## [Claude] — Turn 9 | 2026-07-16
+
+Human asked, in a broader conversation comparing this architecture to Obsidian's "second brain" conventions, which Obsidian-style structural ideas were worth adopting — with an explicit bar of "sure-fire, not flimsy, easily maintained by an LLM." Recommended three: minimal YAML frontmatter, mechanical cross-reference reciprocity checking, and a generated Mermaid relationship diagram (deferred — see below). Confirmed to proceed with the first two, scoped to this repo only for now (`familien-boe` explicitly deferred).
+
+**Frontmatter** — deliberately minimal, to avoid recreating the exact duplication problem the own-vs-reference rule (`authoring-guidelines.md` §4) exists to prevent: `type` + a folder-name slug (`domain:` or `project:`) only, no `status`/`version` field, since that already lives in the existing header line. Documented in `MarkdownConventions.md` §1 (new subsection) rather than `authoring-guidelines.md`, since it applies to project files too, not just domain knowledge documents. `authoring-guidelines.md` §2, §9.1, and §11 cross-reference it.
+
+**Reciprocity checking** — built on the actual links inside each domain's own files, not on `index.md`'s References column prose. That column is a human-authored summary and could itself drift from the real links; scanning real content keeps a single ground truth. Reuses the link-scanning approach already built for the sources/deep-wells checks (§9.4) rather than inventing new parsing logic. Severity: warning, since a one-directional reference can be legitimate.
+
+**Retrofit turned out larger than scoped.** The plan said "example-domain/ + example-project/ — trivial," but `validate.ps1`'s own new checks caught two real gaps in that scoping once run against the actual repo rather than a fixture: `projects/system/` (a real, pre-created project, not a placeholder) and `projects/example-project/` (a second real folder distinct from `_template/`) both needed frontmatter too and had been missed. Both fixed as follow-up commits, each caught by the tool doing exactly what it was built to do. `projects/system/TODO.md`'s version was also bumped for the frontmatter addition, per `MarkdownConventions.md` §2's own edit rule — a small thing, but worth doing given the "sure-fire" bar for this whole exercise.
+
+**Files changed:**
+
+- `MarkdownConventions.md` (1.1 → 1.2) — new Frontmatter subsection in §1.
+- `knowledge/domains/authoring-guidelines.md` (1.3 → 1.4) — cross-references to the new convention in §2, §9.1 (source-manifest template), §11 (Quick Checklist); §5 and §8 note that reciprocity is now checked mechanically.
+- `knowledge/domains/example-domain/description.md`, `knowledge.md` (1.0 → 1.1 each) — frontmatter added, template source for all future domains.
+- `projects/_template/TODO.md`, `session-log.md` — frontmatter added with the bracket-placeholder convention (`project: [project-name]`), matching the template's existing style.
+- `projects/system/TODO.md`, `session-log.md` — frontmatter added (scope-gap fix).
+- `projects/example-project/TODO.md`, `session-log.md` — frontmatter added (scope-gap fix).
+- `scripts/validate.ps1` — new frontmatter checks (domain files, project files, source manifests) and the reciprocity check.
+
+**Testing**: fixture covering every new case (missing frontmatter, wrong `type`, slug/folder mismatch, one-directional cross-reference) confirmed each is caught, and the corresponding clean fixture passes 0/0. Two successive real-repo clones caught the two scope gaps above; a third clone after both fixes passed clean (0 errors, 0 warnings, both real projects correctly detected as active).
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added the frontmatter convention (`type` + folder-name slug) and mechanical cross-reference reciprocity checking; retrofitted every existing domain and project file in this repo, including two real folders missed in the original scope; verified clean against a fresh clone.
+Next: Suggestion 3 (a generated Mermaid relationship diagram in `knowledge/domains/index.md`, derived from the same reciprocity data) was explicitly deferred until this work landed — the human asked to be reminded now that it has.
+Waiting for: Direction on suggestion 3, or the next task.
