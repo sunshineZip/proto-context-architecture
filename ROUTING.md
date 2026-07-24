@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.4 | 2026-07-16 | Production
+Version 1.5 | 2026-07-16 | Production
 
 ---
 
@@ -112,7 +112,8 @@ Apply these in every session regardless of project type or how you entered the s
 
 - **Load before acting.** Do not act on assumptions or unread context. If a required file is missing or unreadable, say so before proceeding.
 - **Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently — surface decisions and blockers, not scaffolding.
-- **Commit and push, almost always.** This is a personal working repo, not shared infrastructure with a review gate — nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either.
+- **Work directly on `main` by default.** This template assumes a personal working repo, not shared infrastructure with a review gate, so branch/PR ceremony isn't the default — commit and push straight to `main`. This is a template default, not a fixed architectural rule: if your fork is a team repo or a shared initiative that needs a review gate, replace this rule with your own branching workflow as part of customizing `ROUTING.md` for your instance.
+- **Commit and push, almost always.** Nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either.
 - **Never leave a push silently pending.** If you defer pushing until a segment finishes rather than after every increment, say so explicitly to the human before the turn ends — e.g. "changes are saved locally but not yet pushed." The human may end the session at any point; an unflagged pending push risks losing untracked work.
 
 ---
@@ -170,3 +171,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.2 | 2026-07-15 | Expanded the Commit and push standing rule with cadence guidance (per-increment vs per-segment) and an explicit requirement to flag the human when a push is deferred. |
 | 1.3 | 2026-07-15 | Step 4 now points to the new Cross-Domain Query Recipes section in `knowledge/domains/index.md` for recurring multi-domain tasks. |
 | 1.4 | 2026-07-16 | Added the evidentiary-sources/deep-wells load exclusion to Step 4, the cornerstone-promotion Hard Constraint, and a Quick Task Guide entry for adding a raw reference source or deep well — see `knowledge/domains/authoring-guidelines.md` §9. |
+| 1.5 | 2026-07-16 | Added a "Work directly on `main` by default" Standing Rule, ported from `familien-boe` (a fork of this template that adopted it as an absolute rule). Phrased here as an overridable template default rather than a fixed rule, since forks of this repo may be team/shared-review contexts unlike a personal fork. |
