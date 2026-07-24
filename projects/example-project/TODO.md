@@ -1,6 +1,11 @@
+---
+type: project
+project: example-project
+---
+
 # Example Project — TODO
 
-Version 1.0 | 2026-06-29 | Active
+Version 1.1 | 2026-07-16 | Active
 
 > **Routing check:** This is a task tracking file, not a work queue. Do not start work on any item here unless you have completed ROUTING.md routing and received explicit human confirmation for this session.
 
