@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.1 | 2026-07-15 | Production
+Version 1.2 | 2026-07-16 | Production
 
 ---
 
@@ -57,6 +57,27 @@ Version [X.Y] | [YYYY-MM-DD] | [Status]
 ### Document Purpose rule
 
 State what the document is and what it covers. Do not restate information the reader can infer from the title. One to two sentences is correct length — if it needs more, the document scope may be too broad.
+
+### Frontmatter
+
+Domain and project instance files additionally open with a YAML frontmatter block, before everything else in the file — including the `#` title and any blockquote that precedes it. This is the one exception to "the file opens with the header block above": frontmatter comes first, the standard header block follows immediately after it.
+
+| File | Frontmatter |
+|---|---|
+| `knowledge/domains/[name]/description.md`, `knowledge.md` | `type: domain` · `domain: [name]` |
+| `knowledge/domains/[name]/sources/manifest.md` | `type: source-manifest` · `domain: [name]` |
+| `projects/[name]/TODO.md`, `session-log.md` | `type: project` · `project: [name]` |
+
+```
+---
+type: domain
+domain: example-domain
+---
+```
+
+The slug field (`domain:` or `project:`) is a checksum, not narrative content — it must match the parent folder name exactly, and `scripts/validate.ps1` checks this. **Never add a `status` or `version` field here**: that information already lives in the header block's "Version | Date | Status" line above. Restating it in frontmatter creates two sources of truth for the same fact — the same own-vs-reference problem `knowledge/domains/authoring-guidelines.md` §4 exists to prevent within a single document, just spanning two locations in the same file instead of two sections.
+
+Root, flow, and registry files (`ROUTING.md`, `Architecture.md`, `knowledge/flow/*.md`, `knowledge/domains/index.md`, `library/reference-index.md`) do not use frontmatter — each is a singleton, not part of a queryable collection of same-shaped files, so frontmatter adds no value there.
 
 ---
 
@@ -207,3 +228,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic markdown conventions adapted from NightCrew baseline. |
 | 1.1 | 2026-07-15 | Added `[TIME-SENSITIVE: source type]` and `[SENSITIVE]` signals to §8 — durability and sensitivity are separate axes from confidence and can stack with the existing four signals. |
+| 1.2 | 2026-07-16 | Added a Frontmatter subsection to §1: domain/project instance files open with a minimal YAML block (`type` + a folder-name checksum field) before the standard header, checked by `scripts/validate.ps1`. Explicitly excludes `status`/`version` to avoid duplicating the header line. |
