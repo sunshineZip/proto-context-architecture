@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.4 | 2026-07-16 | Production
+Version 1.5 | 2026-07-24 | Production
 
 ---
 
@@ -210,6 +210,8 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] If this domain has a `sources/` folder, run `scripts/validate.ps1` and confirm it reports no referential-integrity issues for this domain (§9.4)
 - [ ] Confirm `description.md` and `knowledge.md` both have correct frontmatter (`MarkdownConventions.md` §1) — `scripts/validate.ps1` checks this on every run, but worth a manual glance if either file was ever created by copying another domain's files rather than the template
 
+This pass is scoped to a single domain document. For the equivalent housekeeping at the repo/instance level — including checking whether the upstream template has changed — see `knowledge/flow/upstream-sync.md`.
+
 ---
 
 ## 9. Evidentiary Sources & Deep Wells
@@ -374,3 +376,4 @@ Before submitting any knowledge document for human approval:
 | 1.2 | 2026-07-15 | Added cross-reference reciprocity registration (§5), a correction backlink check for facts copied before the own-vs-reference convention existed (§4), and a when-to-split heuristic (§8) — prompted by a review of known pitfalls in a larger, organically-grown document family. |
 | 1.3 | 2026-07-16 | Added new §9 "Evidentiary Sources & Deep Wells" (evidentiary sources in per-domain `sources/`, deep wells in top-level `library/`, the human-gated cornerstone rule, and referential-integrity tooling) — subsequent sections renumbered (old §9→10, §10→11). Added a `sources/` validation step to the Maintenance Pass (§8) and a source/deep-well resolution check to the Quick Checklist (§11). |
 | 1.4 | 2026-07-16 | Cross-referenced the new frontmatter convention from §2 and the source-manifest template (§9.1); noted that `scripts/validate.ps1` now mechanically checks cross-reference reciprocity (§5, §8) rather than relying on manual review alone. |
+| 1.5 | 2026-07-24 | §8 now cross-references `knowledge/flow/upstream-sync.md` — the repo-level analog of this domain-scoped Maintenance Pass. |

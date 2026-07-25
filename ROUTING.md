@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.5 | 2026-07-16 | Production
+Version 1.6 | 2026-07-24 | Production
 
 ---
 
@@ -132,6 +132,9 @@ Apply these in every session regardless of project type or how you entered the s
 → Evidentiary source (proves one specific claim, small): store it in `knowledge/domains/[name]/sources/`, add a `manifest.md` row, cite it with a relative link from `knowledge.md`. Use the normal knowledge-update flag.
 → Deep well (large, possibly cross-domain, mined incrementally): always add an entry to `library/reference-index.md`. Only store the actual file in `library/deep-wells/` if it clears the cornerstone bar (`knowledge/domains/authoring-guidelines.md` §9.3) — confirm with the human first.
 
+**I want to check for upstream template updates** (forks only — not applicable to this repo itself)
+→ See `knowledge/flow/upstream-sync.md` for the full check/apply procedure. Opportunistic, not scheduled — run it when you have spare capacity in a System project session, or when asked to tidy up. The sync marker lives in `projects/system/TODO.md`'s System Maintenance Pass section.
+
 **I want to pass working material between sessions**
 → Drop it in `temp/` — this is the designated handoff zone for transient artifacts
 → If the material produces knowledge worth keeping, promote it into the relevant domain or project output — do not leave it in temp
@@ -172,3 +175,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.3 | 2026-07-15 | Step 4 now points to the new Cross-Domain Query Recipes section in `knowledge/domains/index.md` for recurring multi-domain tasks. |
 | 1.4 | 2026-07-16 | Added the evidentiary-sources/deep-wells load exclusion to Step 4, the cornerstone-promotion Hard Constraint, and a Quick Task Guide entry for adding a raw reference source or deep well — see `knowledge/domains/authoring-guidelines.md` §9. |
 | 1.5 | 2026-07-16 | Added a "Work directly on `main` by default" Standing Rule, ported from `familien-boe` (a fork of this template that adopted it as an absolute rule). Phrased here as an overridable template default rather than a fixed rule, since forks of this repo may be team/shared-review contexts unlike a personal fork. |
+| 1.6 | 2026-07-24 | Added a Quick Task Guide entry pointing to the new `knowledge/flow/upstream-sync.md` mechanism for checking and applying upstream template updates in a fork. |

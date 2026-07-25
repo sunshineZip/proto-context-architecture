@@ -41,7 +41,7 @@ if (-not (Test-Path $copilotInstructionsPath)) {
 
 # --- knowledge/flow/ ---
 $flowPath = Join-Path $knowledgePath "flow"
-foreach ($file in @("operating-principles.md", "turn-protocol.md", "routing-rules.md", "project-types.md")) {
+foreach ($file in @("operating-principles.md", "turn-protocol.md", "routing-rules.md", "project-types.md", "upstream-sync.md")) {
     if (-not (Test-Path (Join-Path $flowPath $file))) {
         Add-ValidationError "Missing knowledge/flow file: $file"
     }
