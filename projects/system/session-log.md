@@ -237,3 +237,36 @@ STATUS: CHECKPOINT
 Completed: Added the frontmatter convention (`type` + folder-name slug) and mechanical cross-reference reciprocity checking; retrofitted every existing domain and project file in this repo, including two real folders missed in the original scope; verified clean against a fresh clone.
 Next: Suggestion 3 (a generated Mermaid relationship diagram in `knowledge/domains/index.md`, derived from the same reciprocity data) was explicitly deferred until this work landed — the human asked to be reminded now that it has.
 Waiting for: Direction on suggestion 3, or the next task.
+
+---
+
+## [Claude] — Turn 10 | 2026-07-24
+
+Human raised suggestion 3 (the Mermaid diagram) again, per the reminder set in Turn 9 — but on scrutiny (would it help LLM readers of `index.md`, would it help a human looking at a specific domain), it didn't hold up: a Mermaid edge is a lossy restatement of what the References column already says more precisely, LLMs don't gain anything from a rendered shape the way humans do, and the own-vs-reference discipline that makes this architecture good also keeps real cross-references sparse by design — sparse graphs aren't where graph visualization earns its value. Shelved, not built.
+
+Human then raised a real, recurring need: bringing fork instances (`familien-boe`, and a future one, "longstraw") up to date with this template over time, and proposed two mechanisms — a version-number check, and a changelog written to be followed "chronologically and to the word." Talked through both before building:
+
+- **Version-number check, reconsidered as a commit-SHA check instead.** This repo has no unified template version — every file versions independently (`MarkdownConventions.md` §2). Inventing one would mean maintaining a second versioning scheme in parallel. A recorded last-synced upstream commit SHA is more precise (tells you exactly what changed, not just that something did) and needs no new bookkeeping discipline.
+- **Rigid word-for-word migration instructions, pushed back on.** Both prior ports into `familien-boe` (Turns 6–9 here) succeeded specifically because I diffed the fork's *actual* current state before applying anything and used judgement where it had diverged — `Architecture.md` needed hand-fitting, not a copy-paste, once `familien-boe` grew its own §4; two scope misses were caught only by re-verifying against the live repo, not by following a plan. A changelog meant to be followed mechanically risks exactly that failure mode. What already does the job "changelog" was meant to do is the session-log itself — I used Turn 6's and Turn 9's own entries as the brief for both ports, no separate instructions needed.
+- **Scheduled Routine, proposed then dropped.** First plan used a monthly `create_trigger` Routine to run the check. Human pointed out this repo already has a Maintenance Pass discipline (`authoring-guidelines.md` §8) — opportunistic, "on request, or when things have visibly diverged," not scheduled — and asked why not use that instead. Right call: a scheduled Routine would have been the one piece of background-automation infrastructure in a system where everything else is a written procedure a session follows by judgement when it's in the relevant context, and it costs a session every month whether or not anything changed. Dropped entirely in favour of the same opportunistic pattern, surfaced through a marker sitting in a file a System-project session already loads — no new infrastructure needed at all.
+
+**Built:**
+
+- New `knowledge/flow/upstream-sync.md` — the sync marker format (last-synced commit SHA + date, recorded in the *fork's own* `projects/system/TODO.md`, not in any session's local state, since nothing local survives between sessions here), an explicit tracked-paths list (system-layer files only — never a domain's own knowledge, the domain index, a project's own work, or `library/*`), a read-only check procedure, and an apply procedure that requires diffing the fork's real current state first, same discipline as above. Explicitly notes `README.md` and `Architecture.md` as the two most likely to need hand-fitting rather than a clean apply, since both routinely carry fork-specific narrative.
+- `Architecture.md` (1.1 → 1.2) — §6 gained a fork-setup step: add the sync marker to your own `projects/system/TODO.md`, recording your fork's starting commit as the initial sync point.
+- `ROUTING.md` (1.5 → 1.6) — Quick Task Guide gained an entry pointing to the new mechanism.
+- `knowledge/domains/authoring-guidelines.md` (1.4 → 1.5) — §8 cross-references `upstream-sync.md` as the repo-level analog of this domain-scoped pass.
+- `scripts/validate.ps1` — `upstream-sync.md` added to the required `knowledge/flow/` files check.
+
+This repo itself doesn't get a live sync marker in its own `projects/system/TODO.md` — it has no upstream to sync from. The marker is something each fork adds for itself, per the new `Architecture.md` §6 step; `familien-boe` (and eventually `longstraw`) picking this up is a separate, later task, not done this turn.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Reconsidered and shelved the Mermaid-diagram suggestion; designed and built the Upstream Template Sync mechanism (sync marker, tracked-paths list, check/apply procedures) as an opportunistic Maintenance Pass extension rather than scheduled automation; verified clean against a fresh clone.
+Next: Roll the sync marker out to `familien-boe` (set its initial last-synced commit to this repo's current HEAD, since it was just brought fully up to date) — a separate task, not yet started. `longstraw` isn't in scope for this session.
+Waiting for: Direction on rolling this out to familien-boe, or the next task.
