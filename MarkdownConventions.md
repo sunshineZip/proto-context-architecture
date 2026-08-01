@@ -45,6 +45,8 @@ Version [X.Y] | [YYYY-MM-DD] | [Status]
 [One or two sentences: what this document is, who it belongs to or serves, and what it covers.]
 ```
 
+*(For domain and project files, see also §1 "Retirement" below for the additional blockquote a `Retired` status requires.)*
+
 ### Header fields
 
 | Field | Rule |
@@ -52,7 +54,7 @@ Version [X.Y] | [YYYY-MM-DD] | [Status]
 | Title | Matches the filename (without extension and folder path). Use title case. |
 | Version | See §2. |
 | Date | ISO 8601 (`YYYY-MM-DD`) — date of the last edit, not creation. |
-| Status | `Draft`, `Review Pending`, or `Production`. |
+| Status | `Draft`, `Review Pending`, `Production`, or `Retired`. |
 
 ### Document Purpose rule
 
@@ -78,6 +80,17 @@ domain: example-domain
 The slug field (`domain:` or `project:`) is a checksum, not narrative content — it must match the parent folder name exactly, and `scripts/validate.ps1` checks this. **Never add a `status` or `version` field here**: that information already lives in the header block's "Version | Date | Status" line above. Restating it in frontmatter creates two sources of truth for the same fact — the same own-vs-reference problem `knowledge/domains/authoring-guidelines.md` §4 exists to prevent within a single document, just spanning two locations in the same file instead of two sections.
 
 Root, flow, and registry files (`ROUTING.md`, `Architecture.md`, `knowledge/flow/*.md`, `knowledge/domains/index.md`, `library/reference-index.md`) do not use frontmatter — each is a singleton, not part of a queryable collection of same-shaped files, so frontmatter adds no value there.
+
+### Retirement
+
+A domain or project that has become permanently irrelevant is retired, not deleted — the record stays in the repo for history, just excluded from default routing. This is the default outcome; hard-deleting files is a separate, explicitly-confirmed action, not part of retirement itself.
+
+| File | On retirement |
+|---|---|
+| Domain `description.md`, `knowledge.md` | Header Status field (above) → `Retired`. Add a one-line blockquote immediately after Document Purpose, before the Index: `> **Retired:** YYYY-MM-DD — [one-line reason]. Historical reference only; excluded from default routing.` |
+| Project `TODO.md`, `session-log.md` | Header Status field → `Retired`. Add the same blockquote alongside the file's existing top-of-file blockquotes (Routing check, Push policy, or similar). |
+
+Retiring is a structural change, not a content edit — it requires explicit human confirmation and routes through `projects/system/` like adding a domain or project does (`ROUTING.md` Hard Constraints). See `knowledge/domains/index.md` § Retiring a Domain and `ROUTING.md` Quick Task Guide for the full procedure.
 
 ---
 
@@ -229,3 +242,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 | 1.0 | 2026-06-29 | Initial creation. Generic markdown conventions adapted from NightCrew baseline. |
 | 1.1 | 2026-07-15 | Added `[TIME-SENSITIVE: source type]` and `[SENSITIVE]` signals to §8 — durability and sensitivity are separate axes from confidence and can stack with the existing four signals. |
 | 1.2 | 2026-07-16 | Added a Frontmatter subsection to §1: domain/project instance files open with a minimal YAML block (`type` + a folder-name checksum field) before the standard header, checked by `scripts/validate.ps1`. Explicitly excludes `status`/`version` to avoid duplicating the header line. |
+| 1.3 | 2026-07-25 | Added `Retired` to the Status vocabulary and a Retirement subsection to §1, defining the archive-in-place convention (status field + one-line blockquote) for domains and projects that have become permanently irrelevant. Deletion is explicitly a separate, human-confirmed action, not part of retirement. |

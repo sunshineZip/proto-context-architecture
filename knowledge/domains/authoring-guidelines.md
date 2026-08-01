@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.5 | 2026-07-24 | Production
+Version 1.6 | 2026-07-25 | Production
 
 ---
 
@@ -209,6 +209,7 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] Consider whether this domain should split in two: warning signs are routinely needing the Full file (ROUTING.md §4, level 5) because sections are too interdependent to load separately, or two sections that are never needed by the same task. There's no fixed size threshold — judge by whether a task ever needs the whole document versus consistently needing only one part of it
 - [ ] If this domain has a `sources/` folder, run `scripts/validate.ps1` and confirm it reports no referential-integrity issues for this domain (§9.4)
 - [ ] Confirm `description.md` and `knowledge.md` both have correct frontmatter (`MarkdownConventions.md` §1) — `scripts/validate.ps1` checks this on every run, but worth a manual glance if either file was ever created by copying another domain's files rather than the template
+- [ ] Consider whether this domain has become genuinely irrelevant, not just stale — if so, retire it (`knowledge/domains/index.md` § Retiring a Domain) rather than leaving it silently unmaintained
 
 This pass is scoped to a single domain document. For the equivalent housekeeping at the repo/instance level — including checking whether the upstream template has changed — see `knowledge/flow/upstream-sync.md`.
 
@@ -377,3 +378,4 @@ Before submitting any knowledge document for human approval:
 | 1.3 | 2026-07-16 | Added new §9 "Evidentiary Sources & Deep Wells" (evidentiary sources in per-domain `sources/`, deep wells in top-level `library/`, the human-gated cornerstone rule, and referential-integrity tooling) — subsequent sections renumbered (old §9→10, §10→11). Added a `sources/` validation step to the Maintenance Pass (§8) and a source/deep-well resolution check to the Quick Checklist (§11). |
 | 1.4 | 2026-07-16 | Cross-referenced the new frontmatter convention from §2 and the source-manifest template (§9.1); noted that `scripts/validate.ps1` now mechanically checks cross-reference reciprocity (§5, §8) rather than relying on manual review alone. |
 | 1.5 | 2026-07-24 | §8 now cross-references `knowledge/flow/upstream-sync.md` — the repo-level analog of this domain-scoped Maintenance Pass. |
+| 1.6 | 2026-07-25 | §8 gained a check for whether a domain should be retired rather than left silently stale — see the new retirement convention in `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain. |

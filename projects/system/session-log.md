@@ -270,3 +270,45 @@ STATUS: CHECKPOINT
 Completed: Reconsidered and shelved the Mermaid-diagram suggestion; designed and built the Upstream Template Sync mechanism (sync marker, tracked-paths list, check/apply procedures) as an opportunistic Maintenance Pass extension rather than scheduled automation; verified clean against a fresh clone.
 Next: Roll the sync marker out to `familien-boe` (set its initial last-synced commit to this repo's current HEAD, since it was just brought fully up to date) — a separate task, not yet started. `longstraw` isn't in scope for this session.
 Waiting for: Direction on rolling this out to familien-boe, or the next task.
+
+---
+
+## [Claude] — Turn 11 | 2026-07-25
+
+Human asked how clear this architecture's procedure is for deleting a project or knowledge domain once it becomes genuinely irrelevant over the years — a question raised in general discussion, not from a specific repo needing it right now. On inspection there was no such procedure anywhere: `knowledge/domains/index.md` has a 6-step "Adding a Domain" flow with no removal counterpart; `project-types.md`'s "Archive" phase only means logging findings into an operational log, not removing anything; the only "delete" precedent in the whole system was the one-off instruction to delete the example placeholders. An LLM asked to retire something today would have had to improvise. Human agreed with the recommendation to build an archive-in-place mechanism rather than deletion, and asked to implement it.
+
+**Design, reusing existing structure rather than inventing new machinery:**
+
+- Every file already has a header `Status` field (`MarkdownConventions.md` §1: `Draft`, `Review Pending`, `Production`). Added `Retired` as a fourth value — no new field needed.
+- A one-line blockquote (`> **Retired:** YYYY-MM-DD — [reason]`) makes retirement visible to anyone opening the file directly, matching the existing idiom already used throughout for structural meta-notes (Routing check, Edit guard, Setup note).
+- `knowledge/domains/index.md`'s Registered Domains table gained a `Status` column (`Active`/`Retired`) — a simpler routing-relevance flag than the header's four-value vocabulary, since a domain's document maturity (Draft vs. Production) and its ongoing relevance are genuinely different axes; only the Retired/not-Retired distinction between the two is meant to agree.
+- Retiring is explicitly archive-in-place, never deletion — deletion is a separate, explicitly-confirmed action the new Hard Constraint calls out by name, mirroring the existing cornerstone-promotion gate pattern (`authoring-guidelines.md` §9.3).
+
+**Backed by a mechanical check, not just a written rule** — consistent with how the frontmatter/reciprocity and upstream-sync mechanisms were built, and with the earlier explicit ask that additions here be "sure-fire, not flimsy." Extended `scripts/validate.ps1`:
+- A domain's `description.md`/`knowledge.md`/`index.md` Status values must agree on Retired-or-not; any disagreement is flagged.
+- A project marked `Retired` in `TODO.md` that still has a live routing row in `ROUTING.md` Step 2 is flagged — the row should be removed so new work isn't routed there.
+- Summary now reports retired project counts alongside active ones.
+
+Tested both checks directly before trusting them: built a throwaway copy, retired `example-project`/`example-domain` incompletely (index.md updated but not the domain files; TODO.md status flipped but the routing row left in place) and confirmed both new warnings fired correctly; then completed the retirement properly and confirmed both warnings cleared. Discarded the test copy — `example-project`/`example-domain` in the real repo are untouched, still `Active`.
+
+**Files changed:**
+
+- `MarkdownConventions.md` (1.2 → 1.3) — `Retired` added to the Status vocabulary; new "Retirement" subsection under §1 defining the convention for both domain and project files.
+- `knowledge/domains/index.md` (1.1 → 1.2) — `Status` column added to the registry table; new "Retiring a Domain" section mirroring "Adding a Domain".
+- `ROUTING.md` (1.6 → 1.7) — Step 2 gained a note to remove a retired project's routing row; Step 4 gained a rule to skip `Retired` domains by default; Hard Constraints gained a retirement/deletion confirmation rule; Quick Task Guide gained a "retire a domain or project" entry.
+- `knowledge/domains/authoring-guidelines.md` (1.5 → 1.6) — Maintenance Pass (§8) gained a check for whether a domain should be retired rather than left silently stale.
+- `Architecture.md` (1.2 → 1.3) — §4 Routing inputs gained a bullet noting retirement status affects routing.
+- `scripts/validate.ps1` — the two new checks and the retired-project summary count, described above.
+
+No project or domain in this repo was actually retired this turn — this was purely building the mechanism itself, tested on throwaway content.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Designed and built domain/project retirement as an archive-in-place convention (`Retired` status value, retirement blockquote, `index.md` Status column) with two new mechanical `validate.ps1` checks (domain Status agreement across files, retired-project routing-row cleanup) — both checks tested against deliberately broken and then correctly-fixed throwaway content before trusting them; verified clean against a fresh clone.
+Next: This is a template-level addition, not yet rolled out to `familien-boe` or `longstraw` — those forks will need it ported the same way the frontmatter/reciprocity and upstream-sync mechanisms were, whenever their own upstream-sync check next runs.
+Waiting for: Direction on the next task.

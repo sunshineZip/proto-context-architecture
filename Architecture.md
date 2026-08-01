@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.2 | 2026-07-24 | Production
+Version 1.3 | 2026-07-25 | Production
 
 ---
 
@@ -147,6 +147,7 @@ Routing is the mechanism by which the system decides what to load and what to do
 - The current project's last STATUS signal
 - Open flags and outstanding human asks
 - Explicit human override instructions
+- Retirement status of matched domains/projects — `Retired` entries are excluded from default routing (`ROUTING.md` Step 4, `knowledge/domains/index.md`)
 
 ### Priority order
 
@@ -198,3 +199,4 @@ To fork this template for a new initiative:
 | 1.0 | 2026-06-29 | Initial creation. Generic context architecture system design document. |
 | 1.1 | 2026-07-16 | §2 File Structure and §3 Two-Tier Knowledge Model updated for the new `sources/` per-domain folder and top-level `library/` deep-well registry, and a cornerstone-promotion note added to the knowledge promotion procedure (§3). See `knowledge/domains/authoring-guidelines.md` §9. |
 | 1.2 | 2026-07-24 | §6 (Setting Up a New Instance) gained a step for setting up Upstream Template Sync tracking. See `knowledge/flow/upstream-sync.md`, the new mechanism a fork uses to check for and apply upstream template changes. |
+| 1.3 | 2026-07-25 | §4 Routing inputs gained a bullet for domain/project retirement status — `Retired` entries are excluded from default routing. See `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain for the underlying convention. |

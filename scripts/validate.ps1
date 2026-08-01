@@ -75,6 +75,7 @@ if (-not (Test-Path $projectsPath)) {
 
 $projectDirs = Get-ChildItem -Path $projectsPath -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "_template" }
 $activeProjects = @()
+$retiredProjects = @()
 
 foreach ($projectDir in $projectDirs) {
     $todoPath = Join-Path $projectDir.FullName "TODO.md"
@@ -91,6 +92,8 @@ foreach ($projectDir in $projectDirs) {
         $todoText = Get-Content -Path $todoPath -Raw
         if ($todoText -match '(?mi)^Version\s+.+\|\s+\d{4}-\d{2}-\d{2}\s+\|\s+Active\s*$') {
             $activeProjects += $projectDir.Name
+        } elseif ($todoText -match '(?mi)^Version\s+.+\|\s+\d{4}-\d{2}-\d{2}\s+\|\s+Retired\s*$') {
+            $retiredProjects += $projectDir.Name
         }
     }
 }
@@ -120,6 +123,16 @@ function Get-Frontmatter {
         }
     }
     return $result
+}
+
+# --- Shared helper: extract the Status field from a file's standard header
+#     line ("Version X.Y | YYYY-MM-DD | Status"), used by the retirement
+#     consistency checks below. See MarkdownConventions.md §1. ---
+function Get-HeaderStatus {
+    param([string]$Text)
+    $m = [regex]::Match($Text, '(?m)^Version\s+[\d.]+\s*\|\s*\d{4}-\d{2}-\d{2}\s*\|\s*(.+?)\s*$')
+    if ($m.Success) { return $m.Groups[1].Value.Trim() }
+    return $null
 }
 
 # --- Frontmatter: domain files ---
@@ -174,6 +187,53 @@ foreach ($projectDir in $projectDirs) {
         }
         if ($fm['project'] -ne $projectDir.Name) {
             Add-ValidationError "'$($projectDir.Name)/$fileName' frontmatter has project: $($fm['project']), expected '$($projectDir.Name)' (folder name mismatch)"
+        }
+    }
+}
+
+# --- Retirement: domain Status consistency (description.md vs knowledge.md vs
+#     index.md's Status column). See MarkdownConventions.md §1 and
+#     knowledge/domains/index.md § Retiring a Domain. Only the Retired/
+#     not-Retired distinction is compared — the three non-retired values
+#     (Draft, Review Pending, Production) are legitimately independent of
+#     each other and not what this check is for. ---
+$indexDomainStatus = @{}
+$indexPath = Join-Path $domainsPath "index.md"
+if (Test-Path $indexPath) {
+    $indexText = Remove-CodeFences -Text (Get-Content -Path $indexPath -Raw)
+    foreach ($line in ($indexText -split "`r?`n")) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed.StartsWith("|")) { continue }
+        $cells = $trimmed.Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
+        if ($cells.Count -lt 3) { continue }
+        $slugMatch = [regex]::Match($cells[1], 'knowledge/domains/([a-zA-Z0-9_-]+)/?')
+        if (-not $slugMatch.Success) { continue }
+        $indexDomainStatus[$slugMatch.Groups[1].Value] = $cells[2]
+    }
+}
+
+foreach ($domainDir in $domainDirs) {
+    $descPath = Join-Path $domainDir.FullName "description.md"
+    $knowledgeFilePath = Join-Path $domainDir.FullName "knowledge.md"
+    $descStatus = $null
+    $knowledgeStatus = $null
+    if (Test-Path $descPath) { $descStatus = Get-HeaderStatus -Text (Get-Content -Path $descPath -Raw) }
+    if (Test-Path $knowledgeFilePath) { $knowledgeStatus = Get-HeaderStatus -Text (Get-Content -Path $knowledgeFilePath -Raw) }
+
+    $descRetired = ($descStatus -eq "Retired")
+    $knowledgeRetired = ($knowledgeStatus -eq "Retired")
+    if ($descStatus -and $knowledgeStatus -and ($descRetired -ne $knowledgeRetired)) {
+        Add-ValidationWarning "Domain '$($domainDir.Name)': description.md status is '$descStatus' but knowledge.md status is '$knowledgeStatus' — retirement status should match across both files"
+    }
+
+    if ($indexDomainStatus.ContainsKey($domainDir.Name)) {
+        $indexStatus = $indexDomainStatus[$domainDir.Name]
+        $indexRetired = ($indexStatus -eq "Retired")
+        $filesRetired = $descRetired -or $knowledgeRetired
+        if ($indexRetired -and -not $filesRetired) {
+            Add-ValidationWarning "Domain '$($domainDir.Name)': index.md lists Status 'Retired' but description.md/knowledge.md do not — update the files or revert the index"
+        } elseif ($filesRetired -and -not $indexRetired) {
+            Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md status is 'Retired' but index.md still lists Status '$indexStatus' — update the index"
         }
     }
 }
@@ -345,11 +405,46 @@ foreach ($from in $domainLinkMap.Keys) {
     }
 }
 
+# --- Retirement: a Retired project should not still have a live routing row
+#     in ROUTING.md Step 2 — see ROUTING.md's Retirement note under Step 2. ---
+$routingPath = Join-Path $repoRoot "ROUTING.md"
+$step2ProjectNames = @()
+if (Test-Path $routingPath) {
+    $routingText = Get-Content -Path $routingPath -Raw
+    $step2Match = [regex]::Match($routingText, '(?s)### Step 2.*?(?=### Step 3)')
+    if ($step2Match.Success) {
+        $step2Text = Remove-CodeFences -Text $step2Match.Value
+        foreach ($line in ($step2Text -split "`r?`n")) {
+            $trimmed = $line.Trim()
+            if (-not $trimmed.StartsWith("|")) { continue }
+            $cells = $trimmed.Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
+            if ($cells.Count -lt 2) { continue }
+            $projectCell = $cells[1]
+            if ($projectCell -eq "" -or $projectCell -eq "Project" -or $projectCell -match '^-+$') { continue }
+            $step2ProjectNames += ($projectCell.ToLower() -replace '\s+', '-')
+        }
+    }
+}
+
+foreach ($name in $retiredProjects) {
+    if ($step2ProjectNames -contains $name.ToLower()) {
+        Add-ValidationWarning "Project '$name' is marked Retired but still has a routing row in ROUTING.md Step 2 — remove the row so new work isn't routed there"
+    }
+}
+
 # --- Summary ---
 Write-Host ""
 Write-Host "Active projects: $($activeProjects.Count)"
 foreach ($p in $activeProjects) {
     Write-Host "  - $p"
+}
+
+if ($retiredProjects.Count -gt 0) {
+    Write-Host ""
+    Write-Host "Retired projects: $($retiredProjects.Count)"
+    foreach ($p in $retiredProjects) {
+        Write-Host "  - $p"
+    }
 }
 
 Write-Host ""

@@ -1,6 +1,6 @@
 # Domain Index
 
-Version 1.1 | 2026-07-15 | Production
+Version 1.2 | 2026-07-25 | Production
 
 ---
 
@@ -14,11 +14,11 @@ Registry of all knowledge domains in this context architecture. Add one entry pe
 
 ## Registered Domains
 
-> Update `Last Updated` whenever a domain's `description.md` or `knowledge.md` changes materially. Update `References` whenever a `> **See also:**` cross-reference (authoring-guidelines.md §5) is added or removed — and check whether the referenced domain's row should list this one back. A reference that only points one way is a common source of silent drift as the domain family grows.
+> Update `Last Updated` whenever a domain's `description.md` or `knowledge.md` changes materially. Update `References` whenever a `> **See also:**` cross-reference (authoring-guidelines.md §5) is added or removed — and check whether the referenced domain's row should list this one back. A reference that only points one way is a common source of silent drift as the domain family grows. Update `Status` when a domain is retired or reactivated — see § Retiring a Domain below; `scripts/validate.ps1` checks it stays consistent with the domain's own files.
 
-| Domain | Folder | Covers | Last Updated | References |
-|---|---|---|---|---|
-| Example Domain | `knowledge/domains/example-domain/` | Placeholder domain showing the required structure — replace with your first real domain | 2026-06-29 | None |
+| Domain | Folder | Status | Covers | Last Updated | References |
+|---|---|---|---|---|---|
+| Example Domain | `knowledge/domains/example-domain/` | Active | Placeholder domain showing the required structure — replace with your first real domain | 2026-06-29 | None |
 
 ---
 
@@ -43,9 +43,24 @@ Named combinations of domains for recurring tasks that don't map to a single dom
 
 ---
 
+## Retiring a Domain
+
+Use when a domain has become permanently irrelevant — not simply quiet or slow-moving. Confirm with the human first; retiring is a structural, human-gated decision, same as adding a domain.
+
+1. Set the Status field in both `description.md` and `knowledge.md` headers (`MarkdownConventions.md` §1) to `Retired`, bump each file's version, and add the retirement blockquote with today's date and a one-line reason.
+2. Update this domain's row above: `Status` → `Retired`.
+3. Do not remove the domain's folder or files, and do not remove `> See also:` cross-references from other domains that still point to it — a retired domain remains a valid historical reference.
+4. Record the retirement in `projects/system/session-log.md` as a structural change (`ROUTING.md` Hard Constraints).
+5. No `ROUTING.md` edit is needed — Step 4 already skips domains marked `Retired` in this index by default.
+
+Reactivating a retired domain reverses steps 1–2 and is logged the same way.
+
+---
+
 ## Version History
 
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Placeholder example domain registered. |
 | 1.1 | 2026-07-15 | Added `Last Updated` and `References` columns to the registry and a Cross-Domain Query Recipes section — addresses discovery staleness, asymmetric cross-references, and cross-cutting queries with no fixed home. |
+| 1.2 | 2026-07-25 | Added a `Status` column (Active/Retired) to the registry and a "Retiring a Domain" procedure — archive-in-place, not delete, per `MarkdownConventions.md` §1. `scripts/validate.ps1` now checks this column stays consistent with each domain's own header Status. |

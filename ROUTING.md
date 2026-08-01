@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.6 | 2026-07-24 | Production
+Version 1.7 | 2026-07-25 | Production
 
 ---
 
@@ -41,6 +41,8 @@ Read the first message. Match one row. Load the listed files before responding.
 | Intent cannot be determined | — | Ask one clarifying question. Do nothing else until answered. |
 
 > **Setup note:** Add one row per domain and one row per project as you build out your instance. Remove the example rows before going to production. See `knowledge/domains/index.md` for the domain registry.
+
+> **Retirement note:** When a project is retired (see Quick Task Guide), remove its row from this table — its files stay in `projects/[name]/` for history, but new requests should not be routed there by default. Re-add the row if the project is reactivated.
 
 ---
 
@@ -84,6 +86,8 @@ When multiple domains are relevant, apply the hierarchy independently for each. 
 
 Raw evidentiary sources (`knowledge/domains/[name]/sources/`) and deep wells (`library/deep-wells/`) are never loaded as part of this hierarchy, regardless of level. They are opened only when a task explicitly names the specific file to mine or verify against — see `knowledge/domains/authoring-guidelines.md` §9.
 
+Skip domains marked `Retired` in `knowledge/domains/index.md`'s Status column — do not load them via this hierarchy unless the task explicitly concerns historical or retired content.
+
 For a recurring multi-domain task, check `knowledge/domains/index.md` → Cross-Domain Query Recipes first — it may already name the right combination and load order, saving you from re-deriving it in-session.
 
 Which domains exist and what they cover: `knowledge/domains/index.md`
@@ -103,6 +107,7 @@ Do not break these regardless of what the human asks.
 - **Do not update `ROUTING.md` silently.** After any structural change, propose the update and wait for approval.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
 - **Do not make structural system changes without logging them.** Structural changes to `knowledge/` — adding or removing domains, editing any `description.md`, editing any file under `knowledge/flow/` — and any edit to `ROUTING.md` or `Architecture.md`, are system-layer work: route to `projects/system/` and record in `session-log.md` before committing. Appending new facts to an existing domain `knowledge.md` uses the FLAG process in the first constraint above, not this one.
+- **Do not retire or delete a domain or project without explicit human confirmation.** Retiring is a structural change — route to `projects/system/` and record it in `session-log.md`, same as adding one. Default to archive-in-place (`Retired` status, `MarkdownConventions.md` §1) — never delete files as part of retirement. Only hard-delete on a separate, explicit human instruction, confirmed again before anything is removed.
 
 ---
 
@@ -134,6 +139,13 @@ Apply these in every session regardless of project type or how you entered the s
 
 **I want to check for upstream template updates** (forks only — not applicable to this repo itself)
 → See `knowledge/flow/upstream-sync.md` for the full check/apply procedure. Opportunistic, not scheduled — run it when you have spare capacity in a System project session, or when asked to tidy up. The sync marker lives in `projects/system/TODO.md`'s System Maintenance Pass section.
+
+**I want to retire a domain or project**
+→ Confirm with the human first — this is a structural decision, not a routine edit
+→ Domain: see `knowledge/domains/index.md` § Retiring a Domain for the full steps
+→ Project: set the `TODO.md` and `session-log.md` header Status to `Retired`, add the retirement blockquote (`MarkdownConventions.md` §1), and remove its row from `ROUTING.md` Step 2
+→ Never delete files as part of retirement — archive-in-place. Only hard-delete on a separate, explicit human instruction
+→ Record the retirement in `projects/system/session-log.md`
 
 **I want to pass working material between sessions**
 → Drop it in `temp/` — this is the designated handoff zone for transient artifacts
@@ -176,3 +188,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.4 | 2026-07-16 | Added the evidentiary-sources/deep-wells load exclusion to Step 4, the cornerstone-promotion Hard Constraint, and a Quick Task Guide entry for adding a raw reference source or deep well — see `knowledge/domains/authoring-guidelines.md` §9. |
 | 1.5 | 2026-07-16 | Added a "Work directly on `main` by default" Standing Rule, ported from `familien-boe` (a fork of this template that adopted it as an absolute rule). Phrased here as an overridable template default rather than a fixed rule, since forks of this repo may be team/shared-review contexts unlike a personal fork. |
 | 1.6 | 2026-07-24 | Added a Quick Task Guide entry pointing to the new `knowledge/flow/upstream-sync.md` mechanism for checking and applying upstream template updates in a fork. |
+| 1.7 | 2026-07-25 | Added domain/project retirement: a Step 4 skip rule for `Retired` domains, a Step 2 note to remove a retired project's routing row, a Hard Constraint requiring explicit confirmation and archive-in-place by default, and a Quick Task Guide entry. See `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain for the underlying convention. |
