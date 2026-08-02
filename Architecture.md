@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.3 | 2026-07-25 | Production
+Version 1.4 | 2026-07-25 | Production
 
 ---
 
@@ -189,6 +189,7 @@ To fork this template for a new initiative:
 7. **Remove example content** — delete `example-domain/` and `example-project/` once replaced.
 8. **Initialize git** — run `git init`, add remote, push.
 9. **Set up Upstream Template Sync tracking** — add the System Maintenance Pass section to your own `projects/system/TODO.md`, recording this fork's starting commit as the initial "last synced" point. See `knowledge/flow/upstream-sync.md` §2 for the exact format and the rest of this mechanism.
+10. **Activate the pre-commit hook** — run `git config core.hooksPath .githooks` once per clone. This is local git config, not something a fresh clone inherits, so it needs re-running after every fresh clone (a Claude Code session's `.claude/hooks/session-start.sh` does this automatically; other setups need the manual command). Enforces the Hard Constraint that system-layer edits are logged in `projects/system/session-log.md` in the same commit — see `scripts/pre-commit-check.ps1`.
 
 ---
 
@@ -200,3 +201,4 @@ To fork this template for a new initiative:
 | 1.1 | 2026-07-16 | §2 File Structure and §3 Two-Tier Knowledge Model updated for the new `sources/` per-domain folder and top-level `library/` deep-well registry, and a cornerstone-promotion note added to the knowledge promotion procedure (§3). See `knowledge/domains/authoring-guidelines.md` §9. |
 | 1.2 | 2026-07-24 | §6 (Setting Up a New Instance) gained a step for setting up Upstream Template Sync tracking. See `knowledge/flow/upstream-sync.md`, the new mechanism a fork uses to check for and apply upstream template changes. |
 | 1.3 | 2026-07-25 | §4 Routing inputs gained a bullet for domain/project retirement status — `Retired` entries are excluded from default routing. See `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain for the underlying convention. |
+| 1.4 | 2026-07-25 | §6 gained a step for activating the new `.githooks/pre-commit` hook (`git config core.hooksPath .githooks`), which mechanically enforces that system-layer edits are logged in the same commit. See `scripts/pre-commit-check.ps1`. |

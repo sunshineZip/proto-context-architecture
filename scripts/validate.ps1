@@ -24,6 +24,34 @@ $knowledgePath = Join-Path $repoRoot "knowledge"
 $libraryPath = Join-Path $repoRoot "library"
 $copilotInstructionsPath = Join-Path $repoRoot ".github\copilot-instructions.md"
 
+# --- Git helpers, needed early by the pre-commit-hook-activation check
+#     below as well as the append-only checks further down: compare the
+#     working copy against the version committed at HEAD. This only
+#     catches edits made since the last commit — matches how this script
+#     is actually used, immediately before each commit — not full repo
+#     history. ---
+$isGitRepo = $false
+if (Test-Path (Join-Path $repoRoot ".git")) {
+    git -C $repoRoot rev-parse --is-inside-work-tree *> $null
+    $isGitRepo = ($LASTEXITCODE -eq 0)
+}
+
+function Get-GitHeadContent {
+    param([string]$RelativePath)
+    $result = git -C $repoRoot show "HEAD:$RelativePath" 2>$null
+    if ($LASTEXITCODE -ne 0) { return $null }
+    return ($result -join "`n")
+}
+
+function Test-LinesAppendOnly {
+    param([string[]]$OldLines, [string[]]$NewLines)
+    if ($NewLines.Count -lt $OldLines.Count) { return $false }
+    for ($i = 0; $i -lt $OldLines.Count; $i++) {
+        if ($NewLines[$i] -ne $OldLines[$i]) { return $false }
+    }
+    return $true
+}
+
 Write-Host "Context Architecture - Repo Validation"
 Write-Host "Root: $repoRoot"
 Write-Host ""
@@ -37,6 +65,21 @@ foreach ($file in @("README.md", "ROUTING.md", "Architecture.md", "MarkdownConve
 
 if (-not (Test-Path $copilotInstructionsPath)) {
     Add-ValidationError "Missing entry point: .github\copilot-instructions.md"
+}
+
+# --- Pre-commit hook: files must exist, and the hook must actually be
+#     activated (git config core.hooksPath). See Architecture.md §6. ---
+if (-not (Test-Path (Join-Path $repoRoot ".githooks\pre-commit"))) {
+    Add-ValidationError "Missing .githooks/pre-commit"
+}
+if (-not (Test-Path (Join-Path $repoRoot "scripts\pre-commit-check.ps1"))) {
+    Add-ValidationError "Missing scripts/pre-commit-check.ps1"
+}
+if ($isGitRepo) {
+    $hooksPath = (git -C $repoRoot config --get core.hooksPath 2>$null)
+    if ($hooksPath -ne ".githooks") {
+        Add-ValidationWarning "core.hooksPath is not set to '.githooks' in this clone — the pre-commit hook is inactive here. Run: git config core.hooksPath .githooks"
+    }
 }
 
 # --- knowledge/flow/ ---
@@ -133,32 +176,6 @@ function Get-HeaderStatus {
     $m = [regex]::Match($Text, '(?m)^Version\s+[\d.]+\s*\|\s*\d{4}-\d{2}-\d{2}\s*\|\s*(.+?)\s*$')
     if ($m.Success) { return $m.Groups[1].Value.Trim() }
     return $null
-}
-
-# --- Git helpers for the append-only checks below: compare the working
-#     copy against the version committed at HEAD. This only catches edits
-#     made since the last commit — matches how this script is actually
-#     used, immediately before each commit — not full repo history. ---
-$isGitRepo = $false
-if (Test-Path (Join-Path $repoRoot ".git")) {
-    git -C $repoRoot rev-parse --is-inside-work-tree *> $null
-    $isGitRepo = ($LASTEXITCODE -eq 0)
-}
-
-function Get-GitHeadContent {
-    param([string]$RelativePath)
-    $result = git -C $repoRoot show "HEAD:$RelativePath" 2>$null
-    if ($LASTEXITCODE -ne 0) { return $null }
-    return ($result -join "`n")
-}
-
-function Test-LinesAppendOnly {
-    param([string[]]$OldLines, [string[]]$NewLines)
-    if ($NewLines.Count -lt $OldLines.Count) { return $false }
-    for ($i = 0; $i -lt $OldLines.Count; $i++) {
-        if ($NewLines[$i] -ne $OldLines[$i]) { return $false }
-    }
-    return $true
 }
 
 # --- Frontmatter: domain files ---

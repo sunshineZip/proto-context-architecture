@@ -347,3 +347,33 @@ STATUS: CHECKPOINT
 Completed: Added three new `validate.ps1` checks hardening this system against weaker-model failure modes — append-only `session-log.md`, turn-structure/STATUS-signal validation, and generalized Version History append-only/agreement — after verifying the assumptions behind a fourth candidate (no-chaining) against real session-log content and finding it would be pure noise, so it was dropped rather than built. Fixed two real bugs (a PowerShell array-unwrapping gotcha, a code-fence collision) found while testing against deliberately broken content. Verified clean against a fresh clone.
 Next: Item 5 (system-layer edits coupled to a session-log commit) is a separate git-hook addition, not yet built. Not yet ported to `familien-boe` or `longstraw`.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 13 | 2026-07-25
+
+Human asked to build item 5 from the previous turn's hardening review: system-layer edits must be logged in `projects/system/session-log.md` in the same commit. Unlike items 1–4, this can't live in `validate.ps1` — it depends on commit-level diff (what's staged right now vs. what's at `HEAD`), not working-tree state, so it needs an actual git pre-commit hook.
+
+**The real problem wasn't the check logic — it was activation.** A tracked hook file does nothing by itself; git only runs hooks from `.git/hooks/` (untracked, clone-local) unless `core.hooksPath` is pointed at a tracked directory, and `core.hooksPath` is local git config that a fresh clone never inherits. Given how this whole session actually works — Claude Code web sessions clone fresh every time — a hook that silently needs a manual one-time command per clone would, in practice, almost never be active exactly where it matters most. Solved by treating this the same way Turn 6 solved the missing-PowerShell problem: `.claude/hooks/session-start.sh` (already run automatically at the start of every Claude Code session) now also runs `git config core.hooksPath .githooks`, idempotently, regardless of remote vs. local. For non-Claude-Code setups (the human's planned self-hosted homelab included), the one-time manual command is documented in `Architecture.md` §6 — and since a self-hosted setup is more likely to be a persistent clone rather than a fresh one each session, running it once by hand there is genuinely sufficient, not just a fallback.
+
+**Built:**
+
+- `.githooks/pre-commit` — a thin `sh` shim (git invokes hooks directly; PowerShell isn't a valid hook interpreter on its own) that calls `scripts/pre-commit-check.ps1`, keeping the actual logic in the same language as `validate.ps1` rather than introducing a second scripting language.
+- `scripts/pre-commit-check.ps1` — reads staged files (`git diff --cached --name-only`), checks them against the same tracked-paths list `knowledge/flow/upstream-sync.md` §3 already defines as "system-layer" (reused, not reinvented, to avoid a second list drifting out of sync with the first), and blocks the commit if any matches without `projects/system/session-log.md` also being staged. The block message names the files and points at `git commit --no-verify` as the deliberate, visible bypass — better than a silent skip, but still an explicit named action rather than nothing.
+- `scripts/validate.ps1` gained two additions: existence checks for both new hook files, and a warning (not error, since it's clone-local state rather than repo content) if `core.hooksPath` isn't actually set to `.githooks` in the current clone.
+- `Architecture.md` (1.3 → 1.4) — §6 gained step 10 for activation. `ROUTING.md` (1.7 → 1.8) — the "structural changes must be logged" Hard Constraint now cross-references the hook. `knowledge/flow/upstream-sync.md` (1.0 → 1.1) — `.githooks/*` added to the Tracked Paths list, since it's a new system-layer directory forks need to sync too.
+
+**One real bug caught by testing, not just written:** the git-helper block (`$isGitRepo`, `Get-GitHeadContent`) that items 1/2/4 already depended on was defined *after* first use once I added the `core.hooksPath` check earlier in the script — `$isGitRepo` would have silently evaluated as `$null`/falsy at that point, making the new warning never fire regardless of actual state. Moved the git-helper block up to right after `$repoRoot`/`$copilotInstructionsPath` are defined, before anything needs it. Caught by testing the warning both ways (unset, then set) rather than trusting the code once it ran without error.
+
+**Verification:** tested the actual git mechanism end to end, not just the PowerShell logic in isolation — staged a `ROUTING.md`-only change and ran a real `git commit` (blocked, exit 1, nothing committed); staged `session-log.md` alongside it (passed); staged only an unrelated project file (passed, correctly untouched by the check); confirmed `git commit --no-verify` still bypasses deliberately. All test commits were undone (`git reset --soft`, `git checkout --`) before the real work was committed.
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Built and activated a pre-commit git hook (`.githooks/pre-commit` + `scripts/pre-commit-check.ps1`) enforcing that system-layer edits are logged in `projects/system/session-log.md` in the same commit — completing all five hardening vectors from the prior review. Solved the activation gap (local git config doesn't survive a fresh clone) by wiring it into the existing `.claude/hooks/session-start.sh`, and documented the manual one-time command for non-Claude-Code setups. Fixed an evaluation-order bug in `validate.ps1` found while testing both states of the new warning. Verified end to end against a real `git commit`, not just the check logic in isolation.
+Next: This is a template-level addition, not yet ported to `familien-boe` or `longstraw` — same as items 1–4 and the retirement mechanism before it.
+Waiting for: Direction on the next task.

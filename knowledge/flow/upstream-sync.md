@@ -1,6 +1,6 @@
 # Upstream Template Sync
 
-Version 1.0 | 2026-07-24 | Production
+Version 1.1 | 2026-07-25 | Production
 
 ---
 
@@ -67,6 +67,7 @@ Only these paths count as template content. A sync — check or apply — never 
 - `knowledge/flow/*`
 - `scripts/*`
 - `.claude/*`
+- `.githooks/*`
 
 **Never touched by a sync** (fork-owned content):
 - `knowledge/domains/[name]/*` (every domain's own knowledge)
@@ -115,3 +116,4 @@ Opportunistically, not on a schedule — the same discipline as the domain-level
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-07-24 | Initial creation. Defines the sync marker, tracked paths, check procedure, and apply procedure for bringing a fork's system-layer files up to date with `proto-context-architecture`. Deliberately opportunistic rather than scheduled — no recurring trigger, surfaced instead via `projects/system/TODO.md`'s System Maintenance Pass section. |
+| 1.1 | 2026-07-25 | Added `.githooks/*` to the Tracked Paths list — the new `.githooks/pre-commit` hook (`scripts/pre-commit-check.ps1`) is a system-layer file like the others. |
