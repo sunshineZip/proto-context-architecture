@@ -312,3 +312,38 @@ STATUS: CHECKPOINT
 Completed: Designed and built domain/project retirement as an archive-in-place convention (`Retired` status value, retirement blockquote, `index.md` Status column) with two new mechanical `validate.ps1` checks (domain Status agreement across files, retired-project routing-row cleanup) — both checks tested against deliberately broken and then correctly-fixed throwaway content before trusting them; verified clean against a fresh clone.
 Next: This is a template-level addition, not yet rolled out to `familien-boe` or `longstraw` — those forks will need it ported the same way the frontmatter/reciprocity and upstream-sync mechanisms were, whenever their own upstream-sync check next runs.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 12 | 2026-07-25
+
+Human is planning to self-host both this repo and an as-yet-undecided LLM sized for a homelab setup, and asked how confident I was that `ROUTING.md` and the rest of the prose-based instructions would hold up on a weaker or self-hosted model versus a frontier one — a fair question, since I've made real mistakes following this system's own discipline this session (two scope misses porting into `familien-boe`, two forgotten Version History rows). Answered honestly: low-to-moderate confidence for the *restraint* rules specifically (Plan-first, Hard Constraints, no-chaining, what counts as system-layer) — the class of instruction hardest for any LLM to hold reliably, weaker ones especially, because failure there is silent, not a crash. What already holds up regardless of model is anything backed by `scripts/validate.ps1`, since that doesn't depend on the model remembering a rule, only on it running the script and acting on the output.
+
+Human asked for a detailed review of the most obvious hardening vectors. Reviewed `operating-principles.md`, `turn-protocol.md`, `routing-rules.md`, `MarkdownConventions.md`, and `ROUTING.md`'s Hard Constraints for rules that currently depend purely on the model remembering, and ranked five candidates by severity and mechanical checkability: (1) append-only `session-log.md`, (2) turn structure / STATUS signal vocabulary, (3) no-chaining between turns, (4) Version History append-only + header/row agreement, (5) system-layer edits coupled to a session-log entry in the same commit (flagged as needing a git hook, not `validate.ps1`, since it's commit-diff-level). Human approved building 1–4 now, with 5 as a separate later addition.
+
+**Before building anything, verified the underlying assumptions against the real logs rather than trusting the spec docs** — the same discipline that caught the two scope misses earlier this session. This paid off immediately: `turn-protocol.md`'s `[HUMAN]` turn template implies a human turn is logged between confirmations, but `grep`-ing both this repo's and `familien-boe`'s real `session-log.md` files showed every turn after Turn 1 is `[Claude]`/`[Copilot]` consecutively — human confirmation happens in conversation, never as a separate logged entry. A literal "no two consecutive non-HUMAN turns" check would therefore flag the *entire* existing history in both repos as violations. Dropped item 3 rather than ship a check that's pure noise against actual usage — no-chaining is enforced by the conversational medium itself (a new turn requires a new incoming human message), not by anything visible in the repository, so it isn't mechanically checkable here. Documented this reasoning directly in the new `validate.ps1` comment block so a future session doesn't rebuild it under a mistaken assumption.
+
+**Built, all in `scripts/validate.ps1`:**
+
+- **Append-only `session-log.md`** — for each project, fetches the file's content at `git HEAD` and asserts the working copy is that content with only lines appended, never edited or removed. Scope is deliberately working-tree-vs-last-commit, matching how this script is actually run (immediately before each commit) — it does not walk full history.
+- **Turn structure and STATUS-signal vocabulary** — validates every `## [Role] — Turn N | YYYY-MM-DD` header is well-formed and `N` is strictly sequential with no gaps or repeats; every non-`[HUMAN]` turn has a `STATUS:` line (errors if missing); the STATUS text is checked against the known signal vocabulary from `turn-protocol.md`/`routing-rules.md`/`project-types.md` (warns, not errors, if unrecognized — a fork may legitimately add its own phase signals); `STATUS: BLOCKED` is checked for all three required sub-fields (errors if incomplete, per `turn-protocol.md` §3).
+- **Version History discipline, generalized to every file that has one** — header `Version` must match the latest table row (warning — a legitimate mid-edit state); old rows must never be edited or removed compared to `git HEAD`, only appended to (error). This is the exact mistake I made twice earlier this session, caught only by manually `tail`-checking — now it can't happen silently.
+
+**Two real bugs found and fixed while testing, not just written and trusted:**
+1. A classic PowerShell gotcha — a function returning an array via `return $rows` gets unwrapped to a scalar when the array has exactly one element, so `$rows[-1]` silently indexed into a *string's last character* instead of the array's last row for any file with exactly one Version History entry. Wrapped both call sites in `@(...)` to force array context. Caught immediately because the very first real run against this repo threw exceptions instead of passing clean.
+2. Code-fenced examples needed the same `Remove-CodeFences` treatment already used elsewhere — `MarkdownConventions.md` itself contains a fenced *example* of a Version History section, literally including the heading text `## Version History`, which would otherwise be mistaken for a real one.
+
+**Verification, same rigor as the retirement checks:** built a disposable copy, committed a clean baseline, then deliberately injected one violation at a time — an edited word inside an already-committed turn, a skipped turn number, a missing `STATUS:` line, an invented `STATUS: ALL DONE` signal, an incomplete `BLOCKED` signal, and a hand-edited prior Version History row — and confirmed each produced exactly the intended error or warning, with no false positives on the surrounding unmodified content. Discarded the disposable copy afterward. Re-ran against the real repo clean both before and after the fixes.
+
+Item 5 (system-layer edits must be logged in the same commit) is explicitly deferred — it needs a pre-commit git hook, not a `validate.ps1` addition, since it depends on commit-level diff granularity that a working-tree scan can't see.
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added three new `validate.ps1` checks hardening this system against weaker-model failure modes — append-only `session-log.md`, turn-structure/STATUS-signal validation, and generalized Version History append-only/agreement — after verifying the assumptions behind a fourth candidate (no-chaining) against real session-log content and finding it would be pure noise, so it was dropped rather than built. Fixed two real bugs (a PowerShell array-unwrapping gotcha, a code-fence collision) found while testing against deliberately broken content. Verified clean against a fresh clone.
+Next: Item 5 (system-layer edits coupled to a session-log commit) is a separate git-hook addition, not yet built. Not yet ported to `familien-boe` or `longstraw`.
+Waiting for: Direction on the next task.

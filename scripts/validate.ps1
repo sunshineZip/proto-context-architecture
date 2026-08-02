@@ -135,6 +135,32 @@ function Get-HeaderStatus {
     return $null
 }
 
+# --- Git helpers for the append-only checks below: compare the working
+#     copy against the version committed at HEAD. This only catches edits
+#     made since the last commit — matches how this script is actually
+#     used, immediately before each commit — not full repo history. ---
+$isGitRepo = $false
+if (Test-Path (Join-Path $repoRoot ".git")) {
+    git -C $repoRoot rev-parse --is-inside-work-tree *> $null
+    $isGitRepo = ($LASTEXITCODE -eq 0)
+}
+
+function Get-GitHeadContent {
+    param([string]$RelativePath)
+    $result = git -C $repoRoot show "HEAD:$RelativePath" 2>$null
+    if ($LASTEXITCODE -ne 0) { return $null }
+    return ($result -join "`n")
+}
+
+function Test-LinesAppendOnly {
+    param([string[]]$OldLines, [string[]]$NewLines)
+    if ($NewLines.Count -lt $OldLines.Count) { return $false }
+    for ($i = 0; $i -lt $OldLines.Count; $i++) {
+        if ($NewLines[$i] -ne $OldLines[$i]) { return $false }
+    }
+    return $true
+}
+
 # --- Frontmatter: domain files ---
 # See MarkdownConventions.md §1 (Frontmatter).
 foreach ($domainDir in $domainDirs) {
@@ -187,6 +213,82 @@ foreach ($projectDir in $projectDirs) {
         }
         if ($fm['project'] -ne $projectDir.Name) {
             Add-ValidationError "'$($projectDir.Name)/$fileName' frontmatter has project: $($fm['project']), expected '$($projectDir.Name)' (folder name mismatch)"
+        }
+    }
+}
+
+# --- session-log.md: turn header format, sequential numbering, STATUS
+#     signal presence/vocabulary, BLOCKED completeness, and append-only
+#     integrity against the last commit. See knowledge/flow/turn-protocol.md
+#     and operating-principles.md §2. [HUMAN] turns are exempt from the
+#     STATUS requirement — real usage confirms the turn-protocol.md
+#     [HUMAN] template carries none, and no-chaining is enforced by the
+#     conversational medium itself (a new turn requires a new human
+#     message), not by a "[HUMAN] Turn" log entry between every pair — so
+#     that pattern is not checked here. ---
+$knownStatusSignals = @(
+    'STATUS: BLOCKED',
+    'STATUS: WAITING FOR HUMAN:',
+    'STATUS: FLAG RAISED',
+    'STATUS: CHECKPOINT',
+    'STATUS: PROJECT COMPLETE',
+    'STATUS: COMPLETE, SYSTEM FLAGS PENDING',
+    'STATUS: RETURN TO PHASE'
+)
+
+foreach ($projectDir in $projectDirs) {
+    $sessionLogPath = Join-Path $projectDir.FullName "session-log.md"
+    if (-not (Test-Path $sessionLogPath)) { continue }
+    $rawContent = Get-Content -Path $sessionLogPath -Raw
+    $scanText = Remove-CodeFences -Text $rawContent
+
+    $turnMatches = [regex]::Matches($scanText, '(?m)^## \[([^\]]+)\] — Turn (\d+) \| (\d{4}-\d{2}-\d{2})\s*$')
+    $expectedNext = 1
+
+    for ($i = 0; $i -lt $turnMatches.Count; $i++) {
+        $m = $turnMatches[$i]
+        $role = $m.Groups[1].Value
+        $turnNum = [int]$m.Groups[2].Value
+
+        if ($turnNum -ne $expectedNext) {
+            Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn numbering breaks at 'Turn $turnNum' — expected Turn $expectedNext (turns must be sequential, no gaps or repeats)"
+        }
+        $expectedNext = $turnNum + 1
+
+        if ($role.ToUpper() -ne 'HUMAN') {
+            $turnEnd = if ($i -lt $turnMatches.Count - 1) { $turnMatches[$i + 1].Index } else { $scanText.Length }
+            $turnBody = $scanText.Substring($m.Index, $turnEnd - $m.Index)
+
+            $statusMatch = [regex]::Match($turnBody, '(?m)^STATUS:.*$')
+            if (-not $statusMatch.Success) {
+                Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum ([$role]) has no STATUS: line (turn-protocol.md §1 requires one on every non-HUMAN turn)"
+            } else {
+                $statusLine = $statusMatch.Value.Trim()
+                $recognized = $false
+                foreach ($sig in $knownStatusSignals) {
+                    if ($statusLine.StartsWith($sig)) { $recognized = $true; break }
+                }
+                if (-not $recognized) {
+                    Add-ValidationWarning "'$($projectDir.Name)/session-log.md': Turn $turnNum ([$role]) has an unrecognized STATUS signal: '$statusLine' — confirm this is an intentional project-specific phase signal (project-types.md), not a typo"
+                }
+                if ($statusLine -eq 'STATUS: BLOCKED') {
+                    if ($turnBody -notmatch '(?m)^Reason:' -or $turnBody -notmatch '(?m)^Need:' -or $turnBody -notmatch '(?m)^Suggested contact:') {
+                        Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum's STATUS: BLOCKED is missing one of Reason:/Need:/Suggested contact: (turn-protocol.md §3)"
+                    }
+                }
+            }
+        }
+    }
+
+    if ($isGitRepo) {
+        $relPath = ("projects/{0}/session-log.md" -f $projectDir.Name)
+        $oldContent = Get-GitHeadContent -RelativePath $relPath
+        if ($null -ne $oldContent) {
+            $oldLines = $oldContent -split "`r?`n"
+            $newLines = $rawContent -split "`r?`n"
+            if (-not (Test-LinesAppendOnly -OldLines $oldLines -NewLines $newLines)) {
+                Add-ValidationError "'$($projectDir.Name)/session-log.md' has changed content that existed at the last commit — session-log.md is append-only, never edit or remove a prior turn (operating-principles.md §2)"
+            }
         }
     }
 }
@@ -429,6 +531,69 @@ if (Test-Path $routingPath) {
 foreach ($name in $retiredProjects) {
     if ($step2ProjectNames -contains $name.ToLower()) {
         Add-ValidationWarning "Project '$name' is marked Retired but still has a routing row in ROUTING.md Step 2 — remove the row so new work isn't routed there"
+    }
+}
+
+# --- Version History discipline (every file that has one): header Version
+#     must match the latest row, and old rows must never be edited or
+#     removed compared to the last commit — only appended to. See
+#     MarkdownConventions.md §2. Code-fenced examples (e.g. the format
+#     sample inside MarkdownConventions.md itself, which literally contains
+#     a "## Version History" heading in a fence) are stripped first so
+#     they're never mistaken for a real section. ---
+function Get-HeaderVersion {
+    param([string]$Text)
+    $m = [regex]::Match($Text, '(?m)^Version\s+([\d.]+)\s*\|')
+    if ($m.Success) { return $m.Groups[1].Value }
+    return $null
+}
+
+function Get-VersionHistoryRows {
+    param([string]$Text)
+    $rows = @()
+    $m = [regex]::Match($Text, '(?ms)^## Version History\s*\r?\n(.*?)(?:\r?\n---|\z)')
+    if (-not $m.Success) { return $rows }
+    foreach ($line in ($m.Groups[1].Value -split "`r?`n")) {
+        $trimmed = $line.Trim()
+        if (-not $trimmed.StartsWith("|")) { continue }
+        $cells = $trimmed.Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
+        if ($cells.Count -eq 0) { continue }
+        $first = $cells[0]
+        if ($first -eq "" -or $first -eq "Version" -or $first -match '^-+$') { continue }
+        $rows += $trimmed
+    }
+    return $rows
+}
+
+$allMdFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter "*.md" -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '[\\/]temp[\\/]' -and $_.FullName -notmatch '[\\/]\.git[\\/]' }
+
+foreach ($mdFile in $allMdFiles) {
+    $rawText = Get-Content -Path $mdFile.FullName -Raw
+    $scanText = Remove-CodeFences -Text $rawText
+    if ($scanText -notmatch '(?m)^## Version History\s*$') { continue }
+
+    $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
+    $headerVersion = Get-HeaderVersion -Text $scanText
+    $rows = @(Get-VersionHistoryRows -Text $scanText)
+
+    if ($headerVersion -and $rows.Count -gt 0) {
+        $lastRowCells = $rows[-1].Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
+        $lastRowVersion = $lastRowCells[0]
+        if ($lastRowVersion -ne $headerVersion) {
+            Add-ValidationWarning "'$relPath': header Version is '$headerVersion' but the latest Version History row is '$lastRowVersion' — a version bump was likely forgotten"
+        }
+    }
+
+    if ($isGitRepo) {
+        $oldRawText = Get-GitHeadContent -RelativePath $relPath
+        if ($null -ne $oldRawText) {
+            $oldScanText = Remove-CodeFences -Text $oldRawText
+            $oldRows = @(Get-VersionHistoryRows -Text $oldScanText)
+            if (-not (Test-LinesAppendOnly -OldLines $oldRows -NewLines $rows)) {
+                Add-ValidationError "'$relPath': Version History rows changed compared to the last commit — never edit or remove an existing row, only append (MarkdownConventions.md §2)"
+            }
+        }
     }
 }
 
