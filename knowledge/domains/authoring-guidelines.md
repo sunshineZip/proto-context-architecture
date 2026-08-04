@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.6 | 2026-07-25 | Production
+Version 1.7 | 2026-07-25 | Production
 
 ---
 
@@ -125,6 +125,15 @@ Every word in a knowledge document is a recurring cost — it loads on every fut
 - Prefer tables over prose for structured facts (mappings, inventories, configurations).
 - End domain sections with a `> **Note:**` callout if there is a critical caveat that applies to the whole section.
 - Every fact has exactly one owning section. If it's also relevant elsewhere in the same document, cross-reference it (§X.Y) instead of restating it — a restated fact drifts out of sync the moment one copy is updated and the other isn't.
+
+### Behavioral and communication-style notes
+
+A domain may include what's known about how a specific person — a household member or an external party — tends to communicate, argue, or react. This is an ordinary domain fact and follows the same rules as everything else in this section: own-vs-reference, one owning section, `[VERIFIED]`/`[UNVERIFIED]` applied per claim (§6).
+
+- Apply `[SENSITIVE]` (§6) to any claim that's personally sensitive if surfaced — for an external party, this is often a strategic read on their argumentative weaknesses; for a household member, it's just ordinary behavioral privacy. Either way, treat it with the same care.
+- Behavioral claims are pattern-based inferences, not verifiable facts in the usual sense — hedge accordingly ("has responded defensively when challenged in front of others, on 3 observed occasions" reads very differently from "is defensive"). A Maintenance Pass (§8) should ask whether a standing behavioral read has ever been tested against disconfirming evidence, not just repeated instances of the same pattern.
+- For attacker/adversary content specifically (e.g. in a security domain): a captured lesson stays framed as defensive hardening for your own system, never as a portable offensive technique — the same authorized-target-only boundary already governing what you test applies to what you write down, not only to who can read it.
+- Never write roleplayed or hypothetical dialogue into a domain document as if it were a real, confirmed exchange. No new rule is needed for this — the existing writing-style rule (`MarkdownConventions.md` §9) and the validity-signal discipline (§6) already cover it.
 
 ### Procedures
 
@@ -379,3 +388,4 @@ Before submitting any knowledge document for human approval:
 | 1.4 | 2026-07-16 | Cross-referenced the new frontmatter convention from §2 and the source-manifest template (§9.1); noted that `scripts/validate.ps1` now mechanically checks cross-reference reciprocity (§5, §8) rather than relying on manual review alone. |
 | 1.5 | 2026-07-24 | §8 now cross-references `knowledge/flow/upstream-sync.md` — the repo-level analog of this domain-scoped Maintenance Pass. |
 | 1.6 | 2026-07-25 | §8 gained a check for whether a domain should be retired rather than left silently stale — see the new retirement convention in `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain. |
+| 1.7 | 2026-07-25 | §4 gained "Behavioral and communication-style notes" — how a domain captures what's known about how a household member or external party tends to communicate or argue, without needing a separate content type or top-level structure. Reuses existing signals ([SENSITIVE], [VERIFIED]/[UNVERIFIED]) rather than inventing new ones. |

@@ -1,6 +1,6 @@
 # Operating Principles
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-07-25 | Production
 
 ---
 
@@ -96,6 +96,8 @@ Proposed change: [Draft replacement text or description of what should change]
 
 The flag is reviewed by the human, who approves, edits, or rejects it. Only after approval is the change committed to `knowledge/`.
 
+**When processing correspondence** (emails, messages, documents) from a person or organization already covered by a domain — or clearly belonging in one — also watch for behavioral and argumentative-style signals worth flagging (see `authoring-guidelines.md` §4, Behavioral and communication-style notes), not just the logistical content. The same flag-and-confirm process applies; nothing about this content type is captured automatically.
+
 ### System improvement flags
 
 When you identify an improvement to the system's own routing, conventions, or structural files — not a factual correction to a knowledge document, but a design or process change — raise a separate flag:
@@ -116,3 +118,4 @@ At session end, append a handoff turn to the system project's `session-log.md` s
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic operating principles adapted from NightCrew team-identity.md. |
+| 1.1 | 2026-07-25 | §5 gained a note to actively watch for behavioral/argumentative-style signal when processing correspondence from a party already covered by a domain, not just the logistical content — same flag-and-confirm gate, no automatic capture. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes). |

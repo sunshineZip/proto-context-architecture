@@ -377,3 +377,36 @@ STATUS: CHECKPOINT
 Completed: Built and activated a pre-commit git hook (`.githooks/pre-commit` + `scripts/pre-commit-check.ps1`) enforcing that system-layer edits are logged in `projects/system/session-log.md` in the same commit — completing all five hardening vectors from the prior review. Solved the activation gap (local git config doesn't survive a fresh clone) by wiring it into the existing `.claude/hooks/session-start.sh`, and documented the manual one-time command for non-Claude-Code setups. Fixed an evaluation-order bug in `validate.ps1` found while testing both states of the new warning. Verified end to end against a real `git commit`, not just the check logic in isolation.
 Next: This is a template-level addition, not yet ported to `familien-boe` or `longstraw` — same as items 1–4 and the retirement mechanism before it.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 14 | 2026-07-25
+
+Human proposed a new capability: an LLM taking the adversarial side of a real negotiation (employer HR minimizing termination cost, testing whether an expense claim would hold up) to stress-test arguments before acting on them for real. What shipped this turn is a small fraction of what was originally scoped — the design converged down through two rounds of external consultation and two rounds of the human's own direct pushback, each one cutting real complexity rather than adding it.
+
+**Design arc, briefly:**
+
+1. Initial proposal: a full top-level `simulation/` (later `counterparty/`) folder — its own frontmatter type, its own entity registry, a four-phase "Stress-Test" project type, dedicated `STATUS: IN CHARACTER`/`OUT OF CHARACTER` signals with a mandatory per-turn marker, a pairing check in `validate.ps1`.
+2. Consulted `familien-boe` and the human's homelab session directly (via a written feedback-request prompt, not assumed) before building anything. Real findings, not rubber-stamps: two independent naming collisions (`simulation/` read too close to this repo's existing "Scenario A/B" financial-projection pattern in one fork, and to unrelated "simulate a lockout" prose usage in the other); an entry-ambiguity gap (nothing distinguished "predict how he'd react" from "roleplay him telling me no"); a sharper exit-ambiguity gap (a phase-level boundary doesn't mark *individual turns* within a long, multi-topic session); and — from the pentesting follow-up — that a promoted lesson from adversarial security-reasoning could double as an actual offensive playbook, a different risk category than personal-reputational `[SENSITIVE]` exposure.
+3. Human then challenged the core premise directly: why does a real, useful fact ("boss responds better to written follow-ups") need to live in a separate store that's *never loaded outside a stress-test*, when it's just an ordinary domain fact useful in normal ally-mode work too? Correct — the thing that actually needed fencing was never *where facts about a person live*, it was the fictional transcript and the adversarial stance. Dropped the entire `counterparty/entities/` structure; behavioral knowledge about anyone — household member or external party — now lives as ordinary content in whatever domain already owns them.
+4. Human then challenged the remaining mechanism too: most of what the original request needed is just grounded reasoning in the LLM's own voice, which doesn't need a formal sandbox at all — and the `IN CHARACTER`/`OUT OF CHARACTER` apparatus never actually *prevented* anything, it only left an after-the-fact paper trail for a risk that's about behavior in the moment, not documentation of it. Correct again. Dropped the project type, the STATUS signals, the per-turn marker, and every planned `validate.ps1` change.
+5. A closing question from the human ("would this routing apply the same way to how my own or my wife's communication style gets captured?") surfaced that the surviving guidance was still framed adversarially ("Counterparty and behavioral notes," leverage-focused `[SENSITIVE]` example) even though the underlying rules apply equally to non-adversarial, non-external content. Broadened the heading and the first bullet before committing rather than shipping a subsection whose title undersold its own scope.
+
+**What actually shipped — three small additions, no new structure:**
+
+- `knowledge/domains/authoring-guidelines.md` (1.6 → 1.7) — new §4 subsection "Behavioral and communication-style notes": a domain may capture how a household member or external party tends to communicate or argue, using the signals that already exist (`[SENSITIVE]`, `[VERIFIED]`/`[UNVERIFIED]`) rather than new ones; hedge pattern-based behavioral claims and periodically test them against disconfirming evidence, not just repeated confirming instances; attacker/security-domain content stays framed as defensive hardening, never a portable offensive technique; never write roleplayed dialogue into a domain as if it were a real exchange — already covered by existing writing-style and validity-signal rules, no new rule needed.
+- `ROUTING.md` (1.8 → 1.9) — new Hard Constraint: never adopt an adversarial persona without an explicit, unambiguous human request, and drop back to normal voice immediately and unprompted at any sign the human has stepped outside the exercise.
+- `knowledge/flow/operating-principles.md` (1.0 → 1.1, its first edit since initial creation) — §5 gained a note to actively watch for behavioral/argumentative-style signal when processing correspondence from a party a domain already covers, not just the logistical content — same flag-and-confirm gate as any other knowledge candidate, nothing captured automatically.
+
+Everything that would have needed mechanical enforcement got designed away before it needed any — there is nothing new for `validate.ps1` to check this turn.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Shipped the counterparty/behavioral-notes capability as three small additions (`authoring-guidelines.md`, `ROUTING.md`, `operating-principles.md`) after a full design arc that started as a new top-level folder with dedicated signals and tooling, and was cut down through two rounds of grounded fork feedback plus two rounds of the human's own scrutiny to exactly what the original request needed and no more.
+Next: Not yet ported to `familien-boe` or `longstraw`.
+Waiting for: Direction on the next task.

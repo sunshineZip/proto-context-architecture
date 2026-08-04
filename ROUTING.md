@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.8 | 2026-07-25 | Production
+Version 1.9 | 2026-07-25 | Production
 
 ---
 
@@ -108,6 +108,7 @@ Do not break these regardless of what the human asks.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
 - **Do not make structural system changes without logging them.** Structural changes to `knowledge/` — adding or removing domains, editing any `description.md`, editing any file under `knowledge/flow/` — and any edit to `ROUTING.md` or `Architecture.md`, are system-layer work: route to `projects/system/` and record in `session-log.md` before committing. Appending new facts to an existing domain `knowledge.md` uses the FLAG process in the first constraint above, not this one. A `pre-commit` git hook (`scripts/pre-commit-check.ps1`, activated via `git config core.hooksPath .githooks` — see `Architecture.md` §6) enforces this mechanically for the full tracked-paths list in `knowledge/flow/upstream-sync.md` §3, blocking a commit that stages one of those files without also staging `session-log.md`.
 - **Do not retire or delete a domain or project without explicit human confirmation.** Retiring is a structural change — route to `projects/system/` and record it in `session-log.md`, same as adding one. Default to archive-in-place (`Retired` status, `MarkdownConventions.md` §1) — never delete files as part of retirement. Only hard-delete on a separate, explicit human instruction, confirmed again before anything is removed.
+- **Do not adopt an adversarial or opposing persona without an explicit, unambiguous human request** — never infer that intent from a loaded topic or context alone; if it's ambiguous, ask. Drop back to your normal voice immediately and unprompted at any sign the human has stepped outside the exercise (a real logistical question, genuine distress, confusion about whether something is real advice) — do not wait to be asked.
 
 ---
 
@@ -190,4 +191,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.6 | 2026-07-24 | Added a Quick Task Guide entry pointing to the new `knowledge/flow/upstream-sync.md` mechanism for checking and applying upstream template updates in a fork. |
 | 1.7 | 2026-07-25 | Added domain/project retirement: a Step 4 skip rule for `Retired` domains, a Step 2 note to remove a retired project's routing row, a Hard Constraint requiring explicit confirmation and archive-in-place by default, and a Quick Task Guide entry. See `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain for the underlying convention. |
 | 1.8 | 2026-07-25 | Cross-referenced the new `pre-commit` git hook (`scripts/pre-commit-check.ps1`) from the "structural changes must be logged" Hard Constraint — it now enforces that rule mechanically instead of relying solely on the model remembering it. |
+| 1.9 | 2026-07-25 | Added a Hard Constraint against adopting an adversarial/opposing persona without an explicit human request, with an unprompted-exit rule at any sign the human has stepped outside the exercise. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes) for the corresponding content-authoring guidance. |
 
