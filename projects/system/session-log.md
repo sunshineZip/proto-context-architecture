@@ -410,3 +410,30 @@ STATUS: CHECKPOINT
 Completed: Shipped the counterparty/behavioral-notes capability as three small additions (`authoring-guidelines.md`, `ROUTING.md`, `operating-principles.md`) after a full design arc that started as a new top-level folder with dedicated signals and tooling, and was cut down through two rounds of grounded fork feedback plus two rounds of the human's own scrutiny to exactly what the original request needed and no more.
 Next: Not yet ported to `familien-boe` or `longstraw`.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 15 | 2026-07-25
+
+Human relayed feedback from `longstraw`'s session porting the upstream-sync-tracked changes from this repo, gathered while doing the real port rather than a hand-simulated one (that session had `CLAUDE_CODE_REMOTE=true`, so its own session-start hook ran for real, installing real PowerShell — the first time `validate.ps1` and the pre-commit hook were exercised end to end by a session other than this one). Four findings, two requiring action here.
+
+**1. Real bug in `MarkdownConventions.md`, found and fixed.** Its header read "Version 1.2" while its own Version History table's last row already said "1.3" — the exact class of mistake the Version History discipline check (built in the hardening round two turns ago) exists to catch. It didn't catch it. Investigated rather than just patching the content: the check's heading-match regex only recognised a bare `## Version History` heading, but `MarkdownConventions.md` is the one file in this repo that numbers its own final section (`## 10. Version History`, per its own Index) — so the check's initial gate silently skipped the entire file, every time, since the check was written. Confirmed via direct debugging (isolated the two helper functions, ran them against the real file content) rather than guessing from the error's absence. Fixed the regex in both `Get-VersionHistoryRows` and the gate check to accept an optional numeric prefix, verified it now flags the real bug on the unfixed content, then fixed the content (header bumped to 1.4, a new row documenting the fix itself — not silently reused the stale 1.3 slot). Closed my own test-coverage gap at the same time: two turns ago I verified the tamper-detection logic against `ROUTING.md`, which has an unnumbered heading and would never have exercised this exact bug — re-ran the same row-edit and header/row-mismatch tests specifically against `MarkdownConventions.md` this turn and confirmed both now fire correctly, and confirmed the file passes clean when untampered.
+
+**2. Pre-commit hook confirmed working under real conditions** — no action needed, noting for the record since it's the first real (not hand-simulated) confirmation.
+
+**3. A genuine pre-existing gap in `longstraw`'s own history** (a Turn 2 missing its required `STATUS:` line, predating this whole thread) — correctly left undocumented-but-unfixed by that session rather than edited, since fixing it would itself violate the newly-synced append-only check. Right call; nothing to do here, this is `longstraw`'s repo, not this one.
+
+**4. A near-miss during hook testing, self-caught and self-recovered.** An unconditional `git reset --soft HEAD~1`, run right after a blocked (no-op) commit attempt, assumed the attempt had succeeded — it hadn't, so `HEAD~1` was one commit further back than intended, and a real, already-pushed commit briefly got undone locally. Caught by diffing against `origin/main` rather than trusting local state before pushing anything, recovered with `git reset --soft origin/main`, nothing bad reached the remote. Added a comment directly in `scripts/pre-commit-check.ps1` — the file anyone testing or porting this hook will actually be looking at — warning against this exact assumption: a blocked commit creates no commit, so verify before resetting, never assume.
+
+**Files changed:** `MarkdownConventions.md` (1.2 → 1.4, skipping past the never-actually-synced "1.2 state" — the 1.3 row was already real and correct, only the header was stale); `scripts/validate.ps1` (heading-match regex fix, comment updated to record why); `scripts/pre-commit-check.ps1` (hook-testing safety comment, no logic change).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling fix, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Fixed a real header/changelog version mismatch in `MarkdownConventions.md`, found by `longstraw`'s sync port; traced it to a genuine bug in the Version History discipline check itself (a numbered-heading file was being silently skipped since the check was written) rather than just patching the symptom; fixed the check, verified it now catches the bug, then fixed the content; closed a real test-coverage gap by re-running the tamper tests against the specific file type that exposed it. Added a hook-testing safety note to `scripts/pre-commit-check.ps1` from a near-miss `longstraw` self-caught and self-recovered from.
+Next: Nothing scheduled. `familien-boe` and `longstraw` remain ahead of this repo on the counterparty/behavioral-notes addition until their own sync checks run.
+Waiting for: Direction on the next task.

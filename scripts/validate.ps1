@@ -557,7 +557,13 @@ foreach ($name in $retiredProjects) {
 #     MarkdownConventions.md §2. Code-fenced examples (e.g. the format
 #     sample inside MarkdownConventions.md itself, which literally contains
 #     a "## Version History" heading in a fence) are stripped first so
-#     they're never mistaken for a real section. ---
+#     they're never mistaken for a real section. The heading match allows
+#     an optional numeric prefix ("## Version History" or "## 10. Version
+#     History") — MarkdownConventions.md numbers its own final section,
+#     and a first version of this check silently skipped that file
+#     entirely because it didn't, missing a real header/row mismatch that
+#     shipped for over a week before a fork's sync session caught it by
+#     hand. ---
 function Get-HeaderVersion {
     param([string]$Text)
     $m = [regex]::Match($Text, '(?m)^Version\s+([\d.]+)\s*\|')
@@ -568,7 +574,7 @@ function Get-HeaderVersion {
 function Get-VersionHistoryRows {
     param([string]$Text)
     $rows = @()
-    $m = [regex]::Match($Text, '(?ms)^## Version History\s*\r?\n(.*?)(?:\r?\n---|\z)')
+    $m = [regex]::Match($Text, '(?ms)^## (?:\d+\.\s*)?Version History\s*\r?\n(.*?)(?:\r?\n---|\z)')
     if (-not $m.Success) { return $rows }
     foreach ($line in ($m.Groups[1].Value -split "`r?`n")) {
         $trimmed = $line.Trim()
@@ -588,7 +594,7 @@ $allMdFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter "*.md" -File -Error
 foreach ($mdFile in $allMdFiles) {
     $rawText = Get-Content -Path $mdFile.FullName -Raw
     $scanText = Remove-CodeFences -Text $rawText
-    if ($scanText -notmatch '(?m)^## Version History\s*$') { continue }
+    if ($scanText -notmatch '(?m)^## (?:\d+\.\s*)?Version History\s*$') { continue }
 
     $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
     $headerVersion = Get-HeaderVersion -Text $scanText

@@ -7,6 +7,18 @@ param()
 # in the same commit — operationalizes the ROUTING.md Hard Constraint
 # "do not make structural system changes without logging them" instead
 # of relying on the model to remember it.
+#
+# If you're testing this hook's block/pass behaviour (e.g. while porting
+# it to a fork): a blocked `git commit` creates no new commit. A fork's
+# sync session once ran an unconditional `git reset --soft HEAD~1` right
+# after a blocked, no-op commit attempt, assuming the attempt had
+# succeeded — it hadn't, so HEAD~1 was one commit further back than
+# expected, and a real, already-pushed commit got undone. Caught before
+# anything bad was pushed by diffing against origin/<branch> rather than
+# trusting local state, and recovered with `git reset --soft origin/main`.
+# Before running any reset, verify whether the commit actually happened
+# (check the exit code, or compare `git rev-parse HEAD` before and after)
+# — never assume.
 
 $repoRoot = (git rev-parse --show-toplevel 2>$null)
 if (-not $repoRoot) {
