@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.9 | 2026-07-25 | Production
+Version 1.10 | 2026-07-25 | Production
 
 ---
 
@@ -109,6 +109,7 @@ Do not break these regardless of what the human asks.
 - **Do not make structural system changes without logging them.** Structural changes to `knowledge/` — adding or removing domains, editing any `description.md`, editing any file under `knowledge/flow/` — and any edit to `ROUTING.md` or `Architecture.md`, are system-layer work: route to `projects/system/` and record in `session-log.md` before committing. Appending new facts to an existing domain `knowledge.md` uses the FLAG process in the first constraint above, not this one. A `pre-commit` git hook (`scripts/pre-commit-check.ps1`, activated via `git config core.hooksPath .githooks` — see `Architecture.md` §6) enforces this mechanically for the full tracked-paths list in `knowledge/flow/upstream-sync.md` §3, blocking a commit that stages one of those files without also staging `session-log.md`.
 - **Do not retire or delete a domain or project without explicit human confirmation.** Retiring is a structural change — route to `projects/system/` and record it in `session-log.md`, same as adding one. Default to archive-in-place (`Retired` status, `MarkdownConventions.md` §1) — never delete files as part of retirement. Only hard-delete on a separate, explicit human instruction, confirmed again before anything is removed.
 - **Do not adopt an adversarial or opposing persona without an explicit, unambiguous human request** — never infer that intent from a loaded topic or context alone; if it's ambiguous, ask. Drop back to your normal voice immediately and unprompted at any sign the human has stepped outside the exercise (a real logistical question, genuine distress, confusion about whether something is real advice) — do not wait to be asked.
+- **Do not force-push, including `--force-with-lease`, to make a rejected push succeed.** A rejected push means another session's work needs integrating first — see `knowledge/flow/git-collaboration.md`. Force-pushing requires the same explicit, separately-confirmed human authorisation as retiring or deleting content.
 
 ---
 
@@ -119,7 +120,7 @@ Apply these in every session regardless of project type or how you entered the s
 - **Load before acting.** Do not act on assumptions or unread context. If a required file is missing or unreadable, say so before proceeding.
 - **Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently — surface decisions and blockers, not scaffolding.
 - **Work directly on `main` by default.** This template assumes a personal working repo, not shared infrastructure with a review gate, so branch/PR ceremony isn't the default — commit and push straight to `main`. This is a template default, not a fixed architectural rule: if your fork is a team repo or a shared initiative that needs a review gate, replace this rule with your own branching workflow as part of customizing `ROUTING.md` for your instance.
-- **Commit and push, almost always.** Nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either.
+- **Commit and push, almost always.** Nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either. If more than one person may be pushing to this repo, follow `knowledge/flow/git-collaboration.md` — fetch before every push, not only after a rejection.
 - **Never leave a push silently pending.** If you defer pushing until a segment finishes rather than after every increment, say so explicitly to the human before the turn ends — e.g. "changes are saved locally but not yet pushed." The human may end the session at any point; an unflagged pending push risks losing untracked work.
 
 ---
@@ -147,6 +148,13 @@ Apply these in every session regardless of project type or how you entered the s
 → Project: set the `TODO.md` and `session-log.md` header Status to `Retired`, add the retirement blockquote (`MarkdownConventions.md` §1), and remove its row from `ROUTING.md` Step 2
 → Never delete files as part of retirement — archive-in-place. Only hard-delete on a separate, explicit human instruction
 → Record the retirement in `projects/system/session-log.md`
+
+**My push was rejected, or I'm worried it conflicts with someone else's work**
+→ See `knowledge/flow/git-collaboration.md` for the full procedure
+→ Fetch and rebase onto `origin/<branch>`, then re-run `scripts/validate.ps1` even if the rebase was clean — a clean rebase across different files can still leave something structurally inconsistent that only validate.ps1 catches
+→ Never hand-resolve conflict markers in `session-log.md` or a Version History table — re-append your own turn/row fresh against the current content instead
+→ A real same-fact content collision routes through the normal `[CONTRADICTS: source]` correction discipline, not a unilateral pick
+→ Never force-push to push through a rejection
 
 **I want to pass working material between sessions**
 → Drop it in `temp/` — this is the designated handoff zone for transient artifacts
@@ -192,4 +200,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.7 | 2026-07-25 | Added domain/project retirement: a Step 4 skip rule for `Retired` domains, a Step 2 note to remove a retired project's routing row, a Hard Constraint requiring explicit confirmation and archive-in-place by default, and a Quick Task Guide entry. See `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain for the underlying convention. |
 | 1.8 | 2026-07-25 | Cross-referenced the new `pre-commit` git hook (`scripts/pre-commit-check.ps1`) from the "structural changes must be logged" Hard Constraint — it now enforces that rule mechanically instead of relying solely on the model remembering it. |
 | 1.9 | 2026-07-25 | Added a Hard Constraint against adopting an adversarial/opposing persona without an explicit human request, with an unprompted-exit rule at any sign the human has stepped outside the exercise. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes) for the corresponding content-authoring guidance. |
+| 1.10 | 2026-07-25 | Added the new `knowledge/flow/git-collaboration.md` mechanism for multiple people pushing to the same fork: a Standing Rules cross-reference, a Hard Constraint against force-pushing through a rejected push, and a Quick Task Guide entry. |
 

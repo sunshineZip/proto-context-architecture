@@ -437,3 +437,37 @@ STATUS: CHECKPOINT
 Completed: Fixed a real header/changelog version mismatch in `MarkdownConventions.md`, found by `longstraw`'s sync port; traced it to a genuine bug in the Version History discipline check itself (a numbered-heading file was being silently skipped since the check was written) rather than just patching the symptom; fixed the check, verified it now catches the bug, then fixed the content; closed a real test-coverage gap by re-running the tamper tests against the specific file type that exposed it. Added a hook-testing safety note to `scripts/pre-commit-check.ps1` from a near-miss `longstraw` self-caught and self-recovered from.
 Next: Nothing scheduled. `familien-boe` and `longstraw` remain ahead of this repo on the counterparty/behavioral-notes addition until their own sync checks run.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 16 | 2026-07-25
+
+Human asked how well this template handles two people (human's wife and himself) working concurrently in the same fork — specifically fetch/pull discipline before pushing, and safe conflict handling — with the explicit goal that git stay invisible to the humans and be handled by routing/instructions instead. Investigated before answering: grepped `ROUTING.md`, `Architecture.md`, every `knowledge/flow/*.md`, and `scripts/*.ps1` for fetch/pull/merge/conflict/diverge/force. Nothing addressed it — the only hits were about the unrelated upstream-template-sync concept. `scripts/commit-push.ps1` itself does `add` → `commit` → `push` with no fetch step at all; on a rejected push it just reports failure and stops, with no guidance for what happens next. Real, evidenced gap, not a hypothetical one — confirmed before proposing anything, same discipline as the retirement-procedure gap earlier.
+
+Presented a three-phase plan, checkpointed after each phase per the no-chaining discipline:
+
+**Phase 1 — `knowledge/flow/git-collaboration.md` (new file).** Fetch-before-every-push, rebase-then-revalidate integration, file-type-specific resolution (append-only files get renumbered fresh against current remote content, never hand-resolved via conflict markers; ordinary content collisions route through the existing `[CONTRADICTS: source]` correction discipline rather than new machinery), and a Hard Constraint against ever force-pushing automatically.
+
+**Phase 2 — `ROUTING.md` (1.9 → 1.10).** Standing Rules cross-reference, a Hard Constraint against force-pushing through a rejection, a Quick Task Guide entry.
+
+**Phase 3 — `scripts/commit-push.ps1`.** Added fetch, divergence detection, rebase, and a re-validation step before push; on a rebase conflict it aborts back to a clean state, reports exactly which files conflicted (distinguishing a real content conflict from some other rebase failure with no unmerged files, e.g. a hook rejecting a replayed commit, rather than reporting a misleading empty conflict list), and stops without pushing either way. No force-push capability exists anywhere in the script.
+
+**Tested against real divergent clones, not trusted on read** — a bare local "fake remote" cloned from the real repo, two independent clones simulating two concurrent sessions, run through the actual git commands (not just the PowerShell wrapper, which locates `git.exe` via Windows-specific paths that don't exist in this environment — noted as an honest limitation: the underlying git sequence is proven correct end-to-end, the Windows-specific wrapper syntax around it is a comparatively low-risk, mechanical transplant of that same sequence).
+
+- **Clean divergence** (two unrelated files): fetched, rebased silently, `validate.ps1` passed, pushed. Confirmed the ordinary case resolves with nothing for a human to see.
+- **Turn-number collision** (both sessions append "Turn 16" to `session-log.md`): this produced a genuine git conflict during rebase, not a silent clean merge — a real finding, not the assumption the plan and the first draft of `git-collaboration.md` had been written on. Confirmed `--diff-filter=U` correctly names the conflicted file and `rebase --abort` restores a fully clean state. Then executed the actual recommended resolution — reset to the current remote state, re-read the real latest turn number, re-appended fresh as "Turn 17" — and confirmed it validates and pushes cleanly with correct, sequential, non-duplicated history.
+
+**Caught and corrected a real documentation error before shipping it.** The original design assumed concurrent appends to the same file tail would merge cleanly at the git level and only be caught by `validate.ps1`'s turn-numbering check — that assumption was wrong, disproven by the test above, and had already been written into `git-collaboration.md`, `ROUTING.md`'s Quick Task Guide entry, and two places in `commit-push.ps1`'s comments/messages before the test ran. Fixed all four in place: the dominant, evidenced behaviour is that same-point appends surface as real rebase conflicts (handled by §4's abort-and-reappend path), and `validate.ps1`'s re-validation-after-clean-rebase is accurately reframed as a backstop for genuinely non-overlapping edits that could still leave something structurally inconsistent, not as the primary mechanism for the turn-collision case specifically.
+
+**Files changed:** `knowledge/flow/git-collaboration.md` (new, v1.0), `ROUTING.md` (1.9 → 1.10), `scripts/commit-push.ps1` (fetch/rebase/re-validate logic added, corrected comments).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Built and tested multi-writer git safety for this template — fetch-before-push, rebase-and-revalidate integration, append-only turn renumbering, and routing genuine content collisions through the existing `[CONTRADICTS]` discipline rather than new machinery. Verified against real divergent clones rather than trusted on read, which surfaced and corrected a real wrong assumption in the original design (append collisions conflict at the git level far more often than the plan assumed) before it shipped.
+Next: Not yet ported to `familien-boe` or `longstraw`.
+Waiting for: Direction on the next task.
