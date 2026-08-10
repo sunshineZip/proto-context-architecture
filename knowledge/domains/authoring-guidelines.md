@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.7 | 2026-07-25 | Production
+Version 1.8 | 2026-07-25 | Production
 
 ---
 
@@ -36,7 +36,7 @@ This document covers knowledge-document-specific rules only. General markdown fo
 6. [Validity and Confidence Signals](#6-validity-and-confidence-signals)
 7. [Versioning](#7-versioning)
 8. [Maintenance Pass](#8-maintenance-pass)
-9. [Evidentiary Sources & Deep Wells](#9-evidentiary-sources--deep-wells)
+9. [Evidentiary Sources & Reference Works](#9-evidentiary-sources--reference-works)
 10. [What Does Not Belong in a Knowledge Document](#10-what-does-not-belong-in-a-knowledge-document)
 11. [Quick Checklist](#11-quick-checklist)
 
@@ -224,7 +224,7 @@ This pass is scoped to a single domain document. For the equivalent housekeeping
 
 ---
 
-## 9. Evidentiary Sources & Deep Wells
+## 9. Evidentiary Sources & Reference Works
 
 Raw material a domain's knowledge is actually built from — an insurance policy PDF, a medical journal, a contract — has no home in `description.md` or `knowledge.md`. Two categories, handled differently based on size and reusability.
 
@@ -289,21 +289,20 @@ The existing `[VERIFIED: source]` signal (§6) already carries the provenance co
 
 **Edit ceremony:** adding a source and a manifest row is a knowledge-layer content addition — treat it exactly like appending a fact to `knowledge.md` (`[FLAG FOR KNOWLEDGE UPDATE]`, human confirms, then commit). It does not need system-project routing on its own — only introducing or restructuring the `sources/` convention itself (this section) is system-layer work.
 
-### 9.2 Deep Wells
+### 9.2 Reference Works
 
-A deep well is large, mined incrementally, and possibly relevant to more than one domain — a textbook, a manual. It is always registered; it is only physically stored if it clears the cornerstone bar (§9.3).
+A reference work is large, drawn from incrementally, and possibly relevant to more than one domain — a textbook, a manual. It is always registered; it is only physically stored if it clears the cornerstone bar (§9.3).
 
-Location: `library/`, a top-level folder sibling to `knowledge/` and `projects/`.
+Location: `library/`, a top-level folder sibling to `knowledge/` and `projects/`. Stored reference works live directly in `library/` — there is no separate subfolder for them, since the cornerstone bar already keeps this small by design.
 
 ```
 library/
   reference-index.md
-  deep-wells/
-    <cornerstone-work>.pdf
-    <cornerstone-work>-manifest.md
+  <cornerstone-work>.pdf
+  <cornerstone-work>-manifest.md
 ```
 
-`library/reference-index.md` is a cross-domain registry of every deep well ever touched, stored or not. One heading per entry; the heading text is the citation slug:
+`library/reference-index.md` is a cross-domain registry of every reference work ever touched, stored or not. One heading per entry; the heading text is the citation slug:
 
 ```
 ## <slug-in-kebab-case>
@@ -311,16 +310,16 @@ library/
 - **Title:**
 - **Format:**
 - **Stored:** yes / no — if no, note how to reacquire it (ISBN, URL)
-- **Location:** library/deep-wells/<filename> (only if Stored: yes)
+- **Location:** library/<filename> (only if Stored: yes)
 - **Referenced by domains:** <domain-name>
 - **Cornerstone status:** Yes/No — one line why
-- **Extraction log:**
-  - YYYY-MM-DD: <what was mined> → appended to <domain>/knowledge.md, per [VERIFIED: <slug>]
+- **Notes log:**
+  - YYYY-MM-DD: <what was found> → appended to <domain>/knowledge.md, per [VERIFIED: <slug>]
 ```
 
-For a stored cornerstone work, `library/deep-wells/<work>-manifest.md` holds the detailed extraction log (table of contents, what's mined, what isn't), so `reference-index.md` can stay a short summary that links to it.
+For a stored cornerstone work, `library/<work>-manifest.md` holds the detailed notes log (table of contents, what's been captured, what hasn't), so `reference-index.md` can stay a short summary that links to it.
 
-Citing a registry-only (not physically stored) deep well from a domain, from `knowledge/domains/[name]/knowledge.md`:
+Citing a registry-only (not physically stored) reference work from a domain, from `knowledge/domains/[name]/knowledge.md`:
 
 ```
 See [Gray's Anatomy, 43rd ed., ch. 12](../../../library/reference-index.md#grays-anatomy-2023) [VERIFIED: grays-anatomy-2023]
@@ -328,11 +327,11 @@ See [Gray's Anatomy, 43rd ed., ch. 12](../../../library/reference-index.md#grays
 
 ### 9.3 The Cornerstone Rule
 
-A deep well's physical file goes into `library/deep-wells/` only if any one of these holds:
+A reference work's physical file goes into `library/` only if any one of these holds:
 
 - More than one domain draws on it, or is likely to.
 - It's not trivially reacquirable (out of print, a personal scan, paid for and not worth repurchasing).
-- A subproject will mine it incrementally over months and reacquisition friction would slow that down.
+- A subproject will draw on it incrementally over months and reacquisition friction would slow that down.
 
 Otherwise: registry entry only, no physical file.
 
@@ -340,9 +339,9 @@ This decision is never made unilaterally by the LLM — same pattern as the exis
 
 ### 9.4 Referential Integrity
 
-`scripts/validate.ps1` checks that source and deep-well references stay consistent: every `sources/manifest.md` row resolves to a real file and vice versa (orphan detection both directions), every `reference-index.md` entry marked `Stored: yes` resolves to a real file in `library/deep-wells/` and vice versa, and relative links from a domain's `description.md`/`knowledge.md` into `sources/` or `library/reference-index.md` resolve to a real file or a real heading. Run it after adding, removing, or renaming a source or deep well.
+`scripts/validate.ps1` checks that source and reference-work references stay consistent: every `sources/manifest.md` row resolves to a real file and vice versa (orphan detection both directions), every `reference-index.md` entry marked `Stored: yes` resolves to a real file in `library/` and vice versa, and relative links from a domain's `description.md`/`knowledge.md` into `sources/` or `library/reference-index.md` resolve to a real file or a real heading. Run it after adding, removing, or renaming a source or reference work.
 
-> **Note:** Raw evidentiary sources and deep-well files are never loaded as part of routine domain-knowledge routing (`ROUTING.md` §4) — they are opened only when a task explicitly names the specific file to mine or verify against.
+> **Note:** Raw evidentiary sources and stored reference-work files are never loaded as part of routine domain-knowledge routing (`ROUTING.md` §4) — they are opened only when a task explicitly names the specific file to work through or verify against.
 
 ---
 
@@ -389,3 +388,4 @@ Before submitting any knowledge document for human approval:
 | 1.5 | 2026-07-24 | §8 now cross-references `knowledge/flow/upstream-sync.md` — the repo-level analog of this domain-scoped Maintenance Pass. |
 | 1.6 | 2026-07-25 | §8 gained a check for whether a domain should be retired rather than left silently stale — see the new retirement convention in `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain. |
 | 1.7 | 2026-07-25 | §4 gained "Behavioral and communication-style notes" — how a domain captures what's known about how a household member or external party tends to communicate or argue, without needing a separate content type or top-level structure. Reuses existing signals ([SENSITIVE], [VERIFIED]/[UNVERIFIED]) rather than inventing new ones. |
+| 1.8 | 2026-07-25 | §9 renamed "Deep Wells" to "Reference Works" throughout (§9.2–9.4, Index) — more intuitive without the well/mining metaphor needing explanation first. Dropped the `library/deep-wells/` subfolder: stored reference works now live directly in `library/` alongside `reference-index.md`, since the cornerstone bar already keeps that folder small by design — the extra nesting wasn't earning its place. No mechanics changed. |

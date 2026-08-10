@@ -62,9 +62,9 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
         sources/                      ← Evidentiary source files (only if this domain has any)
           manifest.md                 ← Registry of the raw files in this folder
 
-  library/                            ← Cross-domain deep-well registry
-    reference-index.md                ← Registry of every deep well, stored or not
-    deep-wells/                       ← Physical files for cornerstone-status deep wells only
+  library/                            ← Cross-domain reference-work registry
+    reference-index.md                ← Registry of every reference work, stored or not
+    [cornerstone-work files]          ← Stored directly here — only for cornerstone-status reference works
 
   projects/
     system/                           ← Pre-created — audit log for structural changes to this system
@@ -95,3 +95,4 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
 | 1.0 | 2026-06-29 | Initial creation. Generic context architecture template. |
 | 1.1 | 2026-06-29 | Rewritten as human-readable document. LLM routing instructions moved to ROUTING.md. |
 | 1.2 | 2026-07-16 | Added `library/` (cross-domain deep-well registry) and the per-domain `sources/` folder to the folder structure diagram — see `knowledge/domains/authoring-guidelines.md` §9. Also fixed a pre-existing formatting break in the `projects/` block of this same diagram (missing line breaks had collapsed three tree rows onto one line). |
+| 1.3 | 2026-07-25 | Folder structure diagram updated for the "deep well" → "reference work" rename and the dropped `library/deep-wells/` subfolder — see `knowledge/domains/authoring-guidelines.md` §9.2. |

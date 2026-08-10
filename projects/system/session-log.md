@@ -471,3 +471,28 @@ STATUS: CHECKPOINT
 Completed: Built and tested multi-writer git safety for this template — fetch-before-push, rebase-and-revalidate integration, append-only turn renumbering, and routing genuine content collisions through the existing `[CONTRADICTS]` discipline rather than new machinery. Verified against real divergent clones rather than trusted on read, which surfaced and corrected a real wrong assumption in the original design (append collisions conflict at the git level far more often than the plan assumed) before it shipped.
 Next: Not yet ported to `familien-boe` or `longstraw`.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 17 | 2026-07-25
+
+Human flagged that "deep well" isn't intuitive terminology, and asked whether the `library/deep-wells/` subfolder nesting even earns its place, or whether it could be simplified without losing robustness. Brainstormed several options first (keep `library/` and rename the concept to "reference work"; drop the special word entirely and just use the existing `Stored: yes/no` field; or rename `library/` itself to `shared-sources/` to pair explicitly with the per-domain `sources/` convention) before touching anything. Human picked the first: keep `library/` as the folder name, rename the concept to "reference work," and confirmed dropping the `deep-wells/` subfolder.
+
+**Rationale for dropping the subfolder:** it existed only to keep the registry file visually separate from the physical files, but the cornerstone rule (§9.3 — only store a work if multiple domains use it, it's hard to reacquire, or it's mined over months) already keeps that folder small by design. A folder meant to stay small doesn't need its own subfolder to stay organised.
+
+**Renamed throughout, not just at the surface:** "deep well" → "reference work" wherever it appeared, and — since leaving "mined"/"extraction" language in place while dropping the well metaphor would have left a half-finished mixed metaphor — also replaced "mined incrementally" with "drawn from incrementally" and the registry template's "Extraction log" field's "what was mined" with "Notes log" / "what was found". Historical `session-log.md` entries and existing Version History rows were deliberately left untouched — they're an accurate record of what was true when written, not something to retroactively correct; each affected file got a new version row describing the rename instead, per the append-only discipline this template already enforces on itself.
+
+**Files changed:** `knowledge/domains/authoring-guidelines.md` (1.7 → 1.8, §9.2–9.4 and Index), `Architecture.md` (1.4 → 1.5, §2 diagram and §3), `README.md` (folder diagram, new 1.3 row), `ROUTING.md` (1.10 → 1.11, Step 4 / Hard Constraints / Quick Task Guide), `knowledge/flow/upstream-sync.md` (1.1 → 1.2, §3 tracked-paths wording), `library/reference-index.md` (1.0 → 1.1, Document Purpose / Edit guard / section heading / entry template).
+
+**`scripts/validate.ps1` — a real logic change, not just prose.** Rewrote the library-integrity check to scan `library/` directly instead of `library/deep-wells/`, excluding `reference-index.md` itself and `*-manifest.md` files from orphan-file detection (same exclusions as before, same severity levels, just pointed at the flattened location). Tested against a disposable copy before trusting it: a properly registered and stored file validates clean; an unregistered file in `library/` is correctly flagged as an orphan warning; a registered `Stored: yes` entry whose file is missing is correctly flagged as an error; a manifest file sitting alongside a stored work is correctly excluded from orphan detection. All four behaved as intended, no false positives or negatives.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pushed — directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Renamed "deep well" to "reference work" throughout the template and dropped the `library/deep-wells/` subfolder — stored reference works now live directly in `library/`. Updated the mining/extraction language that came with the old metaphor for consistency, not just the folder name. Rewrote and tested the corresponding `scripts/validate.ps1` logic against a disposable fixture before trusting it. No mechanics changed — same checks, same severities, simpler surface.
+Next: Not yet ported to `familien-boe` or `longstraw`.
+Waiting for: Direction on the next task.

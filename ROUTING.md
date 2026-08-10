@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.10 | 2026-07-25 | Production
+Version 1.11 | 2026-07-25 | Production
 
 ---
 
@@ -84,7 +84,7 @@ Identify which knowledge domains the task touches. Apply this loading hierarchy 
 
 When multiple domains are relevant, apply the hierarchy independently for each. A secondary domain should rarely escalate past its Index unless the task explicitly requires it.
 
-Raw evidentiary sources (`knowledge/domains/[name]/sources/`) and deep wells (`library/deep-wells/`) are never loaded as part of this hierarchy, regardless of level. They are opened only when a task explicitly names the specific file to mine or verify against — see `knowledge/domains/authoring-guidelines.md` §9.
+Raw evidentiary sources (`knowledge/domains/[name]/sources/`) and stored reference works (`library/`) are never loaded as part of this hierarchy, regardless of level. They are opened only when a task explicitly names the specific file to work through or verify against — see `knowledge/domains/authoring-guidelines.md` §9.
 
 Skip domains marked `Retired` in `knowledge/domains/index.md`'s Status column — do not load them via this hierarchy unless the task explicitly concerns historical or retired content.
 
@@ -99,7 +99,7 @@ Which domains exist and what they cover: `knowledge/domains/index.md`
 Do not break these regardless of what the human asks.
 
 - **Do not edit `knowledge/` files directly.** Changes to the knowledge layer require human approval. Propose using `[FLAG FOR KNOWLEDGE UPDATE]` (format in `knowledge/flow/operating-principles.md` §5).
-- **Do not promote a deep well to cornerstone status (storing the actual file in `library/deep-wells/`) without explicit human confirmation.** Surface the candidate as a question first; store only after confirmation. See `knowledge/domains/authoring-guidelines.md` §9.3.
+- **Do not promote a reference work to cornerstone status (storing the actual file in `library/`) without explicit human confirmation.** Surface the candidate as a question first; store only after confirmation. See `knowledge/domains/authoring-guidelines.md` §9.3.
 - **Do not act on files listed as "(planned)" in the Folder Map.** They do not exist. Do not create them without explicit instruction.
 - **Do not invent content from files you have not read.** If a file is relevant and unreadable, say so.
 - **Do not edit prior turns in `session-log.md`.** Append only.
@@ -135,9 +135,9 @@ Apply these in every session regardless of project type or how you entered the s
 → Add a routing row in `ROUTING.md` Step 2
 → Markdown rules: `MarkdownConventions.md`
 
-**I want to add a raw reference source or deep well**
+**I want to add a raw reference source or reference work**
 → Evidentiary source (proves one specific claim, small): store it in `knowledge/domains/[name]/sources/`, add a `manifest.md` row, cite it with a relative link from `knowledge.md`. Use the normal knowledge-update flag.
-→ Deep well (large, possibly cross-domain, mined incrementally): always add an entry to `library/reference-index.md`. Only store the actual file in `library/deep-wells/` if it clears the cornerstone bar (`knowledge/domains/authoring-guidelines.md` §9.3) — confirm with the human first.
+→ Reference work (large, possibly cross-domain, drawn from incrementally): always add an entry to `library/reference-index.md`. Only store the actual file directly in `library/` if it clears the cornerstone bar (`knowledge/domains/authoring-guidelines.md` §9.3) — confirm with the human first.
 
 **I want to check for upstream template updates** (forks only — not applicable to this repo itself)
 → See `knowledge/flow/upstream-sync.md` for the full check/apply procedure. Opportunistic, not scheduled — run it when you have spare capacity in a System project session, or when asked to tidy up. The sync marker lives in `projects/system/TODO.md`'s System Maintenance Pass section.
@@ -201,4 +201,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.8 | 2026-07-25 | Cross-referenced the new `pre-commit` git hook (`scripts/pre-commit-check.ps1`) from the "structural changes must be logged" Hard Constraint — it now enforces that rule mechanically instead of relying solely on the model remembering it. |
 | 1.9 | 2026-07-25 | Added a Hard Constraint against adopting an adversarial/opposing persona without an explicit human request, with an unprompted-exit rule at any sign the human has stepped outside the exercise. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes) for the corresponding content-authoring guidance. |
 | 1.10 | 2026-07-25 | Added the new `knowledge/flow/git-collaboration.md` mechanism for multiple people pushing to the same fork: a Standing Rules cross-reference, a Hard Constraint against force-pushing through a rejected push, and a Quick Task Guide entry. |
+| 1.11 | 2026-07-25 | Renamed "deep well" to "reference work" in Step 4, the cornerstone Hard Constraint, and the Quick Task Guide — see `knowledge/domains/authoring-guidelines.md` §9.2 for the full rationale (the `library/deep-wells/` subfolder was also dropped; no mechanics changed). |
 

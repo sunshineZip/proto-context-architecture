@@ -403,10 +403,12 @@ foreach ($domainDir in $domainDirs) {
     }
 }
 
-# --- library/ — deep-well registry vs. stored files ---
+# --- library/ — reference-work registry vs. stored files. Stored files
+#     live directly in library/, alongside reference-index.md itself —
+#     no separate subfolder, since the cornerstone bar (authoring-
+#     guidelines.md §9.3) already keeps this folder small by design. ---
 # See knowledge/domains/authoring-guidelines.md §9.2-9.3.
 $refIndexPath = Join-Path $libraryPath "reference-index.md"
-$deepWellsPath = Join-Path $libraryPath "deep-wells"
 $storedLocations = @()
 
 if (Test-Path $refIndexPath) {
@@ -436,19 +438,17 @@ if (Test-Path $refIndexPath) {
         }
     }
 
-    if (Test-Path $deepWellsPath) {
-        $actualDeepWellFiles = Get-ChildItem -Path $deepWellsPath -File -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -notlike "*-manifest.md" } |
-            ForEach-Object { "library/deep-wells/$($_.Name)" }
+    $actualLibraryFiles = Get-ChildItem -Path $libraryPath -File -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -ne "reference-index.md" -and $_.Name -notlike "*-manifest.md" } |
+        ForEach-Object { "library/$($_.Name)" }
 
-        foreach ($f in $actualDeepWellFiles) {
-            if ($storedLocations -notcontains $f) {
-                Add-ValidationWarning "'$f' exists in library/deep-wells/ but no reference-index.md entry claims it via Location (orphan deep-well file)"
-            }
+    foreach ($f in $actualLibraryFiles) {
+        if ($storedLocations -notcontains $f) {
+            Add-ValidationWarning "'$f' exists in library/ but no reference-index.md entry claims it via Location (orphan reference-work file)"
         }
     }
-} elseif (Test-Path $deepWellsPath) {
-    Add-ValidationError "library/deep-wells/ exists but library/reference-index.md is missing"
+} elseif ((Test-Path $libraryPath) -and (Get-ChildItem -Path $libraryPath -File -ErrorAction SilentlyContinue).Count -gt 0) {
+    Add-ValidationError "library/ has files but library/reference-index.md is missing"
 }
 
 # --- Referential integrity: links from domain files into sources/ or library/reference-index.md ---

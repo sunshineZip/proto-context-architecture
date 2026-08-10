@@ -1,6 +1,6 @@
 # Upstream Template Sync
 
-Version 1.1 | 2026-07-25 | Production
+Version 1.2 | 2026-07-25 | Production
 
 ---
 
@@ -73,7 +73,7 @@ Only these paths count as template content. A sync — check or apply — never 
 - `knowledge/domains/[name]/*` (every domain's own knowledge)
 - `knowledge/domains/index.md` (the fork's own domain registry)
 - `projects/[name]/*` except `_template` (every project's own work)
-- `library/*` (the fork's own deep-well registry and files)
+- `library/*` (the fork's own reference-work registry and files)
 
 `README.md` and `Architecture.md` are the two most likely to need real adaptation rather than a clean apply — both routinely carry fork-specific narrative (a fork's `README.md` describes its own purpose; `familien-boe`'s `Architecture.md` has its own §4 the upstream copy doesn't). Expect to hand-fit those two; expect `ROUTING.md`, `authoring-guidelines.md`, `MarkdownConventions.md`, and `scripts/validate.ps1` to apply more often cleanly, but confirm rather than assume for all of them — see §5.
 
@@ -117,3 +117,4 @@ Opportunistically, not on a schedule — the same discipline as the domain-level
 |---|---|---|
 | 1.0 | 2026-07-24 | Initial creation. Defines the sync marker, tracked paths, check procedure, and apply procedure for bringing a fork's system-layer files up to date with `proto-context-architecture`. Deliberately opportunistic rather than scheduled — no recurring trigger, surfaced instead via `projects/system/TODO.md`'s System Maintenance Pass section. |
 | 1.1 | 2026-07-25 | Added `.githooks/*` to the Tracked Paths list — the new `.githooks/pre-commit` hook (`scripts/pre-commit-check.ps1`) is a system-layer file like the others. |
+| 1.2 | 2026-07-25 | Wording fix in §3: "deep-well" → "reference-work" to match the rename in `knowledge/domains/authoring-guidelines.md` §9.2. No path or mechanics change. |
