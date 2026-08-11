@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.4 | 2026-07-25 | Production
+Version 1.5 | 2026-08-11 | Production
 
 ---
 
@@ -223,6 +223,8 @@ Use these inline signals to flag the reliability of specific claims:
 
 Place signals immediately after the claim they qualify, in square brackets. The first four signals describe a claim's current confidence state and are mutually exclusive. `[TIME-SENSITIVE]` and `[SENSITIVE]` describe a different axis and can stack with any of the four — a claim can be both `[VERIFIED: source]` and `[TIME-SENSITIVE: source type]` at once.
 
+`[SENSITIVE]` documents a decision already made about content that has already been written — it is not the mechanism that decides whether the content should have been written down at all. That decision point is a Hard Constraint in `ROUTING.md`: pause and ask before writing a secret, credential, or third-party confidential detail into any tracked file, regardless of whether it ends up tagged.
+
 ---
 
 ## 9. Writing Style
@@ -244,3 +246,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 | 1.2 | 2026-07-16 | Added a Frontmatter subsection to §1: domain/project instance files open with a minimal YAML block (`type` + a folder-name checksum field) before the standard header, checked by `scripts/validate.ps1`. Explicitly excludes `status`/`version` to avoid duplicating the header line. |
 | 1.3 | 2026-07-25 | Added `Retired` to the Status vocabulary and a Retirement subsection to §1, defining the archive-in-place convention (status field + one-line blockquote) for domains and projects that have become permanently irrelevant. Deletion is explicitly a separate, human-confirmed action, not part of retirement. |
 | 1.4 | 2026-07-25 | Fixed a header/changelog version mismatch: the header still read "1.2" after the 1.3 edit shipped its own row. Found during `longstraw`'s upstream-sync port, not by the Version History discipline check meant to catch exactly this — that check had its own bug (§10's numbered heading, `## 10. Version History`, didn't match the check's unnumbered-only pattern, so this file was silently skipped entirely). Both fixed together; see `scripts/validate.ps1` and `projects/system/session-log.md` Turn 15. |
+| 1.5 | 2026-08-11 | §8 — clarified that `[SENSITIVE]` is a post-hoc documentation tag, not a gate; cross-referenced the new pause-and-ask Hard Constraint in `ROUTING.md` that governs whether sensitive content gets written down in the first place. See `projects/system/session-log.md` Turn 18. |

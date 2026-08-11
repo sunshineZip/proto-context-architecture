@@ -30,6 +30,7 @@ For the full structural design: see [Architecture.md](Architecture.md).
 5. Register domains in `knowledge/domains/index.md`.
 6. Create your first project — copy `projects/_template/`, rename, write Turn 1 in `session-log.md`.
 7. Delete `example-domain/` and `example-project/` once replaced.
+8. (Optional) If this instance will systematically handle real sensitive/confidential third-party material at volume — not just the occasional secret — set up the companion-repository pattern in `knowledge/flow/restricted-tier.md` before ingesting real source material. Most forks won't need this; occasional sensitive content is already covered by `ROUTING.md`'s Hard Constraints and pre-commit secret check.
 
 For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](knowledge/domains/authoring-guidelines.md).
 
@@ -96,3 +97,4 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
 | 1.1 | 2026-06-29 | Rewritten as human-readable document. LLM routing instructions moved to ROUTING.md. |
 | 1.2 | 2026-07-16 | Added `library/` (cross-domain deep-well registry) and the per-domain `sources/` folder to the folder structure diagram — see `knowledge/domains/authoring-guidelines.md` §9. Also fixed a pre-existing formatting break in the `projects/` block of this same diagram (missing line breaks had collapsed three tree rows onto one line). |
 | 1.3 | 2026-07-25 | Folder structure diagram updated for the "deep well" → "reference work" rename and the dropped `library/deep-wells/` subfolder — see `knowledge/domains/authoring-guidelines.md` §9.2. |
+| 1.4 | 2026-08-11 | Setup checklist gained an optional step pointing to the new `knowledge/flow/restricted-tier.md` companion-repository pattern, for instances handling sensitive material systematically. See `projects/system/session-log.md` Turn 18. |

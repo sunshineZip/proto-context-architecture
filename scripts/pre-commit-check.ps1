@@ -31,6 +31,60 @@ if ($stagedFiles.Count -eq 0) {
     exit 0
 }
 
+# --- Secret-pattern scan (staged additions only). Deliberately narrow: ---
+#     matches recognizable token/key SHAPES (a stable prefix or delimiter),
+#     not free-form heuristics like a bare "password=" or entropy scoring —
+#     narrow keeps false positives low enough that this can safely block
+#     rather than warn. This is a mechanical backstop for the ROUTING.md
+#     Hard Constraint requiring a pause-and-ask before writing a secret or
+#     confidential detail into any tracked file — it catches what slips
+#     past that judgment call, it does not replace it. See
+#     projects/system/session-log.md Turn 18.
+$secretPatterns = @(
+    @{ Name = 'AWS Access Key ID';      Regex = 'AKIA[0-9A-Z]{16}' }
+    @{ Name = 'GitHub token';           Regex = 'gh[pousr]_[A-Za-z0-9]{36,}' }
+    @{ Name = 'Slack token';            Regex = 'xox[baprs]-[A-Za-z0-9-]{10,}' }
+    @{ Name = 'Stripe live secret key'; Regex = 'sk_live_[A-Za-z0-9]{24,}' }
+    @{ Name = 'Private key block';      Regex = '-----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----' }
+    @{ Name = 'Generic bearer token';   Regex = '(?i)bearer\s+[A-Za-z0-9\-_\.=]{20,}' }
+)
+
+$secretHits = @()
+foreach ($file in $stagedFiles) {
+    $diff = @(git -C $repoRoot diff --cached -U0 -- $file 2>$null)
+    if ($diff.Count -eq 0) { continue }
+    if ($diff -match 'Binary files .* differ') { continue }
+    foreach ($line in $diff) {
+        if ($line -match '^\+\+\+') { continue }
+        if ($line -notmatch '^\+') { continue }
+        $content = $line.Substring(1)
+        if ($content -match 'pragma:\s*allowlist secret') { continue }
+        foreach ($pattern in $secretPatterns) {
+            if ($content -match $pattern.Regex) {
+                $secretHits += [PSCustomObject]@{ File = $file; Pattern = $pattern.Name }
+            }
+        }
+    }
+}
+
+if ($secretHits.Count -gt 0) {
+    Write-Host ""
+    Write-Host "COMMIT BLOCKED: possible secret detected in staged changes" -ForegroundColor Red
+    Write-Host ""
+    foreach ($hit in $secretHits) {
+        Write-Host "  - $($hit.File)  [$($hit.Pattern)]" -ForegroundColor Red
+    }
+    Write-Host ""
+    Write-Host "If real: rotate/revoke the credential first, then remove it from the staged" -ForegroundColor Yellow
+    Write-Host "change entirely (and from history too, if it was ever committed before)." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "If this is a false positive (a placeholder, an already-revoked example key)," -ForegroundColor Yellow
+    Write-Host "add 'pragma: allowlist secret' on the same line, or use 'git commit --no-verify'" -ForegroundColor Yellow
+    Write-Host "deliberately — that bypass is visible in the commit process, not silent." -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+
 # --- System-layer tracked paths. Mirrors knowledge/flow/upstream-sync.md
 #     §3's Tracked Paths list — if that list changes, update this too. ---
 $systemLayerPatterns = @(

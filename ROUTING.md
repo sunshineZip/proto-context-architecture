@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.11 | 2026-07-25 | Production
+Version 1.12 | 2026-08-11 | Production
 
 ---
 
@@ -98,6 +98,7 @@ Which domains exist and what they cover: `knowledge/domains/index.md`
 
 Do not break these regardless of what the human asks.
 
+- **Do not write a secret, credential, or another party's confidential/personal information into any tracked file without pausing first.** This includes content the human pastes or dictates directly, not just something inferred — "the human said it" is not permission to write it down verbatim without asking. Before writing it: ask whether it belongs in version control at all. A secret or credential never does — point to an environment variable, secrets manager, or local untracked file instead. Other confidential material may belong here, but confirm with the human first, since a fork of this template is sometimes used to back a public GitHub repo and a push cannot be un-published after the fact. If a claim ends up written and is merely sensitive-if-shared rather than a hard no, tag it `[SENSITIVE]` (`MarkdownConventions.md` §8) — that tag documents a decision already made, it does not substitute for asking first. A pre-commit check (`scripts/pre-commit-check.ps1`) blocks a narrow set of recognizable secret shapes as a mechanical backstop, not a substitute for this judgment call. If this fork will systematically ingest real third-party personal or confidential material — not just the occasional secret — see the opt-in pattern in `knowledge/flow/restricted-tier.md` before the first such file is committed.
 - **Do not edit `knowledge/` files directly.** Changes to the knowledge layer require human approval. Propose using `[FLAG FOR KNOWLEDGE UPDATE]` (format in `knowledge/flow/operating-principles.md` §5).
 - **Do not promote a reference work to cornerstone status (storing the actual file in `library/`) without explicit human confirmation.** Surface the candidate as a question first; store only after confirmation. See `knowledge/domains/authoring-guidelines.md` §9.3.
 - **Do not act on files listed as "(planned)" in the Folder Map.** They do not exist. Do not create them without explicit instruction.
@@ -120,7 +121,7 @@ Apply these in every session regardless of project type or how you entered the s
 - **Load before acting.** Do not act on assumptions or unread context. If a required file is missing or unreadable, say so before proceeding.
 - **Human-facing simplicity.** The human does not need to know file paths or system internals. Work transparently — surface decisions and blockers, not scaffolding.
 - **Work directly on `main` by default.** This template assumes a personal working repo, not shared infrastructure with a review gate, so branch/PR ceremony isn't the default — commit and push straight to `main`. This is a template default, not a fixed architectural rule: if your fork is a team repo or a shared initiative that needs a review gate, replace this rule with your own branching workflow as part of customizing `ROUTING.md` for your instance.
-- **Commit and push, almost always.** Nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either. If more than one person may be pushing to this repo, follow `knowledge/flow/git-collaboration.md` — fetch before every push, not only after a rejection.
+- **Commit and push, almost always.** Nearly every file change should be pushed. Run `.\scripts\commit-push.ps1 "brief description of what changed"` after each discrete increment of work, or at minimum after finishing a segment of work — use judgement on which cadence fits the session. Do not interrupt a tightly-coupled sequence of edits just to push mid-sequence, and do not stockpile many unrelated changes unpushed either. If more than one person may be pushing to this repo, follow `knowledge/flow/git-collaboration.md` — fetch before every push, not only after a rejection. This rule does not override the sensitive-content Hard Constraint above — resolve that first if what's about to be pushed might qualify.
 - **Never leave a push silently pending.** If you defer pushing until a segment finishes rather than after every increment, say so explicitly to the human before the turn ends — e.g. "changes are saved locally but not yet pushed." The human may end the session at any point; an unflagged pending push risks losing untracked work.
 
 ---
@@ -138,6 +139,17 @@ Apply these in every session regardless of project type or how you entered the s
 **I want to add a raw reference source or reference work**
 → Evidentiary source (proves one specific claim, small): store it in `knowledge/domains/[name]/sources/`, add a `manifest.md` row, cite it with a relative link from `knowledge.md`. Use the normal knowledge-update flag.
 → Reference work (large, possibly cross-domain, drawn from incrementally): always add an entry to `library/reference-index.md`. Only store the actual file directly in `library/` if it clears the cornerstone bar (`knowledge/domains/authoring-guidelines.md` §9.3) — confirm with the human first.
+
+**I think what I'm about to write down is a secret, credential, or confidential detail**
+→ Stop before writing it. Ask the human whether it belongs in git at all — secrets/credentials never do (environment variable, secrets manager, or untracked local file instead)
+→ If it's confidential but not a hard no, tag it `[SENSITIVE]` (`MarkdownConventions.md` §8) once written, with the human's confirmation that storing it here is intended
+→ This applies even when the human pasted or dictated the content directly — do not treat that as permission to write it down verbatim without asking
+→ If this fork will handle real third-party personal or confidential material systematically, not just occasionally → see `knowledge/flow/restricted-tier.md`
+
+**My commit was blocked by the secret-pattern check**
+→ `scripts/pre-commit-check.ps1` matches narrow, high-confidence secret shapes (AWS/GitHub/Slack/Stripe token prefixes, private-key blocks, bearer tokens) — a hit is very likely real
+→ If real: rotate/revoke the credential, then remove it from the staged change entirely (and from history too, if it was ever committed before)
+→ If it's a genuine false positive (a placeholder, an already-revoked example key): add `pragma: allowlist secret` on the same line, or use `git commit --no-verify` deliberately — visible in the commit process, not silent
 
 **I want to check for upstream template updates** (forks only — not applicable to this repo itself)
 → See `knowledge/flow/upstream-sync.md` for the full check/apply procedure. Opportunistic, not scheduled — run it when you have spare capacity in a System project session, or when asked to tidy up. The sync marker lives in `projects/system/TODO.md`'s System Maintenance Pass section.
@@ -202,4 +214,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.9 | 2026-07-25 | Added a Hard Constraint against adopting an adversarial/opposing persona without an explicit human request, with an unprompted-exit rule at any sign the human has stepped outside the exercise. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes) for the corresponding content-authoring guidance. |
 | 1.10 | 2026-07-25 | Added the new `knowledge/flow/git-collaboration.md` mechanism for multiple people pushing to the same fork: a Standing Rules cross-reference, a Hard Constraint against force-pushing through a rejected push, and a Quick Task Guide entry. |
 | 1.11 | 2026-07-25 | Renamed "deep well" to "reference work" in Step 4, the cornerstone Hard Constraint, and the Quick Task Guide — see `knowledge/domains/authoring-guidelines.md` §9.2 for the full rationale (the `library/deep-wells/` subfolder was also dropped; no mechanics changed). |
+| 1.12 | 2026-08-11 | Added a Hard Constraint requiring a pause-and-ask before writing a secret, credential, or third-party confidential detail into any tracked file — prompted by a human question finding no such gate existed, despite this template sometimes backing public GitHub repos. Backed by a new secret-pattern pre-commit check (`scripts/pre-commit-check.ps1`). Added two Quick Task Guide entries and a Standing Rules cross-reference. Cross-referenced the new opt-in `knowledge/flow/restricted-tier.md` pattern for forks that will handle sensitive material systematically rather than occasionally. |
 
