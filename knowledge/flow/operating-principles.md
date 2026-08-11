@@ -1,6 +1,6 @@
 # Operating Principles
 
-Version 1.1 | 2026-07-25 | Production
+Version 1.2 | 2026-08-11 | Production
 
 ---
 
@@ -111,6 +111,24 @@ Suggested action: [What file should change and how]
 
 At session end, append a handoff turn to the system project's `session-log.md` summarising all open flags. Use `STATUS: COMPLETE, SYSTEM FLAGS PENDING` as the session-close signal when flags are present.
 
+### Upstream feedback flags
+
+When a finding is a property of the template itself — something any fork built the same way would hit, not a mistake specific to this fork's own customization — it doesn't get fixed here and it doesn't get written into the upstream template repo either, even if this session happens to have repo access to it. Raise a separate flag instead:
+
+```
+[FLAG FOR UPSTREAM]
+Source: Project [name], Turn [N]
+Finding: [Describe the template-level gap or bug precisely, and why it isn't fork-specific]
+Proposed prompt: [Self-contained text, ready to hand to a session working in the
+upstream repo with no memory of this conversation — what fork this came from and
+why, the finding, a concrete proposed fix if one exists, and explicit instructions
+for what that session should do]
+```
+
+Same confirm-before-writing gate as above: surface it as a one-line question first, write the full flag only once the human confirms it's worth capturing. Once confirmed, append the entry to `projects/system/TODO.md`'s Upstream Feedback Log — see `knowledge/flow/upstream-sync.md` §7 for the log format and lifecycle.
+
+**This fork never writes the finding directly into the upstream repo, regardless of whether repo access is available in-session.** The human decides if and when to relay it — the same review a human-submitted finding would get applies equally to one this session identified itself.
+
 ---
 
 ## Version History
@@ -119,3 +137,4 @@ At session end, append a handoff turn to the system project's `session-log.md` s
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic operating principles adapted from NightCrew team-identity.md. |
 | 1.1 | 2026-07-25 | §5 gained a note to actively watch for behavioral/argumentative-style signal when processing correspondence from a party already covered by a domain, not just the logistical content — same flag-and-confirm gate, no automatic capture. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes). |
+| 1.2 | 2026-08-11 | §5 gained "Upstream feedback flags" — a third flag type, `[FLAG FOR UPSTREAM]`, for template-level findings a fork identifies in itself. Explicitly never written directly to the upstream repo even when access is available; logged locally in `projects/system/TODO.md` for the human to relay. See `knowledge/flow/upstream-sync.md` §7 and `projects/system/session-log.md` Turn 20. |

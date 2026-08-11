@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.12 | 2026-08-11 | Production
+Version 1.13 | 2026-08-11 | Production
 
 ---
 
@@ -111,6 +111,7 @@ Do not break these regardless of what the human asks.
 - **Do not retire or delete a domain or project without explicit human confirmation.** Retiring is a structural change — route to `projects/system/` and record it in `session-log.md`, same as adding one. Default to archive-in-place (`Retired` status, `MarkdownConventions.md` §1) — never delete files as part of retirement. Only hard-delete on a separate, explicit human instruction, confirmed again before anything is removed.
 - **Do not adopt an adversarial or opposing persona without an explicit, unambiguous human request** — never infer that intent from a loaded topic or context alone; if it's ambiguous, ask. Drop back to your normal voice immediately and unprompted at any sign the human has stepped outside the exercise (a real logistical question, genuine distress, confusion about whether something is real advice) — do not wait to be asked.
 - **Do not force-push, including `--force-with-lease`, to make a rejected push succeed.** A rejected push means another session's work needs integrating first — see `knowledge/flow/git-collaboration.md`. Force-pushing requires the same explicit, separately-confirmed human authorisation as retiring or deleting content.
+- **Do not write a template-level finding directly into the upstream template repo, even when this fork has repo access to it in-session.** Recognizing something as template-level rather than fork-specific is not authorization to act on that boundary unilaterally — same principle as every other cross-boundary flag in this list. Log it locally instead (`[FLAG FOR UPSTREAM]`, `knowledge/flow/operating-principles.md` §5) and let the human decide if and when to relay it. See `knowledge/flow/upstream-sync.md` §7.
 
 ---
 
@@ -153,6 +154,11 @@ Apply these in every session regardless of project type or how you entered the s
 
 **I want to check for upstream template updates** (forks only — not applicable to this repo itself)
 → See `knowledge/flow/upstream-sync.md` for the full check/apply procedure. Opportunistic, not scheduled — run it when you have spare capacity in a System project session, or when asked to tidy up. The sync marker lives in `projects/system/TODO.md`'s System Maintenance Pass section.
+
+**I found something that looks like a template-level bug or gap, not specific to this fork** (forks only)
+→ Confirm with the human first — surface it as a one-line question, don't write the full flag unprompted (`knowledge/flow/operating-principles.md` §5)
+→ Once confirmed, log it as `[FLAG FOR UPSTREAM]` in `projects/system/TODO.md`'s Upstream Feedback Log, written as a self-contained, ready-to-paste prompt for a future session working on the template — see `knowledge/flow/upstream-sync.md` §7
+→ Never write it directly into the upstream repo, even if this session has access to it — the human relays it when and if they choose to
 
 **I want to retire a domain or project**
 → Confirm with the human first — this is a structural decision, not a routine edit
@@ -215,4 +221,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.10 | 2026-07-25 | Added the new `knowledge/flow/git-collaboration.md` mechanism for multiple people pushing to the same fork: a Standing Rules cross-reference, a Hard Constraint against force-pushing through a rejected push, and a Quick Task Guide entry. |
 | 1.11 | 2026-07-25 | Renamed "deep well" to "reference work" in Step 4, the cornerstone Hard Constraint, and the Quick Task Guide — see `knowledge/domains/authoring-guidelines.md` §9.2 for the full rationale (the `library/deep-wells/` subfolder was also dropped; no mechanics changed). |
 | 1.12 | 2026-08-11 | Added a Hard Constraint requiring a pause-and-ask before writing a secret, credential, or third-party confidential detail into any tracked file — prompted by a human question finding no such gate existed, despite this template sometimes backing public GitHub repos. Backed by a new secret-pattern pre-commit check (`scripts/pre-commit-check.ps1`). Added two Quick Task Guide entries and a Standing Rules cross-reference. Cross-referenced the new opt-in `knowledge/flow/restricted-tier.md` pattern for forks that will handle sensitive material systematically rather than occasionally. |
+| 1.13 | 2026-08-11 | Added a Hard Constraint against a fork writing a template-level finding directly into the upstream repo, even with repo access — and a Quick Task Guide entry pointing to the new `[FLAG FOR UPSTREAM]` convention (`knowledge/flow/operating-principles.md` §5, `knowledge/flow/upstream-sync.md` §7) for logging such findings locally instead, for the human to relay. See `projects/system/session-log.md` Turn 20. |
 

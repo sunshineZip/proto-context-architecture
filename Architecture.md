@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.6 | 2026-08-11 | Production
+Version 1.7 | 2026-08-11 | Production
 
 ---
 
@@ -171,6 +171,7 @@ A session focused on Project A may produce findings that belong in Project B (or
 | Knowledge correction or new domain fact | Knowledge layer (`knowledge/domains/`) | Raise `[FLAG FOR KNOWLEDGE UPDATE]` — do not edit directly |
 | Structural or routing improvement to the system itself | System project `session-log.md` | Raise `[FLAG FOR SYSTEM]` and append a handoff turn at session end |
 | Project-specific discovery | Source project's `context/` | Document in-session in the appropriate context file |
+| Template-level finding — a bug or gap inherited from the upstream template, not specific to this fork | Fork's own `projects/system/TODO.md` (Upstream Feedback Log) | Raise `[FLAG FOR UPSTREAM]` — never write directly to the upstream repo, even if it's accessible; the human relays confirmed entries. See `knowledge/flow/upstream-sync.md` §7. |
 
 Do not act on knowledge-layer or system-layer changes from within another project's session. Surface them as flags, hand off via session-log, and resolve in the correct project.
 
@@ -205,3 +206,4 @@ To fork this template for a new initiative:
 | 1.4 | 2026-07-25 | §6 gained a step for activating the new `.githooks/pre-commit` hook (`git config core.hooksPath .githooks`), which mechanically enforces that system-layer edits are logged in the same commit. See `scripts/pre-commit-check.ps1`. |
 | 1.5 | 2026-07-25 | §2 and §3 renamed "deep well" to "reference work" and dropped the `library/deep-wells/` subfolder — stored reference works now live directly in `library/`. See `knowledge/domains/authoring-guidelines.md` §9.2 for the full rationale; no mechanics changed. |
 | 1.6 | 2026-08-11 | §6 gained an optional step pointing to the new `knowledge/flow/restricted-tier.md` companion-repository pattern, for forks that will systematically handle real sensitive/restricted material. Not a default setup step — most forks won't need it. See `projects/system/session-log.md` Turn 18. |
+| 1.7 | 2026-08-11 | §5 gained a fourth Subproject Transcendence row for template-level findings — routed to the fork's own Upstream Feedback Log (`knowledge/flow/upstream-sync.md` §7) via `[FLAG FOR UPSTREAM]`, never written directly to the upstream repo. See `projects/system/session-log.md` Turn 20. |

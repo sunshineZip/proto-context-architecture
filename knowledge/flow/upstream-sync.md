@@ -1,12 +1,12 @@
 # Upstream Template Sync
 
-Version 1.2 | 2026-07-25 | Production
+Version 1.3 | 2026-08-11 | Production
 
 ---
 
 ## Document Purpose
 
-How a fork of this template checks whether the upstream template (`proto-context-architecture` itself) has changed, and how to bring the fork's system-layer files up to date when it has. Only relevant to forks — this file has no effect in `proto-context-architecture` itself, which has no upstream of its own.
+How a fork of this template checks whether the upstream template (`proto-context-architecture` itself) has changed, how to bring the fork's system-layer files up to date when it has, and how a fork reports a template-level finding back without ever writing to the upstream repo directly. Only relevant to forks — this file has no effect in `proto-context-architecture` itself, which has no upstream of its own.
 
 ---
 
@@ -24,7 +24,8 @@ How a fork of this template checks whether the upstream template (`proto-context
 4. [Check Procedure](#4-check-procedure)
 5. [Apply Procedure](#5-apply-procedure)
 6. [When to Run This](#6-when-to-run-this)
-7. [Version History](#version-history)
+7. [Downstream Feedback: Reporting Template-Level Findings](#7-downstream-feedback-reporting-template-level-findings)
+8. [Version History](#version-history)
 
 ---
 
@@ -50,6 +51,8 @@ Each fork records its sync state in a **System Maintenance Pass** section of its
 ```
 
 This is the only state the mechanism depends on. It lives in the fork's own repo (not in any session's local environment) specifically because sessions here are ephemeral — nothing set up locally survives between them, so anything this depends on has to be committed.
+
+The same System Maintenance Pass section also holds the **Upstream Feedback Log** — the reverse-direction counterpart to this marker, for findings flowing back to the upstream template instead of changes flowing down from it. See §7.
 
 ---
 
@@ -111,6 +114,42 @@ Opportunistically, not on a schedule — the same discipline as the domain-level
 
 ---
 
+## 7. Downstream Feedback: Reporting Template-Level Findings
+
+A fork inevitably finds bugs or gaps in what it inherited from the template — not fork-specific mistakes, but something that would affect any fork built the same way. A phantom-file bug in `scripts/validate.ps1`'s source-manifest check, and a full restricted-tier pattern for handling sensitive material, both reached `proto-context-architecture` this way — found in a fork, then relayed by the human into a session working on the template directly. This section defines how that reporting happens, deliberately, rather than depending on the human happening to carry it over by hand each time.
+
+**A fork session never writes directly to the upstream template repo, even when it has repo access to it in-session.** The human who runs `proto-context-architecture` is the sole gatekeeper for what lands there — a finding this session identified itself gets the same review a human-submitted one would get. Writing it in directly just because access happens to be available is exactly the kind of unreviewed cross-boundary action this whole architecture exists to prevent.
+
+**Recognizing a finding as upstream-worthy, not fork-local:** ask whether the issue is a property of the template's own logic or structure — a check that misparses any file of a given shape, a documented convention with a real gap — rather than something specific to this fork's own customizations. If genuinely unsure, treat it as fork-local. A false negative here just waits for the next deliberate review; a false positive spends a human's time relaying something upstream that turns out not to generalize.
+
+**Raising it:** the same confirm-before-writing gate as any other flag (`knowledge/flow/operating-principles.md` §5, "Upstream feedback flags") — surface it as a one-line question in the next CHECKPOINT turn, wait for the human to confirm it's worth capturing, only then write the full `[FLAG FOR UPSTREAM]` block and the log entry below.
+
+**Where it lands:** a new **Upstream Feedback Log** subsection inside `projects/system/TODO.md`'s System Maintenance Pass section (§2), alongside the sync marker:
+
+```
+**Upstream Feedback Log**
+*(Confirmed template-level findings — not yet relayed, or relayed but not yet
+confirmed landed upstream. Delete an entry once the next Check Procedure (§4)
+shows it landed, or the human says it's been handled otherwise.)*
+
+### [Short, scannable title]
+
+Status: Open
+Raised: YYYY-MM-DD (Turn N, [project name])
+
+[Self-contained text, written as if addressed to a session working in
+proto-context-architecture with no memory of this fork's conversation:
+which fork this came from and why, the finding itself, a concrete proposed
+fix if one exists, and explicit instructions for what that session should
+do — apply/test/log, per its own system-layer discipline.]
+```
+
+Write the bracketed body as a ready-to-paste prompt, not a note that needs translating later. The two real entries that reached `proto-context-architecture` this way worked specifically because they were self-contained enough to act on directly, with no back-and-forth needed to reconstruct context — model new entries on that shape.
+
+**Lifecycle:** `Open` until the human relays it (pastes the prompt block into a session working in the upstream repo) — flip to `Relayed` at that point, purely for the human's own tracking, since this fork has no way to observe what happens next. Delete the entry once a later Check Procedure run (§4) shows the corresponding upstream commit, or the human says otherwise. Don't re-relay an entry still marked `Relayed` without checking with the human first — it may already be handled.
+
+---
+
 ## Version History
 
 | Version | Date | Summary |
@@ -118,3 +157,4 @@ Opportunistically, not on a schedule — the same discipline as the domain-level
 | 1.0 | 2026-07-24 | Initial creation. Defines the sync marker, tracked paths, check procedure, and apply procedure for bringing a fork's system-layer files up to date with `proto-context-architecture`. Deliberately opportunistic rather than scheduled — no recurring trigger, surfaced instead via `projects/system/TODO.md`'s System Maintenance Pass section. |
 | 1.1 | 2026-07-25 | Added `.githooks/*` to the Tracked Paths list — the new `.githooks/pre-commit` hook (`scripts/pre-commit-check.ps1`) is a system-layer file like the others. |
 | 1.2 | 2026-07-25 | Wording fix in §3: "deep-well" → "reference-work" to match the rename in `knowledge/domains/authoring-guidelines.md` §9.2. No path or mechanics change. |
+| 1.3 | 2026-08-11 | Added new §7 "Downstream Feedback" — the reverse-direction counterpart to this file's existing check/apply mechanism: how a fork reports a template-level finding to the human for relay, via a new Upstream Feedback Log subsection in `projects/system/TODO.md`'s System Maintenance Pass section, without ever writing to the upstream repo directly. §2 cross-references it. Document Purpose updated to cover both directions. Old §7 Version History renumbered to §8. See `knowledge/flow/operating-principles.md` §5 ("Upstream feedback flags") for the flag format, and `projects/system/session-log.md` Turn 20. |

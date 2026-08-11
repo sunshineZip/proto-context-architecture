@@ -561,3 +561,36 @@ STATUS: CHECKPOINT
 Completed: Fixed the `Get-ManifestTableFirstColumn` phantom-file bug reported by `longstraw` (Version History table rows misread as source-file entries) by scoping the scan to the `File` table block only, matching the section-scoping pattern already used elsewhere in the script. Verified against a disposable fixture: reproduced the original bug first, confirmed the fix clears it, then confirmed both a real missing file and a real orphan file are still caught correctly.
 Next: `familien-boe` and `longstraw` remain ahead of this repo on their own local fixes/additions until their next sync check; this fix should flow back to `familien-boe` too, since it shares the same manifest check.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 20 | 2026-08-11
+
+Human noted that the last two turns (18 and 19) both landed here only because they personally relayed findings from `kej-context-architecture` and `longstraw-context-architecture` by hand — nothing in this template prompts a fork session to surface a template-level finding in the first place, or gives it anywhere durable to go if the human isn't in the room to relay it that same conversation. Confirmed the gap by checking: `knowledge/flow/upstream-sync.md` is entirely one-directional (fork checks/pulls from upstream); `[FLAG FOR SYSTEM]` and Subproject Transcendence (`Architecture.md` §5) only route within a single repo, never across the fork-to-upstream boundary.
+
+Talked through the design before building. Two open questions, both resolved by the human directly rather than assumed:
+
+1. **Should a fork with upstream repo access ever write to it directly, to skip the relay?** No — explicit, considered "no": direct writes would "circumvent [the human] as the gatekeeper." Access to a repo isn't authorization to decide what's worth surfacing in it — the same principle every other cross-boundary flag in this architecture already enforces (`[FLAG FOR KNOWLEDGE UPDATE]`, `[FLAG FOR SYSTEM]`, cornerstone promotion: surface, wait for confirmation, only then act). A fork-local log is also the only path that behaves the same regardless of whether upstream access happens to be attached in a given session — a mechanism that sometimes writes directly and sometimes doesn't is exactly the kind of inconsistency this system is built to avoid.
+2. **Should the log read as raw notes or a ready-to-paste prompt?** Ready-to-paste prompt, modeled directly on the two real examples that worked this session (the `kej` restricted-tier report and the `longstraw` bug report) — both were self-contained, addressed to a session with no shared memory, and ended in explicit instructions. Writing new entries to that same shape removes the translation work from the human, who is now the required relay point for every entry, not just an optional one.
+
+**Built, mirroring the existing flag family exactly:**
+
+- `knowledge/flow/operating-principles.md` (1.1 → 1.2) — §5 gained "Upstream feedback flags": a third flag type, `[FLAG FOR UPSTREAM]`, alongside the existing `[FLAG FOR KNOWLEDGE UPDATE]` and `[FLAG FOR SYSTEM]`. Same confirm-before-writing gate as the other two. Explicit: never written directly to the upstream repo regardless of in-session access.
+- `knowledge/flow/upstream-sync.md` (1.2 → 1.3) — new §7 "Downstream Feedback: Reporting Template-Level Findings", the reverse-direction counterpart to the existing check/apply mechanism: how to recognize a finding as template-level rather than fork-local, the confirm-before-writing gate, the **Upstream Feedback Log** template (a sibling subsection to the existing sync marker inside `projects/system/TODO.md`'s System Maintenance Pass section), and a minimal `Open`/`Relayed` lifecycle with manual deletion once a later Check Procedure run shows the finding landed — no automated resolution tracking, deliberately, to keep the mechanism as small as the actual need. §2 cross-references the new section; Document Purpose updated to cover both directions; old §7 Version History renumbered to §8.
+- `Architecture.md` (1.6 → 1.7) — §5 Subproject Transcendence gained a fourth table row for template-level findings, alongside the existing three (knowledge correction, system improvement, project-specific discovery), routing to the new Upstream Feedback Log.
+- `ROUTING.md` (1.12 → 1.13) — new Hard Constraint against writing a template-level finding directly into the upstream repo even with access, and a Quick Task Guide entry walking through the confirm → log → human-relays sequence.
+
+No new STATUS signal added — deliberately reused `STATUS: CHECKPOINT` and the existing confirm-before-writing gate rather than inventing new turn-protocol machinery for a mechanism that's really just "one more flag type, logged to one more file."
+
+Did not touch `projects/system/TODO.md` in this repo — `upstream-sync.md`'s own scope note already excludes `proto-context-architecture` itself, which has no upstream to report findings to. The System Maintenance Pass section (sync marker + Upstream Feedback Log) is something each fork adds to its own `TODO.md`, same as the sync marker already was.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Built the downstream-feedback counterpart to `upstream-sync.md` — a `[FLAG FOR UPSTREAM]` flag type (`operating-principles.md` §5), a new §7 in `upstream-sync.md` defining the Upstream Feedback Log format and lifecycle, a fourth Subproject Transcendence row in `Architecture.md`, and a Hard Constraint plus Quick Task Guide entry in `ROUTING.md`. Two design decisions made explicitly by the human rather than assumed: forks never write to the upstream repo directly regardless of access, and log entries are written as ready-to-paste prompts, not raw notes.
+Next: Not yet ported to `familien-boe` or `longstraw` — both would benefit from this given they're the two forks that have already generated real upstream findings.
+Waiting for: Direction on the next task.
