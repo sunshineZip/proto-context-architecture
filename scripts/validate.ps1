@@ -362,13 +362,22 @@ foreach ($domainDir in $domainDirs) {
 function Get-ManifestTableFirstColumn {
     param([string]$Text)
     $values = @()
+    $inFileTable = $false
     foreach ($line in ($Text -split "`r?`n")) {
         $trimmed = $line.Trim()
-        if (-not $trimmed.StartsWith("|")) { continue }
+        if ($trimmed -match '^\|\s*File\s*\|') {
+            $inFileTable = $true
+            continue
+        }
+        if (-not $inFileTable) { continue }
+        if (-not $trimmed.StartsWith("|")) {
+            $inFileTable = $false
+            continue
+        }
         $cells = $trimmed.Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
         if ($cells.Count -eq 0) { continue }
         $first = $cells[0]
-        if ($first -eq "" -or $first -eq "File" -or $first -match '^-+$') { continue }
+        if ($first -eq "" -or $first -match '^-+$') { continue }
         $values += $first
     }
     return $values

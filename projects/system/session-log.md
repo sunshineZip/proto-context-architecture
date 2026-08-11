@@ -529,3 +529,35 @@ STATUS: CHECKPOINT
 Completed: Closed the sensitive-data handling gap identified this turn with a tiered design — a universal baseline (ROUTING.md Hard Constraint, MarkdownConventions.md clarification, a tested secret-pattern pre-commit check) that every fork gets by default, plus a new opt-in `knowledge/flow/restricted-tier.md` extension (generalized from a sibling fork's real implementation and incident) for forks that will systematically handle sensitive material at volume. Cross-referenced from Architecture.md and README.md as an optional, clearly-skippable setup step.
 Next: Not yet ported to `familien-boe` or `longstraw`.
 Waiting for: Direction on the next task.
+
+Also, per the human's standing instruction after this turn: this repo does not use feature branches — work directly on `main` and push there. The prior turn's changes had been pushed to a branch by the session's own launch configuration (outside this repo's control) and were fast-forwarded onto `main` and pushed after the fact; the stray remote branch could not be deleted from this session (GitHub rejected the delete with a 403 — push-only credentials) and was left for manual cleanup.
+
+---
+
+## [Claude] — Turn 19 | 2026-08-11
+
+Human relayed a bug report from `longstraw-context-architecture` (a fork), found while creating that fork's first real `knowledge/domains/*/sources/manifest.md` in Turn 9 of its own `session-log.md`.
+
+**The bug:** `Get-ManifestTableFirstColumn` (§9.1 referential-integrity check, added in Turn 6) scanned every line in a manifest starting with `|`, not just rows belonging to the intended `| File | ... |` table. Since `MarkdownConventions.md` requires a `## Version History` table at the bottom of every file, including manifests, that table's own header row and version row got misread as more source-file entries — the literal strings `"Version"` and `"1.0"` (first cell of each row) were flagged as phantom files missing from `sources/`. Same class of bug as the earlier `## 10. Version History` heading-match miss in `MarkdownConventions.md` (Turn 15): a check never exercised against a real file of the shape it's meant to validate, until a fork actually created one.
+
+**Fix, exactly as `longstraw` proposed and verified independently before applying:** scope the scan to the block immediately following a `| File | ...` header row, stopping at the first line that isn't `|`-prefixed — the same section-scoping approach already used elsewhere in this script (e.g. Version History extraction), rather than treating every pipe-prefixed line in the document as a table row.
+
+**Tested against a disposable fixture, not trusted on read.** Built a throwaway copy of the repo (`/tmp` scratch, discarded after) with a real `test-domain/sources/manifest.md` shaped exactly like the authoring-guidelines.md §9.1 template — a `| File | ... |` table followed by the mandatory `## Version History` table — and two matching files in `sources/`.
+
+1. **Reproduced the bug first**, to confirm the fixture actually exercised it: ran the *pre-fix* function against the fixture and got exactly the reported failure — `ERROR: lists 'Version' but that file does not exist` and `ERROR: lists '1.0' but that file does not exist`, nothing else (only the first cell of each Version History row is captured, which is why `Date`/`Summary` didn't also appear as phantom errors).
+2. **Applied the fix, re-ran on the same fixture:** clean, `Validation passed - no issues found` — no phantom errors, both real files correctly matched.
+3. **Broke it for real** (deleted one of the two files the manifest lists): correctly caught as a single genuine error, no phantom errors alongside it.
+4. **Added an orphan file** (a file in `sources/` not listed in the manifest): correctly caught as a warning, confirming the untouched second half of the check (files-on-disk-not-in-manifest) still works.
+
+**File changed:** `scripts/validate.ps1` — `Get-ManifestTableFirstColumn` rewritten to scope to the `File` table block only. No other logic touched.
+
+### Session close
+
+Knowledge candidates: None — tooling fix, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Fixed the `Get-ManifestTableFirstColumn` phantom-file bug reported by `longstraw` (Version History table rows misread as source-file entries) by scoping the scan to the `File` table block only, matching the section-scoping pattern already used elsewhere in the script. Verified against a disposable fixture: reproduced the original bug first, confirmed the fix clears it, then confirmed both a real missing file and a real orphan file are still caught correctly.
+Next: `familien-boe` and `longstraw` remain ahead of this repo on their own local fixes/additions until their next sync check; this fix should flow back to `familien-boe` too, since it shares the same manifest check.
+Waiting for: Direction on the next task.
