@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.7 | 2026-08-11 | Production
+Version 1.8 | 2026-08-11 | Production
 
 ---
 
@@ -99,8 +99,18 @@ The session log only ever grows — no entries are deleted or edited after the f
     commit-push.ps1
     validate.ps1
 
-  temp/                               ← .gitignored transient artifacts
+  incoming/                           ← Git-tracked landing zone for sharing files with a session — see below
+  temp/                               ← .gitignored transient artifacts — not the same thing, see below
 ```
+
+### `incoming/` vs `temp/`
+
+Both are landing zones, but for different purposes — don't conflate them:
+
+- **`incoming/`** — git-tracked, durable. Drop a real file here (a config export, a log, a screenshot, a document — anything easier to hand over as a file than paste inline) for a session to read and act on. Not a permanent home: a session that picks up a file here should either delete it once its purpose is served, or move it to where it actually belongs (a project's `context/` or `outputs/`, a domain's `sources/` — wherever the content's real home is per this document). Files shouldn't accumulate here indefinitely.
+- **`temp/`** — gitignored, ephemeral. For momentary handoff between tools or within a single session only; nothing here survives a fresh clone or persists across sessions. The `ROUTING.md` Hard Constraint against starting substantive work in `temp/` is about `temp/` specifically — it does not apply to `incoming/`, which exists precisely because a fork needs somewhere durable for this.
+
+A fork that has also adopted the optional restricted-tier pattern (`knowledge/flow/restricted-tier.md`) gets a second `incoming/`, inside its companion repo, gated by that pattern's Hard Constraint. That one is specifically for material that might carry third-party sensitivity and hasn't been triaged yet. This repo's own `incoming/` carries no such gate — use it for anything you already know is fine to have here.
 
 ---
 
@@ -207,3 +217,4 @@ To fork this template for a new initiative:
 | 1.5 | 2026-07-25 | §2 and §3 renamed "deep well" to "reference work" and dropped the `library/deep-wells/` subfolder — stored reference works now live directly in `library/`. See `knowledge/domains/authoring-guidelines.md` §9.2 for the full rationale; no mechanics changed. |
 | 1.6 | 2026-08-11 | §6 gained an optional step pointing to the new `knowledge/flow/restricted-tier.md` companion-repository pattern, for forks that will systematically handle real sensitive/restricted material. Not a default setup step — most forks won't need it. See `projects/system/session-log.md` Turn 18. |
 | 1.7 | 2026-08-11 | §5 gained a fourth Subproject Transcendence row for template-level findings — routed to the fork's own Upstream Feedback Log (`knowledge/flow/upstream-sync.md` §7) via `[FLAG FOR UPSTREAM]`, never written directly to the upstream repo. See `projects/system/session-log.md` Turn 20. |
+| 1.8 | 2026-08-11 | §2 gained a new top-level `incoming/` folder — a generic, git-tracked landing zone for sharing files with a session, distinct from the gitignored, ephemeral `temp/`. Added because `restricted-tier.md`'s `incoming/` (companion-repo-only) had inadvertently become the template's only documented `incoming/` concept, leaving forks without that pattern with no sanctioned durable file-sharing folder at all. See `projects/system/session-log.md` Turn 21. |

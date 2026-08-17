@@ -84,7 +84,8 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
     commit-push.ps1                   ← Stage, commit, and push all changes
     validate.ps1                      ← Structural integrity check
 
-  temp/                               ← Transient handoff artifacts (.gitignored)
+  incoming/                           ← Git-tracked landing zone for sharing files with a session (see Architecture.md §2)
+  temp/                               ← Transient handoff artifacts (.gitignored) — not the same thing as incoming/
 ```
 
 ---
@@ -98,3 +99,4 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
 | 1.2 | 2026-07-16 | Added `library/` (cross-domain deep-well registry) and the per-domain `sources/` folder to the folder structure diagram — see `knowledge/domains/authoring-guidelines.md` §9. Also fixed a pre-existing formatting break in the `projects/` block of this same diagram (missing line breaks had collapsed three tree rows onto one line). |
 | 1.3 | 2026-07-25 | Folder structure diagram updated for the "deep well" → "reference work" rename and the dropped `library/deep-wells/` subfolder — see `knowledge/domains/authoring-guidelines.md` §9.2. |
 | 1.4 | 2026-08-11 | Setup checklist gained an optional step pointing to the new `knowledge/flow/restricted-tier.md` companion-repository pattern, for instances handling sensitive material systematically. See `projects/system/session-log.md` Turn 18. |
+| 1.5 | 2026-08-11 | Folder structure diagram gained the new top-level `incoming/` folder — a generic, git-tracked landing zone for sharing files with a session, distinct from the gitignored `temp/`. See `Architecture.md` §2 and `projects/system/session-log.md` Turn 21. |

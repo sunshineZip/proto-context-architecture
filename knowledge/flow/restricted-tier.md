@@ -1,6 +1,6 @@
 # Restricted Tier
 
-Version 1.0 | 2026-08-11 | Production
+Version 1.1 | 2026-08-11 | Production
 
 ---
 
@@ -103,7 +103,7 @@ A flat file list stops being navigable as it grows. Group by function:
 
 ## 6. Untriaged Intake, and Why It Needs Its Own Gate
 
-Give both repos an `incoming/` landing zone for raw files pushed directly via git, bypassing whatever upload mechanism a session normally uses (which may have its own size caps). Put it in the **companion repo**, not the main one — this is the single most important lesson behind this pattern.
+The base template already has a generic `incoming/` folder (`Architecture.md` §2) — a git-tracked landing zone for sharing files with a session, for raw files pushed directly via git rather than through whatever upload mechanism a session normally uses (which may have its own size caps). Adopting the restricted tier means giving the **companion repo** its own copy of that same pattern — not routing untriaged material through the public repo's `incoming/` instead. This is the single most important lesson behind this whole document.
 
 **The failure mode this avoids:** "commit to the public repo first, assess and redact later." Redaction gets applied to *derived* content once someone actually reads the source — but the raw source itself sits in the public repo, fully unredacted, for as long as it remains unprocessed. Untriaged material is unaudited *by definition*; there is no way to know whether it's sensitive until someone has looked at it, and "looked at it" cannot be a precondition for "public," because that ordering is exactly what fails. This is why `incoming/` gets the one Hard Constraint exception (§4): its entire purpose is holding material nobody has classified yet, so gating it behind "only open when named" would defeat the point of moving it there — a session needs to see what's waiting, every session, to actually triage it.
 
@@ -207,3 +207,4 @@ Use this alternative for the occasional-secret case, or a fork that's confident 
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-08-11 | Initial creation. Generalized from a working implementation in a genealogy-research fork, built after a real public-exposure incident there. Defines the companion-repository pattern, the Hard Constraint, intake/triage discipline, the Cornerstone Rule extension, structured-data redaction, review-queue and correspondence patterns, the no-separate-routing recommendation, access-model and validation-tooling notes, a non-git alternative for occasional sensitivity, and a setup checklist. Opt-in — not part of the default fork setup. See `projects/system/session-log.md` Turn 18. |
+| 1.1 | 2026-08-11 | §6 reframed: `incoming/` is now the restricted-tier copy of a generic pattern the base template itself provides (`Architecture.md` §2), not a concept this document introduces from scratch. Fixes a real downstream confusion — a fork without the restricted tier had no sanctioned `incoming/` folder at all, because this was previously the template's only documented version of the pattern. See `projects/system/session-log.md` Turn 21. |

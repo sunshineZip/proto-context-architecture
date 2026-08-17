@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.13 | 2026-08-11 | Production
+Version 1.14 | 2026-08-11 | Production
 
 ---
 
@@ -104,7 +104,7 @@ Do not break these regardless of what the human asks.
 - **Do not act on files listed as "(planned)" in the Folder Map.** They do not exist. Do not create them without explicit instruction.
 - **Do not invent content from files you have not read.** If a file is relevant and unreadable, say so.
 - **Do not edit prior turns in `session-log.md`.** Append only.
-- **Do not start substantive work in `temp/`.** The `temp/` folder is for transient handoff artifacts only — short-lived files passed between tools or sessions. Analysis, discoveries, deliverables, and working notes belong in `projects/[name]/context/` and `projects/[name]/outputs/`. Work started in `temp/` bypasses routing and leaves no project record.
+- **Do not start substantive work in `temp/`.** The `temp/` folder is for transient handoff artifacts only — short-lived files passed between tools or sessions, gitignored, never committed. Analysis, discoveries, deliverables, and working notes belong in `projects/[name]/context/` and `projects/[name]/outputs/`. Work started in `temp/` bypasses routing and leaves no project record. This constraint is about `temp/` specifically — it does not apply to `incoming/`, a separate, git-tracked folder that exists precisely for durably sharing a file with a session. See `Architecture.md` §2.
 - **Do not update `ROUTING.md` silently.** After any structural change, propose the update and wait for approval.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
 - **Do not make structural system changes without logging them.** Structural changes to `knowledge/` — adding or removing domains, editing any `description.md`, editing any file under `knowledge/flow/` — and any edit to `ROUTING.md` or `Architecture.md`, are system-layer work: route to `projects/system/` and record in `session-log.md` before committing. Appending new facts to an existing domain `knowledge.md` uses the FLAG process in the first constraint above, not this one. A `pre-commit` git hook (`scripts/pre-commit-check.ps1`, activated via `git config core.hooksPath .githooks` — see `Architecture.md` §6) enforces this mechanically for the full tracked-paths list in `knowledge/flow/upstream-sync.md` §3, blocking a commit that stages one of those files without also staging `session-log.md`.
@@ -178,6 +178,12 @@ Apply these in every session regardless of project type or how you entered the s
 → Drop it in `temp/` — this is the designated handoff zone for transient artifacts
 → If the material produces knowledge worth keeping, promote it into the relevant domain or project output — do not leave it in temp
 
+**I want to share a file with the LLM, or set up a durable "incoming" folder for this repo**
+→ Use the top-level `incoming/` folder — git-tracked, not gitignored, exists for exactly this (`Architecture.md` §2)
+→ Drop the file in; a session reads it, acts on it, then either deletes it or moves it to its real home (a project's `context/`/`outputs/`, a domain's `sources/`, wherever it belongs) — it's a landing zone, not a permanent home
+→ Not the same as `temp/` — that one's gitignored and for momentary tool handoff only, nothing durable
+→ If this fork has also adopted the restricted-tier pattern, that gets its own separate `incoming/` inside the companion repo, specifically for material that might carry third-party sensitivity — see `knowledge/flow/restricted-tier.md` §6. This repo's own `incoming/` is for anything you already know is fine to have here
+
 **I want to start a new project**
 → Ask the human: what should it be called, and what does done look like?
 → Copy `projects/_template/` to `projects/[project-name]/`
@@ -222,4 +228,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.11 | 2026-07-25 | Renamed "deep well" to "reference work" in Step 4, the cornerstone Hard Constraint, and the Quick Task Guide — see `knowledge/domains/authoring-guidelines.md` §9.2 for the full rationale (the `library/deep-wells/` subfolder was also dropped; no mechanics changed). |
 | 1.12 | 2026-08-11 | Added a Hard Constraint requiring a pause-and-ask before writing a secret, credential, or third-party confidential detail into any tracked file — prompted by a human question finding no such gate existed, despite this template sometimes backing public GitHub repos. Backed by a new secret-pattern pre-commit check (`scripts/pre-commit-check.ps1`). Added two Quick Task Guide entries and a Standing Rules cross-reference. Cross-referenced the new opt-in `knowledge/flow/restricted-tier.md` pattern for forks that will handle sensitive material systematically rather than occasionally. |
 | 1.13 | 2026-08-11 | Added a Hard Constraint against a fork writing a template-level finding directly into the upstream repo, even with repo access — and a Quick Task Guide entry pointing to the new `[FLAG FOR UPSTREAM]` convention (`knowledge/flow/operating-principles.md` §5, `knowledge/flow/upstream-sync.md` §7) for logging such findings locally instead, for the human to relay. See `projects/system/session-log.md` Turn 20. |
+| 1.14 | 2026-08-11 | Cross-referenced the new top-level `incoming/` folder (`Architecture.md` §2) from the `temp/` Hard Constraint, and added a Quick Task Guide entry — closes a gap where `restricted-tier.md`'s companion-repo-only `incoming/` had become the template's only documented "incoming" concept, leaving other forks with no sanctioned durable file-sharing folder. See `projects/system/session-log.md` Turn 21. |
 

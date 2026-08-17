@@ -594,3 +594,30 @@ STATUS: CHECKPOINT
 Completed: Built the downstream-feedback counterpart to `upstream-sync.md` — a `[FLAG FOR UPSTREAM]` flag type (`operating-principles.md` §5), a new §7 in `upstream-sync.md` defining the Upstream Feedback Log format and lifecycle, a fourth Subproject Transcendence row in `Architecture.md`, and a Hard Constraint plus Quick Task Guide entry in `ROUTING.md`. Two design decisions made explicitly by the human rather than assumed: forks never write to the upstream repo directly regardless of access, and log entries are written as ready-to-paste prompts, not raw notes.
 Next: Not yet ported to `familien-boe` or `longstraw` — both would benefit from this given they're the two forks that have already generated real upstream findings.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 21 | 2026-08-11
+
+Human caught a real side effect of Turn 18's `restricted-tier.md`: it invented the `incoming/` landing-zone concept entirely inside that document, framed around the sensitivity problem ("give both repos an `incoming/` landing zone... put it in the companion repo, not the main one"). This template never had a generic version of the pattern — only the gitignored, ephemeral `temp/` — so a fork *without* the restricted tier (the human's own home-IT-infrastructure fork, reported directly) had no sanctioned durable folder for sharing files with a session at all, and its own session was advising against creating one because nothing in the inherited template supported it. Confirmed the gap directly: `temp/` is gitignored (verified — nothing survives a clone) and its own Hard Constraint says not to do substantive work there, so it structurally cannot serve as a durable file-sharing folder; `restricted-tier.md` was, before this turn, the template's only place `incoming/` was mentioned at all.
+
+**Fix: give the base template the generic pattern it should have had from the start, then have `restricted-tier.md` reference it instead of re-deriving it.**
+
+- New top-level `incoming/` folder, git-tracked (not gitignored) — created with a `.gitkeep` placeholder so it exists in a fresh clone rather than being a folder only referenced in prose (`temp/` itself has no placeholder and doesn't physically exist in this repo, but `temp/` is gitignored so that's fine for it — `incoming/` needs to actually be there since it's meant to be committed).
+- `Architecture.md` (1.7 → 1.8) — §2 File Structure diagram gained `incoming/`, plus a new "`incoming/` vs `temp/`" subsection distinguishing durable/git-tracked (share a real file, triage it out to its real home, don't let files accumulate) from ephemeral/gitignored (momentary tool handoff, nothing survives a session).
+- `README.md` (1.4 → 1.5) — folder diagram updated to match.
+- `ROUTING.md` (1.13 → 1.14) — the `temp/` Hard Constraint now explicitly states it doesn't apply to `incoming/`; new Quick Task Guide entry for setting one up or using it.
+- `knowledge/flow/restricted-tier.md` (1.0 → 1.1) — §6 reframed: its `incoming/` is now presented as the restricted-tier's own copy of the base template's generic pattern, gated by that document's Hard Constraint, not something invented fresh in that document. No mechanics changed — same failure mode, same triage procedure, same companion-repo-only placement for genuinely untriaged material.
+
+The relationship is now stated explicitly in both directions: a fork's public `incoming/` is for anything already known to be fine to have in that repo; a restricted-tier fork's companion-repo `incoming/` is specifically for material that hasn't been triaged for third-party sensitivity yet. The two coexist rather than compete — adopting the restricted tier doesn't remove the public `incoming/`, it adds a second, more gated one.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added a generic, git-tracked top-level `incoming/` folder to the base template (with a `.gitkeep` placeholder), documented in `Architecture.md` §2 alongside a clarified distinction from `temp/`, cross-referenced from `ROUTING.md`'s Hard Constraints and Quick Task Guide, and reframed `restricted-tier.md` §6 to present its own `incoming/` as the restricted-tier variant of this pattern rather than the pattern's origin. Closes a real gap the human hit directly in a fork that had no restricted tier and therefore no sanctioned file-sharing folder at all.
+Next: Not yet ported to `familien-boe` or `longstraw`; the human's home-IT-infrastructure fork can pick this up via its own upstream-sync check once this is pushed.
+Waiting for: Direction on the next task.
