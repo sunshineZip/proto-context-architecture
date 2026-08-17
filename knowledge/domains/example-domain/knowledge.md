@@ -5,7 +5,7 @@ domain: example-domain
 
 # Example Domain — Knowledge
 
-Version 1.1 | 2026-07-16 | Production
+Version 1.2 | 2026-08-11 | Production
 
 ---
 
@@ -27,6 +27,7 @@ Reference knowledge for the Example Domain. Load the Index first — then load o
 2. [Section Title](#2-section-title) — [describe the key concepts in this section so a routing LLM can decide whether to load it]
 3. [Section Title](#3-section-title) — [describe the key concepts in this section]
 4. [Section Title](#4-section-title) — [describe the key concepts in this section]
+5. [Version History](#version-history)
 
 ---
 
@@ -69,3 +70,4 @@ Reference knowledge for the Example Domain. Load the Index first — then load o
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Placeholder knowledge document template. |
 | 1.1 | 2026-07-16 | Added frontmatter (`type: domain`, `domain: example-domain`) per `MarkdownConventions.md` §1. |
+| 1.2 | 2026-08-11 | Added a missing "5. Version History" Index entry — the template's own Index never indexed its Version History section, a real gap that would have propagated to every real domain copied from it. Found by the new Index structural-integrity check in `scripts/validate.ps1`. See `projects/system/session-log.md` Turn 22. |

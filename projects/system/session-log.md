@@ -621,3 +621,37 @@ STATUS: CHECKPOINT
 Completed: Added a generic, git-tracked top-level `incoming/` folder to the base template (with a `.gitkeep` placeholder), documented in `Architecture.md` §2 alongside a clarified distinction from `temp/`, cross-referenced from `ROUTING.md`'s Hard Constraints and Quick Task Guide, and reframed `restricted-tier.md` §6 to present its own `incoming/` as the restricted-tier variant of this pattern rather than the pattern's origin. Closes a real gap the human hit directly in a fork that had no restricted tier and therefore no sanctioned file-sharing folder at all.
 Next: Not yet ported to `familien-boe` or `longstraw`; the human's home-IT-infrastructure fork can pick this up via its own upstream-sync check once this is pushed.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 22 | 2026-08-11
+
+Human asked, in a broader discussion of whether a medical-curriculum fork was viable, for two `scripts/validate.ps1` additions discussed but not yet built: (1) a mechanical check for Index structural integrity (stale links, orphan sections) — since the loading-hierarchy discipline in `ROUTING.md` Step 4 depends entirely on the Index staying trustworthy, and a script can catch the structural half of "trustworthy" even though the semantic half still needs a human read; (2) a "heaviness" tripwire for domain files, since a domain that's silently grown too large defeats the loading hierarchy's whole purpose (a session defaulting to a full-file load burns far more context than the hierarchy is meant to cost) — explicitly framed around not wasting the AI credit budget on context loading alone.
+
+**Built both, plus the Executive-Summary-specific variant of the second, as agreed:**
+
+- **Index structural integrity** (new `Get-GithubAnchorSlug` helper + a check applied to every `.md` file with an `## Index` heading, not just domains — scoped generically since the Index convention itself is repo-wide, per `MarkdownConventions.md` §3): every Index link must resolve to a real `##` heading in the same file (error if not — a stale entry), and every real `##` section (excluding `Document Purpose` and `Index` themselves) must have a corresponding Index entry (warning if not — an orphan section). Explicitly scoped to structural drift only; whether an Index description still semantically matches its section is left to the Maintenance Pass, since no script can judge that.
+- **Domain heaviness**: three independent tripwires per `knowledge.md` — total line count (>600), Index entry count (>15), and Executive Summary length specifically (>20 non-blank lines, much lower than the others since Step 4 Level 3 loads the Executive Summary on nearly every query to that domain — that's the single most expensive place for bloat to hurt an ordinary session). All three are warnings, not errors, and the thresholds are named constants at the top of the block for a fork to retune.
+
+**First real run against this repo caught two genuine pre-existing bugs, not just fixture cases:**
+
+1. My own `Get-GithubAnchorSlug` had a real bug on first run — it collapsed runs of whitespace to a single hyphen, which produced a false "stale Index entry" against `authoring-guidelines.md`'s own correct anchor for "9. Evidentiary Sources & Reference Works" (`#9-evidentiary-sources--reference-works`, a genuine double hyphen — GitHub's real algorithm strips the `&` but doesn't collapse the two spaces it leaves behind into one hyphen). Fixed by replacing each space individually instead of collapsing `\s+`.
+2. With that fixed, two *real*, previously-invisible gaps surfaced: `authoring-guidelines.md`'s own Index never included its own Version History section, and — more consequential — `example-domain/knowledge.md`'s Index template has *never* included a Version History entry, meaning every real domain anyone has ever created by copying this template inherited the same gap silently. Fixed both by adding the missing Index entries (`authoring-guidelines.md` 1.8 → 1.9, `example-domain/knowledge.md` 1.1 → 1.2).
+
+**Tested against deliberately broken fixtures before trusting either check**, same discipline as every prior script change this session, in a disposable `/tmp` copy of the repo (discarded after):
+
+- Index check: broke one Index link to point at a nonexistent anchor (caught as an error) and added a real section with no Index entry (caught as a warning, correctly also flagging the now-effectively-unindexed neighboring section) — then reverted and confirmed clean again.
+- Heaviness check: built a throwaway domain padded past all three thresholds at once (676 lines, 18 Index entries, a 30-line Executive Summary) — all three warnings fired correctly and independently, with the Index-integrity check itself catching an unrelated bug in my own test fixture along the way (I'd forgotten to index the fixture's own Version History section) — confirming the two new checks compose correctly rather than interfering with each other.
+
+**File changed:** `scripts/validate.ps1` (two new check blocks + one helper function). Also `knowledge/domains/authoring-guidelines.md` and `knowledge/domains/example-domain/knowledge.md` (the two real Index gaps the new check found).
+
+### Session close
+
+Knowledge candidates: None — tooling addition plus two real pre-existing documentation bugs, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added Index structural-integrity checking and domain-heaviness tripwires (file size, Index entry count, Executive Summary length) to `scripts/validate.ps1`, tested against deliberately broken fixtures before trusting either. The first real run surfaced and fixed a genuine bug in the new check's own anchor-slug algorithm, plus two real pre-existing gaps in this repo's own content — most notably that `example-domain/knowledge.md`'s Index template never indexed its own Version History section, a gap every real domain copied from it would have silently inherited.
+Next: Not yet ported to `familien-boe` or `longstraw` — both would benefit, especially `longstraw` given its own manifest-check history.
+Waiting for: Direction on the next task.

@@ -629,6 +629,114 @@ foreach ($mdFile in $allMdFiles) {
     }
 }
 
+# --- Index structural integrity: every file with an "## Index" section
+#     should have each Index entry resolve to a real heading in the same
+#     file (a stale entry — the section it pointed to was renamed or
+#     removed), and every real ## section (excluding Document Purpose and
+#     Index themselves) should have a corresponding Index entry (an
+#     orphan section — added without updating the Index). This only
+#     catches structural drift. Whether an Index entry's *description*
+#     still accurately reflects a section that changed underneath it is a
+#     judgment call no script can make — that's what the Maintenance Pass
+#     (authoring-guidelines.md §8) is for. See projects/system/
+#     session-log.md Turn 22. ---
+function Get-GithubAnchorSlug {
+    # Mirrors GitHub's actual heading-anchor algorithm closely enough for
+    # this repo's headings: strip characters outside [a-z0-9 -], then
+    # replace each individual space with a hyphen (not collapsed) — GitHub
+    # does not collapse runs of whitespace, so removing punctuation that
+    # sat between two spaces ("Sources & Reference" -> "Sources  Reference")
+    # legitimately produces a double hyphen ("sources--reference"), not a
+    # single one. An earlier version of this function collapsed \s+ to a
+    # single hyphen and produced a false "stale Index entry" against
+    # authoring-guidelines.md's real, correct anchor for exactly this case.
+    param([string]$HeadingText)
+    $slug = $HeadingText.Trim().ToLowerInvariant()
+    $slug = [regex]::Replace($slug, '[^a-z0-9\- ]', '')
+    $slug = $slug.Replace(' ', '-')
+    return $slug
+}
+
+foreach ($mdFile in $allMdFiles) {
+    $rawText = Get-Content -Path $mdFile.FullName -Raw
+    $scanText = Remove-CodeFences -Text $rawText
+    if ($scanText -notmatch '(?m)^## Index\s*$') { continue }
+
+    $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
+
+    $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
+    $indexLinkAnchors = @{}
+    if ($indexMatch.Success) {
+        foreach ($linkMatch in [regex]::Matches($indexMatch.Groups[1].Value, '\[[^\]]+\]\(#([a-z0-9\-]+)\)')) {
+            $indexLinkAnchors[$linkMatch.Groups[1].Value] = $true
+        }
+    }
+
+    $realSlugs = @{}
+    foreach ($headingMatch in [regex]::Matches($scanText, '(?m)^## (.+?)\s*$')) {
+        $headingText = $headingMatch.Groups[1].Value.Trim()
+        if ($headingText -eq "Document Purpose" -or $headingText -eq "Index") { continue }
+        $realSlugs[(Get-GithubAnchorSlug -HeadingText $headingText)] = $headingText
+    }
+
+    foreach ($anchor in $indexLinkAnchors.Keys) {
+        if (-not $realSlugs.ContainsKey($anchor)) {
+            Add-ValidationError "'$relPath': Index links to '#$anchor' but no section with that heading exists — stale Index entry"
+        }
+    }
+
+    foreach ($slug in $realSlugs.Keys) {
+        if (-not $indexLinkAnchors.ContainsKey($slug)) {
+            Add-ValidationWarning "'$relPath': section '$($realSlugs[$slug])' has no corresponding Index entry — orphan section"
+        }
+    }
+}
+
+# --- Domain "heaviness": knowledge.md files large enough to strain the
+#     Step 4 loading hierarchy (ROUTING.md) are a real cost — a session
+#     that defaults to a full-file load burns far more context than the
+#     hierarchy is meant to cost. These are lagging-indicator tripwires,
+#     not hard limits or errors: crossing one is a prompt to consider the
+#     authoring-guidelines.md §8 split heuristic at the next Maintenance
+#     Pass. The Executive Summary gets its own, much lower threshold
+#     since Step 4 Level 3 loads it on nearly every domain query — bloat
+#     there is the most expensive place for a heavy domain to hurt an
+#     ordinary session. Thresholds are deliberately generous defaults;
+#     tune them per instance if needed. See projects/system/
+#     session-log.md Turn 22. ---
+$domainSizeLineWarnThreshold = 600
+$domainIndexEntryWarnThreshold = 15
+$executiveSummaryLineWarnThreshold = 20
+
+foreach ($domainDir in $domainDirs) {
+    $knowledgeFilePath = Join-Path $domainDir.FullName "knowledge.md"
+    if (-not (Test-Path $knowledgeFilePath)) { continue }
+
+    $rawText = Get-Content -Path $knowledgeFilePath -Raw
+    $scanText = Remove-CodeFences -Text $rawText
+    $lineCount = @($rawText -split "`r?`n").Count
+
+    if ($lineCount -gt $domainSizeLineWarnThreshold) {
+        Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' is $lineCount lines (over $domainSizeLineWarnThreshold) — consider whether it should split (authoring-guidelines.md §8)"
+    }
+
+    $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
+    if ($indexMatch.Success) {
+        $entryCount = @([regex]::Matches($indexMatch.Groups[1].Value, '(?m)^\d+\.\s')).Count
+        if ($entryCount -gt $domainIndexEntryWarnThreshold) {
+            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' has $entryCount Index entries (over $domainIndexEntryWarnThreshold) — consider whether it should split (authoring-guidelines.md §8)"
+        }
+    }
+
+    $execMatch = [regex]::Match($scanText, '(?ms)^## (?:\d+\.\s*)?Executive Summary\s*\r?\n(.*?)(?:\r?\n## |\r?\n---|\z)')
+    if ($execMatch.Success) {
+        $execLineCount = @($execMatch.Groups[1].Value -split "`r?`n" | Where-Object { $_.Trim() -ne "" }).Count
+        if ($execLineCount -gt $executiveSummaryLineWarnThreshold) {
+            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' Executive Summary is $execLineCount non-blank lines (over $executiveSummaryLineWarnThreshold) — this is what Step 4 Level 3 loads on nearly every query; move detail into a named section instead (authoring-guidelines.md §8)"
+        }
+    }
+}
+
 # --- Summary ---
 Write-Host ""
 Write-Host "Active projects: $($activeProjects.Count)"

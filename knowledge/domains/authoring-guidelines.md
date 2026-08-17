@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.8 | 2026-07-25 | Production
+Version 1.9 | 2026-08-11 | Production
 
 ---
 
@@ -39,6 +39,7 @@ This document covers knowledge-document-specific rules only. General markdown fo
 9. [Evidentiary Sources & Reference Works](#9-evidentiary-sources--reference-works)
 10. [What Does Not Belong in a Knowledge Document](#10-what-does-not-belong-in-a-knowledge-document)
 11. [Quick Checklist](#11-quick-checklist)
+12. [Version History](#version-history)
 
 ---
 
@@ -389,3 +390,4 @@ Before submitting any knowledge document for human approval:
 | 1.6 | 2026-07-25 | §8 gained a check for whether a domain should be retired rather than left silently stale — see the new retirement convention in `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain. |
 | 1.7 | 2026-07-25 | §4 gained "Behavioral and communication-style notes" — how a domain captures what's known about how a household member or external party tends to communicate or argue, without needing a separate content type or top-level structure. Reuses existing signals ([SENSITIVE], [VERIFIED]/[UNVERIFIED]) rather than inventing new ones. |
 | 1.8 | 2026-07-25 | §9 renamed "Deep Wells" to "Reference Works" throughout (§9.2–9.4, Index) — more intuitive without the well/mining metaphor needing explanation first. Dropped the `library/deep-wells/` subfolder: stored reference works now live directly in `library/` alongside `reference-index.md`, since the cornerstone bar already keeps that folder small by design — the extra nesting wasn't earning its place. No mechanics changed. |
+| 1.9 | 2026-08-11 | Added a missing "12. Version History" Index entry — this file's own Version History section had never been indexed, a real pre-existing gap found by the new Index structural-integrity check in `scripts/validate.ps1`. See `projects/system/session-log.md` Turn 22. |
