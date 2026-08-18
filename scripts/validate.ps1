@@ -82,6 +82,9 @@ if (-not (Test-Path (Join-Path $repoRoot ".githooks\pre-push"))) {
 if (-not (Test-Path (Join-Path $repoRoot "scripts\pre-push-check.ps1"))) {
     Add-ValidationError "Missing scripts/pre-push-check.ps1"
 }
+if (-not (Test-Path (Join-Path $repoRoot "scripts\sync-check.ps1"))) {
+    Add-ValidationError "Missing scripts/sync-check.ps1"
+}
 if ($isGitRepo) {
     $hooksPath = (git -C $repoRoot config --get core.hooksPath 2>$null)
     if ($hooksPath -ne ".githooks") {

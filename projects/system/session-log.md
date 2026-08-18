@@ -684,3 +684,38 @@ STATUS: CHECKPOINT
 Completed: Promoted "work directly on `main` by default" from a Standing Rule to a Hard Constraint naming the model's own branch-by-habit instinct directly, backed it with a new, tested `pre-push` hook that mechanically blocks pushes to non-default branches (deliberate `--no-verify` bypass, same pattern as the existing hooks), and gave explicit procedural guidance for the one failure path no in-repo mechanism can prevent — a session-launch environment pre-assigning a branch, exactly as happened in this session two turns ago.
 Next: Not yet ported to `familien-boe` or `longstraw` — both were named directly as repeat offenders and would benefit immediately.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 24 | 2026-08-18
+
+Human reported real, recurring conflicts from jumping between Claude Code web and VS Code + Copilot on the same forks: the newly-started interface doesn't always have what the other one already pushed, since a fresh session has no natural "pull before I start" moment. Asked for a mechanical check, run whenever a session is about to work in the repo — and noted this is also exactly what's needed for real multi-person team collaboration on a shared `main`, not just a single person's two interfaces.
+
+**Distinguished this from what already existed, rather than assuming it was missing entirely.** `commit-push.ps1` (built Turn 16) already fetches, detects divergence, and rebases — but only right before a push, *after* a session has already read files and done work against whatever was locally current. `git-collaboration.md` §1 had literally already named the gap this turn closes: "there's no natural 'pull before I start' moment unless something instructs it" — that sentence had sat there unaddressed since Turn 16. The two checkpoints are genuinely complementary, not redundant: catching staleness before work begins is what actually avoids wasted effort and late-discovered collisions; catching it right before push (already built) is the necessary last line of defense regardless.
+
+**Built `scripts/sync-check.ps1`** — deliberately conservative, matching the same safety posture as everything else in this template that touches git automatically: fetches `origin/<branch>`, and only fast-forwards when it's unambiguously safe (no local uncommitted changes, no local-only commits). Anything less clean-cut — behind with local edits in progress, or a genuine divergence — is reported plainly and left untouched, with a pointer to `git-collaboration.md` §4-5 for the real resolution procedure. Always exits 0: this is informational infrastructure that keeps a session from starting work on stale content, not a gate that should ever block anything.
+
+**Wired into `.claude/hooks/session-start.sh` — and found a real bug in that file while doing it.** The script had two early `exit 0`s guarding its PowerShell-install logic: one for any non-remote (local) session, one for a remote session where `pwsh` was already cached. Appending the new sync-check call at the end of the file, as originally planned, would have meant it only ran in the single narrow case of "remote session, `pwsh` not yet installed" — i.e. almost never. Restructured both early exits into an `if` gate around the install block instead, so execution always reaches the new sync-check call regardless of path. Verified this mattered, not just in theory: ran the restructured script directly with `CLAUDE_CODE_REMOTE` unset (the "local" path) and with it set to `true` with `pwsh` already present (the "cached remote" path) — both previously would have exited before the install block; both now correctly reach and run `sync-check.ps1`. `bash -n` syntax-checked the result; the install commands themselves were only moved, not altered.
+
+**Tested `sync-check.ps1` against all five real states, not just the happy path**, using two real clones of a bare local remote to simulate the actual two-interface scenario:
+
+1. Up to date — reported cleanly, no action.
+2. Behind by 1, clean working tree (the exact reported scenario — "session A" pushed, "session B" starts fresh) — fast-forwarded automatically, listed the incoming commit, and the file content was confirmed actually updated afterward.
+3. Behind by 1, with an uncommitted local edit present — correctly refused to auto-sync, left the edit untouched (verified via `git status` before and after), and named the fix.
+4. Diverged (both ahead and behind) — correctly detected and refused to touch anything, pointed at the rebase procedure.
+5. Ahead only (a genuine unpushed local commit, nothing new upstream) — correctly reported as informational, no action taken.
+
+**Updated `git-collaboration.md`** to document the new checkpoint as new §2 "Sync at Session Start," ahead of the existing §2 "Fetch Before Every Push" (renumbered to §3, with §4-6 shifting accordingly and all internal cross-references fixed to match) — and corrected §1's own text, which had been describing the gap this turn closes as still open. Updated `ROUTING.md` Step 1 (renamed "Sync, then load") to instruct running this before loading or trusting anything else, with the honest caveat that Claude Code gets this automatically and other setups (Copilot) depend on the model actually doing it — same reliance class as any other unhooked instruction here. Added a Quick Task Guide entry. Added an existence check for the new script to `scripts/validate.ps1`.
+
+**Files changed:** `scripts/sync-check.ps1` (new), `.claude/hooks/session-start.sh` (restructured, bug fixed), `ROUTING.md` (1.15 → 1.16), `knowledge/flow/git-collaboration.md` (1.0 → 1.1), `scripts/validate.ps1` (existence check).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Built and wired in `scripts/sync-check.ps1` — a session-start sync check that safely auto-fast-forwards when possible and clearly reports when not, closing a gap `git-collaboration.md` had named but left unaddressed since Turn 16. Found and fixed a real bug in `.claude/hooks/session-start.sh` while wiring it in (two early exits that would have made the new check run almost never), verified the fix actually reaches both previously-skipped paths, and tested all five real sync states (up to date, safe-behind, behind-with-local-changes, diverged, ahead-only) against real local clones before trusting any of it.
+Next: Not yet ported to `familien-boe` or `longstraw` — the human's stated cross-interface workflow is exactly what this was built for.
+Waiting for: Direction on the next task.

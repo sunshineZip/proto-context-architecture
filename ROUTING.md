@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.15 | 2026-08-18 | Production
+Version 1.16 | 2026-08-18 | Production
 
 ---
 
@@ -22,7 +22,11 @@ Do not emit STATUS signals or append to `session-log.md` unless explicitly asked
 
 ---
 
-### Step 1 — Always load first
+### Step 1 — Sync, then load
+
+Before loading or trusting the content of any file in this repo: if this session has shell/git access and hasn't already run it this session, run `scripts/sync-check.ps1`. It fetches and — only when safe (no local uncommitted changes, no local-only commits) — fast-forwards this checkout to match `origin`, so nothing below is read from a stale copy. Claude Code sessions get this automatically via `.claude/hooks/session-start.sh`; other setups (VS Code + Copilot, or any environment without an automatic session-start hook) need to run it as their own first action, since nothing here can force that mechanically outside Claude Code. If the script reports a divergence, stop and follow `knowledge/flow/git-collaboration.md` §3-4 before doing anything else.
+
+Then load:
 
 `knowledge/flow/operating-principles.md`
 
@@ -153,6 +157,12 @@ Apply these in every session regardless of project type or how you entered the s
 → If real: rotate/revoke the credential, then remove it from the staged change entirely (and from history too, if it was ever committed before)
 → If it's a genuine false positive (a placeholder, an already-revoked example key): add `pragma: allowlist secret` on the same line, or use `git commit --no-verify` deliberately — visible in the commit process, not silent
 
+**`scripts/sync-check.ps1` reported I'm behind, diverged, or couldn't fast-forward**
+→ Behind, clean working tree: it already fast-forwarded you automatically — nothing to do
+→ Behind, with uncommitted local changes: commit or stash first, then re-run it, before trusting anything you've already read this session
+→ Diverged (both ahead and behind): stop — see `knowledge/flow/git-collaboration.md` §3-4 for the rebase and append-only-safe resolution procedure before editing anything, especially `session-log.md`
+→ This is a session-*start* check, distinct from the fetch/rebase `commit-push.ps1` already does right before every push (`git-collaboration.md` §2-3) — both matter, they catch staleness at different points
+
 **My push was blocked because I'm not pushing to `main`**
 → That's `scripts/pre-push-check.ps1` doing its job — this repo's default is `main`, not a feature branch, even if that's not your usual habit
 → Ask yourself first: did the human explicitly ask for a branch, or is there a specific, stated reason for isolation here? If neither, the fix is to get this work onto `main` instead of bypassing the check
@@ -237,4 +247,5 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.13 | 2026-08-11 | Added a Hard Constraint against a fork writing a template-level finding directly into the upstream repo, even with repo access — and a Quick Task Guide entry pointing to the new `[FLAG FOR UPSTREAM]` convention (`knowledge/flow/operating-principles.md` §5, `knowledge/flow/upstream-sync.md` §7) for logging such findings locally instead, for the human to relay. See `projects/system/session-log.md` Turn 20. |
 | 1.14 | 2026-08-11 | Cross-referenced the new top-level `incoming/` folder (`Architecture.md` §2) from the `temp/` Hard Constraint, and added a Quick Task Guide entry — closes a gap where `restricted-tier.md`'s companion-repo-only `incoming/` had become the template's only documented "incoming" concept, leaving other forks with no sanctioned durable file-sharing folder. See `projects/system/session-log.md` Turn 21. |
 | 1.15 | 2026-08-18 | Promoted "work directly on `main` by default" from a Standing Rule to a Hard Constraint, reworded to explicitly counter a model's own branch-by-habit instinct and to name the only two exceptions (explicit human request, a specific stated reason). Backed by a new mechanical `pre-push` hook (`scripts/pre-push-check.ps1`) that blocks pushing to a non-default branch unless deliberately bypassed. Added explicit guidance for finding oneself already on a session-assigned branch, and a Quick Task Guide entry. Prompted by the human reporting this happening constantly across every fork and this repo itself. See `projects/system/session-log.md` Turn 23. |
+| 1.16 | 2026-08-18 | Step 1 renamed "Sync, then load" — a session now runs the new `scripts/sync-check.ps1` before loading or trusting any file content, closing the gap where switching between environments (Claude Code web, VS Code + Copilot) on the same fork left the newly-started side working from a stale checkout. Automatic in Claude Code via `.claude/hooks/session-start.sh`; other setups must run it themselves, an honest limitation stated plainly. Added a Quick Task Guide entry. See `projects/system/session-log.md` Turn 24. |
 
