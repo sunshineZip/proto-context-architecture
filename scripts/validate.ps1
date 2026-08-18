@@ -67,18 +67,25 @@ if (-not (Test-Path $copilotInstructionsPath)) {
     Add-ValidationError "Missing entry point: .github\copilot-instructions.md"
 }
 
-# --- Pre-commit hook: files must exist, and the hook must actually be
-#     activated (git config core.hooksPath). See Architecture.md §6. ---
+# --- Git hooks: files must exist, and hooksPath must actually be
+#     activated (git config core.hooksPath) for either to run. See
+#     Architecture.md §6. ---
 if (-not (Test-Path (Join-Path $repoRoot ".githooks\pre-commit"))) {
     Add-ValidationError "Missing .githooks/pre-commit"
 }
 if (-not (Test-Path (Join-Path $repoRoot "scripts\pre-commit-check.ps1"))) {
     Add-ValidationError "Missing scripts/pre-commit-check.ps1"
 }
+if (-not (Test-Path (Join-Path $repoRoot ".githooks\pre-push"))) {
+    Add-ValidationError "Missing .githooks/pre-push"
+}
+if (-not (Test-Path (Join-Path $repoRoot "scripts\pre-push-check.ps1"))) {
+    Add-ValidationError "Missing scripts/pre-push-check.ps1"
+}
 if ($isGitRepo) {
     $hooksPath = (git -C $repoRoot config --get core.hooksPath 2>$null)
     if ($hooksPath -ne ".githooks") {
-        Add-ValidationWarning "core.hooksPath is not set to '.githooks' in this clone — the pre-commit hook is inactive here. Run: git config core.hooksPath .githooks"
+        Add-ValidationWarning "core.hooksPath is not set to '.githooks' in this clone — the pre-commit and pre-push hooks are both inactive here. Run: git config core.hooksPath .githooks"
     }
 }
 

@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.8 | 2026-08-11 | Production
+Version 1.9 | 2026-08-18 | Production
 
 ---
 
@@ -200,7 +200,7 @@ To fork this template for a new initiative:
 7. **Remove example content** — delete `example-domain/` and `example-project/` once replaced.
 8. **Initialize git** — run `git init`, add remote, push.
 9. **Set up Upstream Template Sync tracking** — add the System Maintenance Pass section to your own `projects/system/TODO.md`, recording this fork's starting commit as the initial "last synced" point. See `knowledge/flow/upstream-sync.md` §2 for the exact format and the rest of this mechanism.
-10. **Activate the pre-commit hook** — run `git config core.hooksPath .githooks` once per clone. This is local git config, not something a fresh clone inherits, so it needs re-running after every fresh clone (a Claude Code session's `.claude/hooks/session-start.sh` does this automatically; other setups need the manual command). Enforces the Hard Constraint that system-layer edits are logged in `projects/system/session-log.md` in the same commit — see `scripts/pre-commit-check.ps1`.
+10. **Activate the git hooks** — run `git config core.hooksPath .githooks` once per clone. This is local git config, not something a fresh clone inherits, so it needs re-running after every fresh clone (a Claude Code session's `.claude/hooks/session-start.sh` does this automatically; other setups need the manual command). One command activates both hooks: the pre-commit hook enforces that system-layer edits are logged in `projects/system/session-log.md` in the same commit (`scripts/pre-commit-check.ps1`); the pre-push hook enforces the Hard Constraint that pushes default to `main` unless deliberately bypassed (`scripts/pre-push-check.ps1`).
 11. **(Optional) Set up the restricted-tier companion repo** — only if this fork will systematically handle real third-party sensitive/restricted material (personal records, confidential documents, regulated data) at volume, and only before ingesting the first real source file. See `knowledge/flow/restricted-tier.md`. Most forks won't need this — occasional sensitive content is already covered by `ROUTING.md`'s pause-and-ask Hard Constraint and the pre-commit secret-pattern check.
 
 ---
@@ -218,3 +218,4 @@ To fork this template for a new initiative:
 | 1.6 | 2026-08-11 | §6 gained an optional step pointing to the new `knowledge/flow/restricted-tier.md` companion-repository pattern, for forks that will systematically handle real sensitive/restricted material. Not a default setup step — most forks won't need it. See `projects/system/session-log.md` Turn 18. |
 | 1.7 | 2026-08-11 | §5 gained a fourth Subproject Transcendence row for template-level findings — routed to the fork's own Upstream Feedback Log (`knowledge/flow/upstream-sync.md` §7) via `[FLAG FOR UPSTREAM]`, never written directly to the upstream repo. See `projects/system/session-log.md` Turn 20. |
 | 1.8 | 2026-08-11 | §2 gained a new top-level `incoming/` folder — a generic, git-tracked landing zone for sharing files with a session, distinct from the gitignored, ephemeral `temp/`. Added because `restricted-tier.md`'s `incoming/` (companion-repo-only) had inadvertently become the template's only documented `incoming/` concept, leaving forks without that pattern with no sanctioned durable file-sharing folder at all. See `projects/system/session-log.md` Turn 21. |
+| 1.9 | 2026-08-18 | §6 step 10 reworded from "activate the pre-commit hook" to "activate the git hooks" — one `core.hooksPath` command now also activates the new `pre-push` hook (`scripts/pre-push-check.ps1`), which enforces the promoted `main`-by-default Hard Constraint. See `ROUTING.md` and `projects/system/session-log.md` Turn 23. |

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Delegates to scripts/pre-push-check.ps1 — see that file and
+# ROUTING.md's Hard Constraints for what this enforces and why.
+# Requires `git config core.hooksPath .githooks` to actually run
+# (Architecture.md §6) — this file being tracked does not activate it.
+repo_root=$(git rev-parse --show-toplevel)
+pwsh -NoProfile -File "$repo_root/scripts/pre-push-check.ps1"
+exit $?

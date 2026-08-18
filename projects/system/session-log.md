@@ -655,3 +655,32 @@ STATUS: CHECKPOINT
 Completed: Added Index structural-integrity checking and domain-heaviness tripwires (file size, Index entry count, Executive Summary length) to `scripts/validate.ps1`, tested against deliberately broken fixtures before trusting either. The first real run surfaced and fixed a genuine bug in the new check's own anchor-slug algorithm, plus two real pre-existing gaps in this repo's own content — most notably that `example-domain/knowledge.md`'s Index template never indexed its own Version History section, a gap every real domain copied from it would have silently inherited.
 Next: Not yet ported to `familien-boe` or `longstraw` — both would benefit, especially `longstraw` given its own manifest-check history.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 23 | 2026-08-18
+
+Human reported that every fork of this template, and this repo itself, keeps creating branches and pushing to them instead of `main` — including this very session, which had been placed on `claude/proto-template-sensitive-data-368nn7` by its own launch configuration two turns ago and had to be fast-forwarded onto `main` by hand once the human caught it. Asked for something with more teeth than the existing Standing Rule, while explicitly preserving room for branching when the human asks for one or the LLM has a real reason.
+
+**Root-caused why the existing rule wasn't working, not just reworded it.** The "work directly on `main` by default" rule (`ROUTING.md` Standing Rules) is a written instruction with no mechanical backing at all — unlike the system-layer-logging and secret-content rules, which both have a `pre-commit` hook enforcing them. Two separate failure paths converge on the same symptom: (1) a session's own generic training-instinct toward "always branch" competing with, and sometimes winning against, a Standing-Rule-level instruction; (2) a session-launch environment assigning a branch before the session's first git command runs at all, which no amount of in-repo wording can prevent — exactly what happened here two turns ago.
+
+**Response, matched to which failure path it addresses:**
+
+1. **Promoted the rule to a Hard Constraint** (`ROUTING.md`) — reworded to name the instinct directly ("a model's own training-instinct toward 'always work on a feature branch' — that instinct is wrong for this repo") rather than stating the rule neutrally, and to name exactly two exceptions: the human explicitly asked for a branch, or there's a specific, stated reason for isolation — either one requires saying so plainly, not branching silently. This addresses failure path 1; it cannot address path 2, and says so.
+2. **Built a mechanical backstop for path 1**: a new `pre-push` git hook (`.githooks/pre-push` + `scripts/pre-push-check.ps1`), activated the same way as the existing pre-commit hook (`core.hooksPath`, already wired into `.claude/hooks/session-start.sh`) — no new activation step needed. Blocks any push that creates or updates a branch other than `main` (branch deletions and tag pushes are never blocked), requiring a deliberate `git push --no-verify` to override, same visible-bypass pattern as the two existing pre-commit checks. Honestly scoped in its own comments and in `ROUTING.md`: this only fires when a session drives `git push` itself, so it cannot address failure path 2 either.
+3. **Named path 2 explicitly and gave it a procedure**, since no hook or instruction can prevent it: if a session finds itself already on a non-default branch it didn't choose, developing there is fine, but landing the finished work on `main` is part of finishing the task, not optional — fast-forward or merge onto `main` and push there before considering the work done, unless the human says otherwise. This formalizes exactly the recovery this session performed by hand two turns ago, so it doesn't have to be re-litigated every time it recurs.
+
+**Tested the hook properly before trusting it**, same discipline as the pre-commit hooks: unit-tested `pre-push-check.ps1` directly against four hand-built stdin payloads matching git's real pre-push input format (push to `main` — allowed; push to a new branch — blocked; branch deletion — allowed; tag push — allowed), all four correct. Then ran a full end-to-end test — a real bare local remote, a real clone with `core.hooksPath` set, a real `git push` to a feature branch. First attempt at the end-to-end test was invalid (cloned before the new hook files were committed anywhere, so the clone genuinely had no `.githooks/pre-push` to run — caught immediately since the hook binary was missing rather than silently passing) — rebuilt the fixture from a full working-tree copy including the new, not-yet-committed hook files, committed with `--no-verify` as the baseline, and reran. Confirmed: push to a feature branch is blocked and nothing lands on the remote; push to `main` succeeds normally; `git push --no-verify` to the feature branch is a real, working bypass.
+
+**Files changed:** `.githooks/pre-push` (new, executable), `scripts/pre-push-check.ps1` (new), `ROUTING.md` (1.14 → 1.15 — Hard Constraint promoted and reworded, Standing Rules entry shrunk to a pointer, new Quick Task Guide entry), `Architecture.md` (1.8 → 1.9 — §6 step 10 reworded from singular "the pre-commit hook" to "the git hooks," since one activation command now covers both), `scripts/validate.ps1` (existence checks for the two new hook files, alongside the existing pre-commit ones).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Promoted "work directly on `main` by default" from a Standing Rule to a Hard Constraint naming the model's own branch-by-habit instinct directly, backed it with a new, tested `pre-push` hook that mechanically blocks pushes to non-default branches (deliberate `--no-verify` bypass, same pattern as the existing hooks), and gave explicit procedural guidance for the one failure path no in-repo mechanism can prevent — a session-launch environment pre-assigning a branch, exactly as happened in this session two turns ago.
+Next: Not yet ported to `familien-boe` or `longstraw` — both were named directly as repeat offenders and would benefit immediately.
+Waiting for: Direction on the next task.
