@@ -719,3 +719,26 @@ STATUS: CHECKPOINT
 Completed: Built and wired in `scripts/sync-check.ps1` — a session-start sync check that safely auto-fast-forwards when possible and clearly reports when not, closing a gap `git-collaboration.md` had named but left unaddressed since Turn 16. Found and fixed a real bug in `.claude/hooks/session-start.sh` while wiring it in (two early exits that would have made the new check run almost never), verified the fix actually reaches both previously-skipped paths, and tested all five real sync states (up to date, safe-behind, behind-with-local-changes, diverged, ahead-only) against real local clones before trusting any of it.
 Next: Not yet ported to `familien-boe` or `longstraw` — the human's stated cross-interface workflow is exactly what this was built for.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 25 | 2026-08-18
+
+Human compared this repo against how the AI industry currently frames "context engineering" (Gartner's July 2025 definition, RAG/vector-DB tooling, MCP, agent-memory services) for a possible career pivot, then asked which of the resulting ideas could practically be added to proto without compromising what makes it distinctive. Talked through four candidates and a rough priority order: an MCP server exposing the routing table and domain loading (best fit — a deterministic interface on top of existing logic, no change to how decisions get made), a retrieval eval harness (cheap, closes a real gap, prerequisite for honestly evaluating anything semantic), an opt-in semantic-search layer for Step 4 (real embeddings/vector-store experience, scoped as an optional aid with the hand-curated Index staying ground truth), and a LangGraph/memory-as-a-service exploration recommended as a separate standalone project rather than a proto change, since both fight the audit-first design harder than the rest and real forks — including a production one — depend on proto's current stability.
+
+Human then asked whether to self-host the MCP server for AI sessions beyond this one to use. Recommended scoping any first version to personal/team hosting rather than a broadly-reachable public service — a real hosted server is real infrastructure (uptime, auth, rate limiting) and, more importantly, a leak-surface risk for any fork that also holds a restricted-tier companion repo with genuinely sensitive content; a routing server has no business being the thing that exposes that. Also noted plainly that "other AIs using it" isn't automatic — it requires the server to be configured as an MCP connector wherever a given session actually runs.
+
+Asked to log all of this as a backlog for later, not build any of it now.
+
+**Built:** `projects/system/TODO.md` (1.2 → 1.3) — new "Backlog — Context-Engineering / Industry-Tooling Exploration" section, the four candidates each with enough context to be picked up cold by a future session, plus the self-hosting scoping note. This is a project-layer file (not on the system-layer tracked-paths list), so no pre-commit-hook-forced session-log entry was actually required for this edit — logging it anyway for continuity, matching how every other change this session has been narrated.
+
+### Session close
+
+Knowledge candidates: None — backlog note, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Logged four context-engineering/industry-tooling ambitions (MCP server, eval harness, opt-in semantic-search layer, and a separate LangGraph/memory-service practice project) plus a self-hosting scoping note, in a new Backlog section of `projects/system/TODO.md`. Nothing built — explicitly deferred for later, per direct instruction.
+Next: None scheduled — human said they'll come back to these individually.
+Waiting for: Direction on the next task.
