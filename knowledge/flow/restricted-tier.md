@@ -1,6 +1,6 @@
 # Restricted Tier
 
-Version 1.1 | 2026-08-11 | Production
+Version 1.2 | 2026-08-22 | Production
 
 ---
 
@@ -136,11 +136,13 @@ Where the public repo holds structured data with individual sensitive records em
 
 **A gotcha worth checking before writing any programmatic manipulation of a file like this:** if the format mixes record types that can interleave (append-over-time formats often do — new records get appended past existing blocks of a different type rather than the file staying sorted), any script that locates a record's boundary by "next record of the same type" will silently swallow intervening records of the other type. Bound on "next record of *any* type," and verify against the live file before trusting the result.
 
+**A second, unrelated gotcha — this one about the validation check itself, not parsing:** the check above ("every restricted record needs a matching public placeholder") assumes restricted always means "fully anonymized in public." It doesn't always. An individual can be legitimately public by name while a narrower, related fact about them stays restricted — their identity isn't sensitive, one specific matter involving them is. A check that only compares placeholder-presence can't distinguish that intentional case from a genuinely stale, accidental un-redaction, and will flag it as a warning every run. Fix: check whether the public record's own note text cross-references the restricted file by that same ID — if it does, that's a confirmed intentional link, not a mismatch, and the check should skip it rather than warn.
+
 ---
 
 ## 9. Two-Tier Review-Queue Pattern
 
-If the fork has a mechanism for flagging open questions that need a specific human's confirmation before being treated as settled, it needs a restricted-tier counterpart for the same reason the structured data does: some open questions are themselves sensitive to even *pose* publicly. Same file, same format, living in the companion repo and referenced from — not merged into — the public one, so the public queue stays a complete, publicly-safe list of everything else pending review.
+If the fork has adopted `knowledge/flow/external-review.md`'s queue/log pattern for tracking findings a specific named external party must confirm, it needs a restricted-tier counterpart for the same reason the structured data does: some open questions are themselves sensitive to even *pose* publicly. Same file, same format, living in the companion repo and referenced from — not merged into — the public one, so the public queue stays a complete, publicly-safe list of everything else pending review. See `external-review.md` §5.
 
 ---
 
@@ -208,3 +210,4 @@ Use this alternative for the occasional-secret case, or a fork that's confident 
 |---|---|---|
 | 1.0 | 2026-08-11 | Initial creation. Generalized from a working implementation in a genealogy-research fork, built after a real public-exposure incident there. Defines the companion-repository pattern, the Hard Constraint, intake/triage discipline, the Cornerstone Rule extension, structured-data redaction, review-queue and correspondence patterns, the no-separate-routing recommendation, access-model and validation-tooling notes, a non-git alternative for occasional sensitivity, and a setup checklist. Opt-in — not part of the default fork setup. See `projects/system/session-log.md` Turn 18. |
 | 1.1 | 2026-08-11 | §6 reframed: `incoming/` is now the restricted-tier copy of a generic pattern the base template itself provides (`Architecture.md` §2), not a concept this document introduces from scratch. Fixes a real downstream confusion — a fork without the restricted tier had no sanctioned `incoming/` folder at all, because this was previously the template's only documented version of the pattern. See `projects/system/session-log.md` Turn 21. |
+| 1.2 | 2026-08-22 | §8 gained a second gotcha: a validation check comparing only placeholder-presence can't distinguish "legitimately public-by-name but restricted-detail" from a genuine accidental un-redaction — fix is checking for an explicit cross-reference in the public record's own note text. §9 rewritten to point at the new base-template mechanism (`knowledge/flow/external-review.md`) instead of assuming one exists. Both relayed via `[FLAG FOR UPSTREAM]` from `kej-context-architecture`. See `projects/system/session-log.md` Turn 26. |

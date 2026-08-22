@@ -1,6 +1,6 @@
 # Operating Principles
 
-Version 1.2 | 2026-08-11 | Production
+Version 1.3 | 2026-08-22 | Production
 
 ---
 
@@ -129,6 +129,20 @@ Same confirm-before-writing gate as above: surface it as a one-line question fir
 
 **This fork never writes the finding directly into the upstream repo, regardless of whether repo access is available in-session.** The human decides if and when to relay it — the same review a human-submitted finding would get applies equally to one this session identified itself.
 
+### External review flags
+
+When a finding needs confirmation from someone who isn't the session's own user — a source, a subject-matter expert, a client, a co-researcher the fork's work draws its authority from or is conducted on behalf of — it isn't a knowledge-layer correction, a system improvement, or a template-level finding. The party who has to confirm it is a specific named person, not whoever happens to be running the session. Raise a separate flag:
+
+```
+[FLAG FOR EXTERNAL REVIEW]
+Source: Project [name], Turn [N]
+Party: [Who must confirm this, and why they are the authority — not the session's own user]
+Finding: [What needs their confirmation, precisely]
+Grounds: [What supports this, and how confident]
+```
+
+Same confirm-before-writing gate as above. Once confirmed, log it per `knowledge/flow/external-review.md` — a queue/log pattern distinct from the flags above, since the party being asked to confirm it is someone else entirely, not the human running this session. That file also covers the escalation discipline for deciding when a low-confidence anomaly is even worth raising as a flag in the first place, rather than every one reaching the named party.
+
 ---
 
 ## Version History
@@ -138,3 +152,4 @@ Same confirm-before-writing gate as above: surface it as a one-line question fir
 | 1.0 | 2026-06-29 | Initial creation. Generic operating principles adapted from NightCrew team-identity.md. |
 | 1.1 | 2026-07-25 | §5 gained a note to actively watch for behavioral/argumentative-style signal when processing correspondence from a party already covered by a domain, not just the logistical content — same flag-and-confirm gate, no automatic capture. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes). |
 | 1.2 | 2026-08-11 | §5 gained "Upstream feedback flags" — a third flag type, `[FLAG FOR UPSTREAM]`, for template-level findings a fork identifies in itself. Explicitly never written directly to the upstream repo even when access is available; logged locally in `projects/system/TODO.md` for the human to relay. See `knowledge/flow/upstream-sync.md` §7 and `projects/system/session-log.md` Turn 20. |
+| 1.3 | 2026-08-22 | §5 gained "External review flags" — a fourth flag type, `[FLAG FOR EXTERNAL REVIEW]`, for findings that need confirmation from a specific named party who isn't the session's own user. Relayed via `[FLAG FOR UPSTREAM]` from a fork (`kej-context-architecture`) whose work is conducted on behalf of exactly such a party. See new `knowledge/flow/external-review.md` and `projects/system/session-log.md` Turn 26. |

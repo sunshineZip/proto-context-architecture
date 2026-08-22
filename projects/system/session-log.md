@@ -742,3 +742,30 @@ STATUS: CHECKPOINT
 Completed: Logged four context-engineering/industry-tooling ambitions (MCP server, eval harness, opt-in semantic-search layer, and a separate LangGraph/memory-service practice project) plus a self-hosting scoping note, in a new Backlog section of `projects/system/TODO.md`. Nothing built — explicitly deferred for later, per direct instruction.
 Next: None scheduled — human said they'll come back to these individually.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 26 | 2026-08-22
+
+Human relayed two `[FLAG FOR UPSTREAM]` findings from `kej-context-architecture`, both already confirmed worth relaying by the human running that fork — the mechanism built in Turn 20 working exactly as designed, this time carrying real content instead of being tested in the abstract. Per that mechanism's own rule, and an explicit instruction embedded in the relay, did not commit anything before presenting an assessment of each and getting confirmation.
+
+**Finding 1 — no flag type or mechanism exists for a finding that needs confirmation from a specific named external party who isn't the session's own user.** `kej`'s fork represents a family's primary source and final genealogical authority, who isn't its day-to-day user — a case this template's three existing flags (all assuming the session's own user is the confirming party) had no answer for. Real, non-fork-specific gap, and one already assumed to exist by `restricted-tier.md` §9 without ever being defined at the base — same shape of gap as the `incoming/` finding in Turn 21. Assessed the proposed design (a queue file, a companion log it moves to once resolved, and an escalation discipline so low-confidence anomalies don't reach the named party until a real pattern emerges) as proportionate — smaller and tighter than the Turn 14 counterparty-flags proposal that needed real cutting down. Made two deliberate refinements before building, both surfaced to the human first: generalized the queue/log location from `kej`'s bespoke `grandfather-review/` folder to `projects/[name]/context/` (the folder this template already designates for project-specific working notes, rather than a new top-level convention); and documented the escalation discipline as a principle ("track anomalies in a lighter side file first, promote only once a real pattern emerges") rather than hardcoding `kej`'s specific "3+ instances" threshold as a universal rule.
+
+**Finding 2 — the structured-data redaction check (`restricted-tier.md` §8) can't distinguish "legitimately public-by-name but restricted-detail" from a genuine accidental un-redaction.** A person can be public by identity while a narrower fact about them stays restricted; a check that only compares placeholder-presence flags that real, intentional case as a warning every run. `kej`'s fix — check whether the public record's own note text cross-references the restricted file by the same ID, and treat that as confirmation rather than a mismatch — generalizes cleanly with no code, only documentation, since §8 already describes the pattern rather than shipping an implementation.
+
+**Built, after confirmation:**
+
+- `knowledge/flow/operating-principles.md` (1.2 → 1.3) — §5 gained a fourth flag type, "External review flags" / `[FLAG FOR EXTERNAL REVIEW]`, same confirm-before-writing gate and structural shape as the other three, pointing at the new mechanism file for the queue/log/escalation details rather than inlining them into a flag definition already shared by three other flag types.
+- New `knowledge/flow/external-review.md` (v1.0) — the queue/log file pattern (§2), the escalation discipline as a principle rather than a fixed number (§3), the flag-raising procedure (§4), and the restricted-tier counterpart (§5). Generalized from `kej`'s working `grandfather-review/queue.md`, with the two refinements above already folded in rather than left as follow-up edits.
+- `knowledge/flow/restricted-tier.md` (1.1 → 1.2) — §8 gained the second gotcha as a new paragraph, phrased generically (no code, no fork-specific field names); §9 rewritten to point at `external-review.md` §5 instead of assuming a base mechanism that, until this turn, didn't exist.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added a fourth flag type, `[FLAG FOR EXTERNAL REVIEW]`, and a new `knowledge/flow/external-review.md` defining the queue/log/escalation mechanism it points to — closing a gap `restricted-tier.md` §9 had assumed away since Turn 18 — and added a second, generalized gotcha to `restricted-tier.md` §8's redaction-validation guidance. Both relayed via `[FLAG FOR UPSTREAM]` from `kej-context-architecture`, both assessed and refined (not adopted verbatim) before building, per direct confirmation.
+Next: Not yet ported to `familien-boe` or `longstraw`. `kej` itself would benefit from generalizing its own `grandfather-review/` implementation to match the new base pattern, once it next runs its upstream-sync check.
+Waiting for: Direction on the next task.
