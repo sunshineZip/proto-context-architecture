@@ -769,3 +769,33 @@ STATUS: CHECKPOINT
 Completed: Added a fourth flag type, `[FLAG FOR EXTERNAL REVIEW]`, and a new `knowledge/flow/external-review.md` defining the queue/log/escalation mechanism it points to — closing a gap `restricted-tier.md` §9 had assumed away since Turn 18 — and added a second, generalized gotcha to `restricted-tier.md` §8's redaction-validation guidance. Both relayed via `[FLAG FOR UPSTREAM]` from `kej-context-architecture`, both assessed and refined (not adopted verbatim) before building, per direct confirmation.
 Next: Not yet ported to `familien-boe` or `longstraw`. `kej` itself would benefit from generalizing its own `grandfather-review/` implementation to match the new base pattern, once it next runs its upstream-sync check.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 27 | 2026-08-22
+
+Human relayed four upstream findings from an unnamed fork's own repo-wide Maintenance Pass (~5 weeks, 15 domains, 8 projects deep). Verified each against this repo's actual current code and history before building anything, rather than accepting the write-up as-is — one finding's framing didn't hold up, worth correcting rather than quietly adopting.
+
+**Finding 1 — real bug, framing partly wrong.** Confirmed `validate.ps1`'s project Active/Retired regexes require a bare date immediately before the status word, and reproduced the described symptom directly: a project using a `2026-08-22 (later)`-style suffix silently drops out of both the active and retired counts, no warning. But searched this entire repo's history for the claimed "template convention" of same-day date suffixes and found zero occurrences — it isn't documented anywhere, and no prior turn ever fixed "the turn-numbering checker" for the same issue as claimed. This template already has an adequate mechanism for same-day multiple edits (bump the version number), so a date suffix isn't solving an unmet need here. Fixed the regex fragility anyway — a header field shouldn't silently misparse just because something unexpected follows the date — without adopting the suffix as a blessed convention. While verifying, found the turn-header regex (`session-log.md` parsing) has the identical bare-date assumption, undiscovered until now; fixed it in the same pass with a single shared date-field regex fragment, per the finding's own suggestion, closing what would otherwise have been a third occurrence of this exact bug shape.
+
+**Findings 2 & 3 — both real, addressed together since they're the same category of gap** (a domain's own stale placeholder prose; other domains' stale plain-text references to superseded content) **at two points: prevention and backstop.** Added step 7 to `knowledge/domains/index.md` § Adding a Domain — grep the repo for stale mentions of the new domain at onboarding time, when it's cheap and the session already knows what changed. Added the retroactive backstop to `authoring-guidelines.md` §8's Maintenance Pass checklist, for anything onboarded before step 7 existed or that missed it anyway.
+
+**Finding 4 — real, fixed at the source rather than just documented.** Confirmed `authoring-guidelines.md` §5 and the `validate.ps1` reciprocity check both treated every one-directional cross-reference identically. Documented the two-category split in §5 (genuine scope-exclusion pointers, permanently one-way, versus real content dependencies worth fixing) and cross-referenced it from §8. Upgraded the validator itself to detect "does NOT cover" phrasing within a window before a one-directional link and word its warning differently when found — kept as a visible warning either way, never suppressed, since the pattern match is a heuristic and not proof of intent.
+
+**Tested all four against fixtures before trusting any of them,** same discipline as every prior script change this session:
+
+- Finding 1: built a disposable project with a `(later)`-suffixed date, confirmed it now counts correctly (3 active projects including it); reverted the fix temporarily against the same fixture and confirmed the original bug reproduces exactly as described (2 active projects, the suffixed one silently missing) before re-applying the fix.
+- Finding 4: built three disposable domains — one linking to another near "does NOT cover" phrasing (correctly got the differentiated wording), one with a plain unreciprocated link (correctly got the generic wording), then added the reciprocal link back and confirmed only that second warning cleared while the exclusion-pointer warning correctly persisted.
+
+**Files changed:** `scripts/validate.ps1` (shared date-field pattern used in three places; reciprocity-check upgrade), `knowledge/domains/index.md` (1.2 → 1.3), `knowledge/domains/authoring-guidelines.md` (1.9 → 1.10).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Fixed a real project-status-detection bug and a latent twin of it in turn-header parsing (shared regex fragment now used by both, plus the domain-onboarding step and Maintenance Pass items), and gave the cross-reference reciprocity checker a way to distinguish genuine scope-exclusion pointers from real drift instead of treating every one-directional link identically. All four relayed via upstream feedback from a fork's Maintenance Pass; one finding's "template convention" framing was checked and didn't hold up, corrected rather than adopted as stated; all four tested against disposable fixtures before trusting them.
+Next: Not yet ported to `familien-boe` or `longstraw`.
+Waiting for: Direction on the next task.

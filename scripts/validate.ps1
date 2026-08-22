@@ -121,6 +121,21 @@ foreach ($domainDir in $domainDirs) {
     }
 }
 
+# --- Shared regex fragment: a YYYY-MM-DD date, optionally followed by a
+#     parenthetical annotation (e.g. a same-day second edit written as
+#     "2026-08-22 (later)"). Used everywhere a header line's date field is
+#     matched, so a trailing annotation doesn't silently break detection —
+#     this exact bug shape (a bare-date assumption) has now recurred twice
+#     independently: project Active/Retired detection below, and the
+#     identical latent gap in the turn-header regex further down, found
+#     while fixing this one. This is not a convention the template itself
+#     defines or requires — the existing version-number and turn-number
+#     increments already disambiguate same-day multiple edits without
+#     needing a date suffix at all — but the regex should not silently
+#     misparse if a fork uses one anyway. See projects/system/
+#     session-log.md Turn 27. ---
+$dateFieldPattern = '\d{4}-\d{2}-\d{2}(?:\s*\([^)]*\))?'
+
 # --- projects/ ---
 if (-not (Test-Path $projectsPath)) {
     Add-ValidationError "Missing projects folder"
@@ -143,9 +158,9 @@ foreach ($projectDir in $projectDirs) {
 
     if (Test-Path $todoPath) {
         $todoText = Get-Content -Path $todoPath -Raw
-        if ($todoText -match '(?mi)^Version\s+.+\|\s+\d{4}-\d{2}-\d{2}\s+\|\s+Active\s*$') {
+        if ($todoText -match "(?mi)^Version\s+.+\|\s+$dateFieldPattern\s+\|\s+Active\s*`$") {
             $activeProjects += $projectDir.Name
-        } elseif ($todoText -match '(?mi)^Version\s+.+\|\s+\d{4}-\d{2}-\d{2}\s+\|\s+Retired\s*$') {
+        } elseif ($todoText -match "(?mi)^Version\s+.+\|\s+$dateFieldPattern\s+\|\s+Retired\s*`$") {
             $retiredProjects += $projectDir.Name
         }
     }
@@ -269,7 +284,7 @@ foreach ($projectDir in $projectDirs) {
     $rawContent = Get-Content -Path $sessionLogPath -Raw
     $scanText = Remove-CodeFences -Text $rawContent
 
-    $turnMatches = [regex]::Matches($scanText, '(?m)^## \[([^\]]+)\] — Turn (\d+) \| (\d{4}-\d{2}-\d{2})\s*$')
+    $turnMatches = [regex]::Matches($scanText, "(?m)^## \[([^\]]+)\] — Turn (\d+) \| ($dateFieldPattern)\s*`$")
     $expectedNext = 1
 
     for ($i = 0; $i -lt $turnMatches.Count; $i++) {
@@ -513,11 +528,22 @@ foreach ($domainDir in $domainDirs) {
 # the actual links inside each domain's own files, not index.md's prose
 # References column — that column is a human-authored summary and could
 # itself drift from the real links.
+#
+# A one-directional link near "does NOT cover" phrasing is a genuine
+# scope-exclusion pointer (authoring-guidelines.md §5) — permanently
+# one-way by design, not drift. Recognizing that pattern and wording its
+# warning differently is what actually fixes the reviewer toil: without
+# it, every one-directional warning looks identical, and the only way to
+# tell a confirmed-fine exclusion pointer from a real broken reference is
+# to re-open both domains' content and check by hand, every single pass.
+# Still reported either way — never fully suppressed, since the pattern
+# match is a heuristic, not a proof of intent — just distinguishable at a
+# glance. See projects/system/session-log.md Turn 27.
 $domainNames = $domainDirs | ForEach-Object { $_.Name }
 $domainLinkMap = @{}
 
 foreach ($domainDir in $domainDirs) {
-    $linkedDomains = New-Object System.Collections.Generic.HashSet[string]
+    $linked = @{}
     foreach ($fileName in @("description.md", "knowledge.md")) {
         $filePath = Join-Path $domainDir.FullName $fileName
         if (-not (Test-Path $filePath)) { continue }
@@ -526,19 +552,31 @@ foreach ($domainDir in $domainDirs) {
         $siblingMatches = [regex]::Matches($text, '\]\(\.\./([a-zA-Z0-9_-]+)/')
         foreach ($m in $siblingMatches) {
             $target = $m.Groups[1].Value
-            if ($target -ne $domainDir.Name -and ($domainNames -contains $target)) {
-                [void]$linkedDomains.Add($target)
+            if ($target -eq $domainDir.Name -or -not ($domainNames -contains $target)) { continue }
+
+            $windowStart = [Math]::Max(0, $m.Index - 400)
+            $window = $text.Substring($windowStart, $m.Index - $windowStart)
+            $isExclusion = [bool]($window -match '(?i)does\s+not\s+cover')
+
+            if (-not $linked.ContainsKey($target)) {
+                $linked[$target] = $isExclusion
+            } elseif ($isExclusion) {
+                $linked[$target] = $true
             }
         }
     }
-    $domainLinkMap[$domainDir.Name] = $linkedDomains
+    $domainLinkMap[$domainDir.Name] = $linked
 }
 
 foreach ($from in $domainLinkMap.Keys) {
-    foreach ($to in $domainLinkMap[$from]) {
-        $backLinked = $domainLinkMap.ContainsKey($to) -and $domainLinkMap[$to].Contains($from)
+    foreach ($to in $domainLinkMap[$from].Keys) {
+        $backLinked = $domainLinkMap.ContainsKey($to) -and $domainLinkMap[$to].ContainsKey($from)
         if (-not $backLinked) {
-            Add-ValidationWarning "'$from' links to '$to', but '$to' does not link back to '$from' (one-directional cross-reference — confirm this is intentional, see authoring-guidelines.md §5)"
+            if ($domainLinkMap[$from][$to]) {
+                Add-ValidationWarning "'$from' links to '$to' near 'does NOT cover' phrasing, with no link back (likely a permanent scope-exclusion pointer, not drift — see authoring-guidelines.md §5; only re-check if '$to''s actual scope changed)"
+            } else {
+                Add-ValidationWarning "'$from' links to '$to', but '$to' does not link back to '$from' (one-directional cross-reference — confirm this is intentional, see authoring-guidelines.md §5)"
+            }
         }
     }
 }

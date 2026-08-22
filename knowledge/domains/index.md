@@ -1,6 +1,6 @@
 # Domain Index
 
-Version 1.2 | 2026-07-25 | Production
+Version 1.3 | 2026-08-22 | Production
 
 ---
 
@@ -40,6 +40,7 @@ Named combinations of domains for recurring tasks that don't map to a single dom
 4. Add a routing row in ROUTING.md Step 2.
 5. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
 6. If this domain cross-references another (authoring-guidelines.md §5), check whether the referenced domain's row should reference this one back.
+7. Grep the repo for stale mentions of this domain now that it exists — both scope-exclusion placeholder prose in other domains' `description.md` files (e.g. "[Topic] domain (not yet created)") and any plain-text references to a raw file this domain supersedes. Update each to a real link or domain reference. Do this now, not later — onboarding is the moment this is cheap to fix, since the session already knows exactly what changed; a later Maintenance Pass has to rediscover it (`authoring-guidelines.md` §8 has the backstop check for exactly the cases this misses).
 
 ---
 
@@ -64,3 +65,4 @@ Reactivating a retired domain reverses steps 1–2 and is logged the same way.
 | 1.0 | 2026-06-29 | Initial creation. Placeholder example domain registered. |
 | 1.1 | 2026-07-15 | Added `Last Updated` and `References` columns to the registry and a Cross-Domain Query Recipes section — addresses discovery staleness, asymmetric cross-references, and cross-cutting queries with no fixed home. |
 | 1.2 | 2026-07-25 | Added a `Status` column (Active/Retired) to the registry and a "Retiring a Domain" procedure — archive-in-place, not delete, per `MarkdownConventions.md` §1. `scripts/validate.ps1` now checks this column stays consistent with each domain's own header Status. |
+| 1.3 | 2026-08-22 | Added step 7 to "Adding a Domain" — grep the repo for stale mentions of the new domain (scope-exclusion placeholders in sibling `description.md` files, superseded raw-file references) at onboarding time, when it's cheap. Relayed via `[FLAG FOR UPSTREAM]`. See `projects/system/session-log.md` Turn 27. |
