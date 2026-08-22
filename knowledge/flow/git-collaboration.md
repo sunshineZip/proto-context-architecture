@@ -1,6 +1,6 @@
 # Git Collaboration
 
-Version 1.1 | 2026-08-18 | Production
+Version 1.2 | 2026-08-22 | Production
 
 ---
 
@@ -34,6 +34,8 @@ This template's default workflow — direct to `main`, commit and push almost ev
 - `session-log.md` turns are append-only *and* sequentially numbered. Two sessions starting from the same base and each appending the next turn number is a realistic, not hypothetical, collision. Appending at the same point in a file is exactly the case git's merge does flag as a conflict (verified directly — see §4), so this usually surfaces as a rebase conflict rather than slipping through silently. Still never resolve it by hand-editing conflict markers — §5 gives the actual procedure.
 
 The goal is that the humans involved almost never see any of this. Catching drift early — at session start (§2) and again before every push (§3) — means most real collisions resolve silently.
+
+This file covers collisions between writers on the *same* repo. A related but distinct concern — a session's own calling tool or harness imposing a workflow constraint (a mandated branch, a permission mode) that lives entirely outside this repo — is a `ROUTING.md` Hard Constraint, not a collision, since there's no second writer involved: see the Hard Constraint on disclosing a workflow constraint's actual source.
 
 ---
 
@@ -99,3 +101,4 @@ This is the hard case: two people genuinely changed the same thing. Do not silen
 |---|---|---|
 | 1.0 | 2026-07-25 | Initial creation. Defines fetch-before-push discipline, rebase-and-revalidate integration, append-only vs. ordinary-content conflict resolution (reusing the existing turn-numbering check and `[CONTRADICTS]` correction discipline rather than new machinery), and the force-push Hard Constraint. |
 | 1.1 | 2026-08-18 | Added new §2 "Sync at Session Start" — the new `scripts/sync-check.ps1`, run automatically at session start in Claude Code and manually elsewhere, closing the gap §1 previously named as unaddressed (no natural pull-before-I-start moment when switching environments on the same fork). Subsequent sections renumbered (old §2→3, §3→4, §4→5, §5→6) and internal cross-references updated to match. See `projects/system/session-log.md` Turn 24. |
+| 1.2 | 2026-08-22 | §1 gained a pointer distinguishing this file's scope (collisions between writers on the same repo) from a harness-imposed workflow constraint (no second writer involved) — the latter is a `ROUTING.md` Hard Constraint. Relayed via `[FLAG FOR UPSTREAM]` from `homelab-context-architecture`. See `projects/system/session-log.md` Turn 29. |

@@ -195,11 +195,26 @@ function Get-Frontmatter {
 
 # --- Shared helper: extract the Status field from a file's standard header
 #     line ("Version X.Y | YYYY-MM-DD | Status"), used by the retirement
-#     consistency checks below. See MarkdownConventions.md §1. ---
+#     consistency checks below. See MarkdownConventions.md §1. Uses the
+#     shared $dateFieldPattern (defined above) rather than a bare-date
+#     assumption — this function had the identical bare-date bug already
+#     fixed elsewhere in this script (project Active/Retired detection,
+#     turn-header parsing) until it was found here too. See
+#     projects/system/session-log.md Turn 29. ---
 function Get-HeaderStatus {
     param([string]$Text)
-    $m = [regex]::Match($Text, '(?m)^Version\s+[\d.]+\s*\|\s*\d{4}-\d{2}-\d{2}\s*\|\s*(.+?)\s*$')
+    $m = [regex]::Match($Text, "(?m)^Version\s+[\d.]+\s*\|\s*$dateFieldPattern\s*\|\s*(.+?)\s*`$")
     if ($m.Success) { return $m.Groups[1].Value.Trim() }
+    return $null
+}
+
+# --- Shared helper: extract just the bare date from the same header line,
+#     ignoring any trailing annotation. Used by the domain Last-Updated
+#     staleness check below. ---
+function Get-HeaderDate {
+    param([string]$Text)
+    $m = [regex]::Match($Text, '(?m)^Version\s+[\d.]+\s*\|\s*(\d{4}-\d{2}-\d{2})')
+    if ($m.Success) { return $m.Groups[1].Value }
     return $null
 }
 
@@ -342,6 +357,7 @@ foreach ($projectDir in $projectDirs) {
 #     (Draft, Review Pending, Production) are legitimately independent of
 #     each other and not what this check is for. ---
 $indexDomainStatus = @{}
+$indexDomainLastUpdated = @{}
 $indexPath = Join-Path $domainsPath "index.md"
 if (Test-Path $indexPath) {
     $indexText = Remove-CodeFences -Text (Get-Content -Path $indexPath -Raw)
@@ -353,6 +369,12 @@ if (Test-Path $indexPath) {
         $slugMatch = [regex]::Match($cells[1], 'knowledge/domains/([a-zA-Z0-9_-]+)/?')
         if (-not $slugMatch.Success) { continue }
         $indexDomainStatus[$slugMatch.Groups[1].Value] = $cells[2]
+        if ($cells.Count -gt 4) {
+            $indexDateMatch = [regex]::Match($cells[4], '\d{4}-\d{2}-\d{2}')
+            if ($indexDateMatch.Success) {
+                $indexDomainLastUpdated[$slugMatch.Groups[1].Value] = $indexDateMatch.Value
+            }
+        }
     }
 }
 
@@ -378,6 +400,27 @@ foreach ($domainDir in $domainDirs) {
             Add-ValidationWarning "Domain '$($domainDir.Name)': index.md lists Status 'Retired' but description.md/knowledge.md do not — update the files or revert the index"
         } elseif ($filesRetired -and -not $indexRetired) {
             Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md status is 'Retired' but index.md still lists Status '$indexStatus' — update the index"
+        }
+    }
+
+    # --- Last Updated staleness: index.md's own instruction (§ Registered
+    #     Domains) says to update this column whenever description.md or
+    #     knowledge.md changes materially, but nothing checked it — a
+    #     domain's own files could get edited (and their header dates
+    #     bumped) every month without the separate index row ever being
+    #     touched. Warning, not error: a small lag between an edit and the
+    #     next validate run can be normal. See projects/system/
+    #     session-log.md Turn 29. ---
+    $descDate = $null
+    $knowledgeDate = $null
+    if (Test-Path $descPath) { $descDate = Get-HeaderDate -Text (Get-Content -Path $descPath -Raw) }
+    if (Test-Path $knowledgeFilePath) { $knowledgeDate = Get-HeaderDate -Text (Get-Content -Path $knowledgeFilePath -Raw) }
+    $latestFileDate = @($descDate, $knowledgeDate) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
+
+    if ($latestFileDate -and $indexDomainLastUpdated.ContainsKey($domainDir.Name)) {
+        $indexDate = $indexDomainLastUpdated[$domainDir.Name]
+        if ($latestFileDate -gt $indexDate) {
+            Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md was last touched $latestFileDate but index.md's Last Updated column still says $indexDate — update the index row (knowledge/domains/index.md § Registered Domains)"
         }
     }
 }

@@ -822,3 +822,30 @@ STATUS: CHECKPOINT
 Completed: Added a blockquote to `ROUTING.md`'s Hard Constraints section stating they apply for the whole session and should be re-checked on a direct question about a past or in-progress action, not answered from assumption or outer-context framing. Relayed via `[FLAG FOR UPSTREAM]` from `longstraw-context-architecture`, prompted by a real incident; framing corrected (not literally "entry-only" in the text) before the fix was written, and exact wording confirmed with the human before committing, per the flag's own request.
 Next: Not yet ported to `familien-boe` or `kej`.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 29 | 2026-08-22
+
+Human relayed two findings from `homelab-context-architecture`, both verified before building.
+
+**Finding 1 — sessions can misattribute a harness-imposed workflow constraint to the human or the repo.** Real incident: a session on that fork, run under branch-mandating harness tooling, complied all session, then described the branch requirement back to the human as "your standing instructions" — confronted directly, had to walk it back. Distinct from Turn 28's fix (that one was about re-checking a rule; this one is about correctly attributing where a rule came from). Confirmed `git-collaboration.md`'s actual scope is multi-writer collision handling, no overlap with constraint-provenance. Placed the fix in `ROUTING.md` Hard Constraints instead of `git-collaboration.md` as the finding suggested — this is a "never do X" rule of the same shape as the existing Hard Constraints there, needs to cover harness-level constraints generally (permission modes, outcome-branch targets), not just branches, and is narrower in scope than what `git-collaboration.md` actually covers.
+
+**Finding 2 — `validate.ps1` never checked `index.md`'s `Last Updated` column against a domain's own file dates**, despite `index.md`'s own instruction saying to update it whenever `description.md`/`knowledge.md` changes materially. Confirmed the gap and the existing Status-consistency check's pattern to extend. Built the extension, then immediately caught a real, previously-invisible case in this repo's own content: `example-domain`'s Last Updated cell still said `2026-06-29`, six weeks stale against `knowledge.md`'s actual `2026-08-11` header date from Turn 22. Fixed the stale row in the same turn.
+
+**Bonus, found while building Finding 2:** `Get-HeaderStatus` — the function the Status-consistency check itself depends on — had the identical bare-date assumption already fixed twice in Turn 27 (project Active/Retired detection, turn-header parsing) and missed there. Widened it to use the same shared `$dateFieldPattern` rather than leaving a fourth latent instance of the same bug. Added a matching `Get-HeaderDate` helper (bare date only, ignoring any trailing annotation) for the new Last-Updated comparison.
+
+**Tested all three before trusting them**, in a disposable `/tmp` copy: the Last-Updated check against index-ahead (no warning), index-equal (no warning), and index-behind (warns with correct dates) cases; the `Get-HeaderStatus` widening against a `(later)`-suffixed domain header, confirming Status still parses correctly and the retirement-consistency check isn't disrupted by the suffix.
+
+**Files changed:** `ROUTING.md` (1.17 → 1.18 — new Hard Constraint, Quick Task Guide entry), `knowledge/flow/git-collaboration.md` (1.1 → 1.2 — §1 pointer distinguishing its scope from harness-constraint attribution), `scripts/validate.ps1` (`Get-HeaderStatus` widened, new `Get-HeaderDate` helper, new Last-Updated staleness check), `knowledge/domains/index.md` (real stale `Last Updated` cell for `example-domain` fixed, found by the new check).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added a Hard Constraint requiring sessions to distinguish and disclose whether a workflow constraint came from this repo, the human, or the calling harness — never misattributing the third to the first two — and extended `validate.ps1` with a Last-Updated staleness check that immediately found and let us fix a real six-week-stale index row in this repo's own `example-domain`. Also closed a fourth latent instance of the bare-date regex bug found while building the second fix. Both findings relayed via `[FLAG FOR UPSTREAM]` from `homelab-context-architecture`.
+Next: Not yet ported to `familien-boe`, `longstraw`, or `kej`.
+Waiting for: Direction on the next task.

@@ -18,7 +18,7 @@ Registry of all knowledge domains in this context architecture. Add one entry pe
 
 | Domain | Folder | Status | Covers | Last Updated | References |
 |---|---|---|---|---|---|
-| Example Domain | `knowledge/domains/example-domain/` | Active | Placeholder domain showing the required structure — replace with your first real domain | 2026-06-29 | None |
+| Example Domain | `knowledge/domains/example-domain/` | Active | Placeholder domain showing the required structure — replace with your first real domain | 2026-08-11 | None |
 
 ---
 
