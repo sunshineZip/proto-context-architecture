@@ -799,3 +799,26 @@ STATUS: CHECKPOINT
 Completed: Fixed a real project-status-detection bug and a latent twin of it in turn-header parsing (shared regex fragment now used by both, plus the domain-onboarding step and Maintenance Pass items), and gave the cross-reference reciprocity checker a way to distinguish genuine scope-exclusion pointers from real drift instead of treating every one-directional link identically. All four relayed via upstream feedback from a fork's Maintenance Pass; one finding's "template convention" framing was checked and didn't hold up, corrected rather than adopted as stated; all four tested against disposable fixtures before trusting them.
 Next: Not yet ported to `familien-boe` or `longstraw`.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 28 | 2026-08-22
+
+Human relayed a `[FLAG FOR UPSTREAM]` from `longstraw-context-architecture`: `ROUTING.md`'s Hard Constraints are only actually re-checked at session start (Step 1's sequence), with nothing telling a session to re-read the relevant constraint when it's asked directly, mid-session, about a past or in-progress action. Real incident behind it: a session on that fork, asked "why are you on a branch instead of main," answered from the outer harness's generic branch-per-task framing instead of re-reading `ROUTING.md` — which already had the correct, specific answer written — and only self-corrected after the human pushed back.
+
+Verified before proposing anything. One framing correction: the finding said Hard Constraints are "framed and enforced only at session start," but the actual text never scopes them that way — "do not break these regardless of what the human asks" already reads as an ongoing rule. The real gap is narrower: no instruction tells a session to *re-check* the file on a relevant direct question, especially many turns past when it was last actually loaded. Also confirmed this isn't a hook-closeable gap — it's precisely the residual case the branch-default constraint's own text already admits the pre-push hook can't reach (a session-launch-assigned branch, pushed by the harness's own plumbing, not a local `git push` the hook could intercept). What failed was purely conversational: the session had the right answer on file and didn't go read it.
+
+Proposed exact wording for confirmation before committing, per the flag's own explicit instruction to confirm wording first. Human approved as proposed, no changes.
+
+**Built:** `ROUTING.md` (1.16 → 1.17) — a blockquote directly under the `## Hard Constraints` heading (not a separate Standing Rule, and not extended to Standing Rules generally — the flag scoped this to Hard Constraints specifically, so left Standing Rules alone rather than expanding scope unprompted): Hard Constraints apply for the whole session, not just at Step 1; a direct question touching one should trigger re-reading it before answering, not an answer from assumption or outer-session-launch framing.
+
+### Session close
+
+Knowledge candidates: None — structural change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Added a blockquote to `ROUTING.md`'s Hard Constraints section stating they apply for the whole session and should be re-checked on a direct question about a past or in-progress action, not answered from assumption or outer-context framing. Relayed via `[FLAG FOR UPSTREAM]` from `longstraw-context-architecture`, prompted by a real incident; framing corrected (not literally "entry-only" in the text) before the fix was written, and exact wording confirmed with the human before committing, per the flag's own request.
+Next: Not yet ported to `familien-boe` or `kej`.
+Waiting for: Direction on the next task.
