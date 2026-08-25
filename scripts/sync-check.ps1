@@ -24,6 +24,20 @@ param()
 # automatically, and this script always exits 0 — it is informational
 # infrastructure, not a gate, and must never block a session from
 # starting.
+#
+# Also checks (added Turn 30, after real cross-fork evidence that the
+# pre-push hook alone did not stop recurring branch pushes — see
+# projects/system/session-log.md): whether the current checkout is on
+# the default branch at all, independent of git fetch/push succeeding —
+# unlike the pre-push hook, this fires even for a session whose writes
+# will go through a non-git path (e.g. a GitHub API tool); and whether
+# the remote's own default-branch setting actually matches, since a
+# successful push doesn't change that setting on its own.
+
+# A fork using a different default branch name than "main" should change
+# $defaultBranch below — same template-default-not-derived convention as
+# scripts/pre-push-check.ps1.
+$defaultBranch = "main"
 
 $repoRoot = (git rev-parse --show-toplevel 2>$null)
 if (-not $repoRoot) {
@@ -36,10 +50,55 @@ if (-not $branch -or $branch -eq "HEAD") {
     exit 0
 }
 
+# --- Loud, write-path-blind branch notice. This check is deliberately
+#     independent of git fetch/push succeeding at all — it only looks at
+#     which branch is currently checked out, so it fires even offline and
+#     even for a session whose actual writes will go through a non-git
+#     path (e.g. a GitHub API tool) that no git hook could ever see. A
+#     real, evidenced incident (projects/system/session-log.md Turn 30)
+#     showed the pre-push hook alone did not stop recurring branch
+#     pushes — this is the one check confirmed to catch it before any
+#     writes happen, regardless of write path. ---
+if ($branch -ne $defaultBranch) {
+    Write-Host ""
+    Write-Host "======================================================================" -ForegroundColor Red
+    Write-Host " NOT ON '$defaultBranch' — currently on '$branch'" -ForegroundColor Red
+    Write-Host "======================================================================" -ForegroundColor Red
+    Write-Host "ROUTING.md Hard Constraints: this repo defaults to '$defaultBranch'. If a" -ForegroundColor Yellow
+    Write-Host "calling harness assigned this branch (not something the human said, not" -ForegroundColor Yellow
+    Write-Host "this repo's own convention), disclose that plainly at the first opportunity" -ForegroundColor Yellow
+    Write-Host "— this repo's own convention wins over conflicting harness instructions," -ForegroundColor Yellow
+    Write-Host "even ones phrased just as firmly. Developing here is fine; leaving it" -ForegroundColor Yellow
+    Write-Host "unlanded is not: land finished work on '$defaultBranch' (git checkout" -ForegroundColor Yellow
+    Write-Host "$defaultBranch, then merge/fast-forward and push) before considering any" -ForegroundColor Yellow
+    Write-Host "task done, and never end a turn with unmerged work here without saying so." -ForegroundColor Yellow
+    Write-Host ""
+}
+
 git -C $repoRoot fetch origin $branch 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "sync-check: could not fetch origin/$branch (offline, or no remote configured) — skipping." -ForegroundColor Yellow
     exit 0
+}
+
+# --- Remote's actual default branch, not just its content. A successful
+#     push to $defaultBranch does not change which branch the *hosting
+#     side* (e.g. GitHub) treats as default — only a genuinely empty
+#     repo's very first push sets that automatically. Confirmed as a
+#     real, separately-evidenced incident (Turn 30) distinct from the
+#     branch-notice check above: content can be correctly on
+#     $defaultBranch while the repo's actual default-branch setting still
+#     points elsewhere. Informational only — this script never changes
+#     hosting-side settings itself. ---
+$remoteShowOutput = git -C $repoRoot remote show origin 2>$null
+if ($LASTEXITCODE -eq 0) {
+    $headBranchMatch = [regex]::Match(($remoteShowOutput -join "`n"), '(?m)^\s*HEAD branch:\s*(\S+)\s*$')
+    if ($headBranchMatch.Success) {
+        $remoteDefaultBranch = $headBranchMatch.Groups[1].Value
+        if ($remoteDefaultBranch -ne $defaultBranch -and $remoteDefaultBranch -ne '(unknown)') {
+            Write-Host "sync-check: the remote's actual default branch is '$remoteDefaultBranch', not '$defaultBranch' — pushing content to '$defaultBranch' does not change this setting on its own. Check/update it on the hosting side (e.g. GitHub repo Settings > Branches) if that's not intended." -ForegroundColor Red
+        }
+    }
 }
 
 git -C $repoRoot rev-parse --verify "origin/$branch" 2>&1 *> $null

@@ -5,9 +5,17 @@
 #
 # Usage:
 #   .\scripts\commit-push.ps1 "describe what changed"
+#   .\scripts\commit-push.ps1 "describe what changed" -AllowBranch   # deliberate, non-main only
 #
 # Note: git is not in the system PATH on this machine — this script locates it
 # automatically via the GitHub Desktop installation.
+#
+# Note on the branch check: refuses to run at all if the current branch
+# isn't ROUTING.md's default (main) unless -AllowBranch is passed — see
+# ROUTING.md's branch-default Hard Constraint. Deliberately redundant with
+# the pre-push git hook (scripts/pre-push-check.ps1): that hook only runs
+# if core.hooksPath is configured in this clone; this check doesn't depend
+# on that at all. See projects/system/session-log.md Turn 30.
 #
 # Note on stderr handling: git writes normal progress/status output (e.g. the
 # "To <url> ... branch -> branch" push summary) to stderr by design, even on
@@ -35,7 +43,8 @@
 
 param(
     [Parameter(Mandatory = $true)]
-    [string]$Message
+    [string]$Message,
+    [switch]$AllowBranch
 )
 
 $ErrorActionPreference = "Stop"
@@ -61,6 +70,34 @@ $repo = Split-Path $PSScriptRoot -Parent
 Write-Host "Repository: $repo"
 Write-Host "Git:        $git"
 Write-Host ""
+
+# --- Independent branch check, deliberately redundant with the pre-push
+#     git hook (.githooks/pre-push / scripts/pre-push-check.ps1). That
+#     hook only runs if core.hooksPath is actually configured in this
+#     clone; this check doesn't depend on that at all — it fires for
+#     anyone who runs this script, hooksPath set or not. Real,
+#     cross-fork evidence (projects/system/session-log.md Turn 30) showed
+#     the hook alone was not sufficient. -AllowBranch is the deliberate,
+#     visible override — same philosophy as the hooks' --no-verify,
+#     never a silent bypass. ---
+$defaultBranch = "main"
+$currentBranch = (& $git -C $repo rev-parse --abbrev-ref HEAD 2>&1).Trim()
+if ($currentBranch -ne $defaultBranch -and -not $AllowBranch) {
+    Write-Host ""
+    Write-Host "BLOCKED: currently on '$currentBranch', not '$defaultBranch'." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "ROUTING.md Hard Constraints: this repo defaults to '$defaultBranch'. If a" -ForegroundColor Yellow
+    Write-Host "human explicitly asked for a branch, or there's a specific stated reason for" -ForegroundColor Yellow
+    Write-Host "isolation, re-run with -AllowBranch to proceed deliberately. Otherwise:" -ForegroundColor Yellow
+    Write-Host "  git checkout $defaultBranch" -ForegroundColor Yellow
+    Write-Host "  git merge --ff-only $currentBranch   # or rebase/merge as appropriate" -ForegroundColor Yellow
+    Write-Host "then re-run this script from $defaultBranch." -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+} elseif ($currentBranch -ne $defaultBranch) {
+    Write-Host "Proceeding on '$currentBranch' — -AllowBranch was passed deliberately." -ForegroundColor Yellow
+    Write-Host ""
+}
 
 # From here on, native git stderr output must never escalate into a
 # terminating PowerShell error — see note above. $LASTEXITCODE is checked

@@ -849,3 +849,40 @@ STATUS: CHECKPOINT
 Completed: Added a Hard Constraint requiring sessions to distinguish and disclose whether a workflow constraint came from this repo, the human, or the calling harness — never misattributing the third to the first two — and extended `validate.ps1` with a Last-Updated staleness check that immediately found and let us fix a real six-week-stale index row in this repo's own `example-domain`. Also closed a fourth latent instance of the bare-date regex bug found while building the second fix. Both findings relayed via `[FLAG FOR UPSTREAM]` from `homelab-context-architecture`.
 Next: Not yet ported to `familien-boe`, `longstraw`, or `kej`.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 30 | 2026-08-25
+
+Human relayed five documents of hard, cross-fork evidence that the branch-default enforcement built two turns ago (Hard Constraint + pre-push hook) was not sufficient: a `familien-boe` post-mortem, a `longstraw` post-mortem (the most rigorous — four documented episodes with git-log evidence), and two shorter incident write-ups. Central, load-bearing fact: `longstraw`'s most recent stray branch was created and pushed to *four days after* the pre-push hook shipped, in a session that had the hook active.
+
+**Synthesized five distinct root causes from the evidence, not assumed:**
+
+1. Branch assignment happens before any repo convention can be read (already known, already documented as an irreducible limit).
+2. **Two authority sources actively conflict, and nothing forces this repo's own convention to win** — `longstraw`'s harness injected "NEVER push to a different branch without explicit permission," worded exactly as absolutely as this file's own Hard Constraints, for a branch the harness itself had assigned. A session took it at face value.
+3. **The pre-push hook has two real gaps**: it only fires after a whole session's work has already happened on the wrong branch, and it's silently bypassed by GitHub-API-based writes (`longstraw`'s `jaqueq` branch was pushed to twice via `create_or_update_file`, never touching a local git hook at all).
+4. **"Land it before calling it done" has no forcing function** — `tut8v2` sat unlanded for four days; the session that created it even flagged the exact problem in its own log and moved on without resolving it.
+5. A stale reference to "the two-branch/multi-session setup this fork is currently running under" raised the possibility that concurrent sessions genuinely needed separate branches at some point — asked the human directly rather than assume either way, since the fix differs completely depending on the answer. Confirmed: no current need for parallel branches in any fork. Root cause 5 is closed; "always `main`" can stay unconditional.
+
+Two more findings, each from a different document, folded into the same fix: pushing a branch's commits to the remote `main` ref (`git push origin branch:main`) does not move local HEAD, so subsequent commits keep landing on the stale branch until `git checkout main` actually happens (the `.txt` postmortem); and a successful push to `main` does not change which branch the *hosting side* treats as default — only a genuinely empty repo's first-ever push does that automatically (the other `.txt` postmortem).
+
+**Built, closing root causes 2, 3, and 4 plus both secondary findings:**
+
+- `scripts/sync-check.ps1` — two new checks, confirmed by the evidence as the two highest-leverage additions. (1) A loud, write-path-blind "NOT ON 'main'" banner the moment a session starts on any other branch — deliberately independent of git fetch/push succeeding at all, since the evidence showed the actual failure mode is often a write path (GitHub API) no git hook could ever see. (2) A check against the remote's actual default branch (`git remote show origin`, parsed for `HEAD branch:`), closing the hosting-side-default-branch finding.
+- `scripts/commit-push.ps1` — new `-AllowBranch` switch; the script now refuses to run at all on a non-`main` branch unless it's passed deliberately. Independently redundant with the pre-push hook on purpose: the hook depends on `core.hooksPath` being configured in a given clone, this doesn't depend on that at all.
+- `ROUTING.md` (1.18 → 1.19): rewrote the branch-default Hard Constraint to describe all three mechanical layers as independent and non-substitutable, and tightened "land on `main`" to explicitly mean `git checkout main`, not just advancing the remote ref. Added a new Hard Constraint: when a harness's own instructions conflict with this repo's conventions, this repo wins, even when the harness is worded just as firmly — closing root cause 2. Added a new Standing Rule mirroring "never leave a push silently pending": never leave a branch silently unmerged — closing root cause 4. Added a matching Quick Task Guide entry.
+
+**Tested before trusting, same discipline as every prior script change this session.** `sync-check.ps1`: built a bare local remote and a real clone, confirmed the branch banner fires correctly (and independently of fetch succeeding — it printed even when the feature branch had never been pushed anywhere), confirmed the remote-default-branch check correctly detects a mismatch by pointing a bare repo's `HEAD` symref at a non-`main` branch, and confirmed both checks stay silent on a correctly-configured `main` checkout. `commit-push.ps1`: this script resolves `git.exe` via Windows-specific paths that don't exist in this Linux sandbox (a known, previously-documented limitation, Turn 16) — extracted just the new branch-check logic into a standalone test against a real repo instead, confirmed it blocks on a non-`main` branch, proceeds normally on `main`, and proceeds with a visible notice when `-AllowBranch` is passed; separately confirmed the actual edited file still parses with no syntax errors.
+
+**Files changed:** `scripts/sync-check.ps1`, `scripts/commit-push.ps1`, `ROUTING.md` (1.18 → 1.19).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling change, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main`.
+
+STATUS: CHECKPOINT
+Completed: Closed three of five root causes identified from real cross-fork evidence that the existing branch-default enforcement was insufficient — authority conflict between harness and repo (new Hard Constraint), the pre-push hook's write-path and timing gaps (two new `sync-check.ps1` checks plus `commit-push.ps1`'s new `-AllowBranch` gate), and the missing forcing function for landing unmerged branches (new Standing Rule). Confirmed with the human that root cause 5 (possible legitimate concurrent-session need) doesn't apply to any current fork, so "always `main`" stays unconditional. Two secondary findings (pushing to remote `main` doesn't move local HEAD; a successful push doesn't change the hosting side's default branch) folded into the same fix. All new logic tested against real repos before trusting it.
+Next: None of this is yet ported to `familien-boe`, `longstraw`, `homelab-context-architecture`, or `kej` — all four would benefit, `longstraw` most directly since its own postmortem is what drove this turn.
+Waiting for: Direction on the next task.
