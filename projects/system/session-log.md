@@ -916,3 +916,29 @@ STATUS: CHECKPOINT
 Completed: Attached and reviewed two real forks (`hh-learning`, `familien-boe`) to ground a new opt-in pattern, then designed and wrote `knowledge/flow/repo-mixing.md` — home/guest routing authority, an export registry for what's mixable, a sensitivity gate reusing existing tiering, a restate-never-link rule, and a mixing log, generalizing real precedent found in both attached forks rather than inventing the mechanism from scratch. Cross-referenced from `README.md`.
 Next: Not yet adopted by any actual fork — this is template-layer only until a human decides to adopt it in `hh-learning`/`familien-boe`/a third career fork.
 Waiting for: Direction on the next task, and a decision on whether/when to land this turn's work on `main` given the harness-assigned branch.
+
+---
+
+## [Claude] — Turn 32 | 2026-08-31 (later)
+
+Human asked to land Turn 31's work on `main` — checked out `main`, fast-forwarded to `origin/main` (already current), fast-forwarded in `claude/multi-fork-session-routing-koesjw`'s single commit (clean fast-forward, no divergence), pushed, and verified the remote's actual `HEAD branch` still reports `main` (`git remote show origin`), per the Standing Rule to verify a branch-governing action's real outcome rather than inferring it from a successful push. The harness-assigned branch itself is left in place, fully merged, not deleted.
+
+Human then asked two direct design questions about `repo-mixing.md` §5: how is the correct fork confirmed as "guest," and what changes with three or more forks in one session. Both were real gaps in how explicit the document was, not just requests to restate what it already said — clarified and edited in place rather than answered only in conversation:
+
+- Home/guest is always a human statement, never inferred from which repos merely happen to be reachable in the session — being mounted is not the same signal as being declared.
+- With three-plus forks present, each guest must be named individually, not as a block, because §6/§7 gating is evaluated per guest against that guest's own domain scope and tagging conventions — a blanket declaration would invite treating every guest as equally reviewed when they aren't.
+- §9's mixing log follows the same per-guest logic: one row per (session, guest, destination), not one merged row per session, so "what has ever crossed from fork X specifically" stays answerable later without parsing a combined row.
+
+**Files changed:** `knowledge/flow/repo-mixing.md` (1.0 → 1.1 — §5 and §9 clarified for explicit-declaration and multi-guest mechanics).
+
+### Session close
+
+Knowledge candidates: None — structural/tooling document, not a domain fact.
+Open flags: None.
+Push status: Pending — will push immediately after this turn is logged, directly to `main` (now the checked-out branch).
+Note on branch: `main` is now checked out and is confirmed the actual GitHub default branch (`HEAD branch: main`). No unmerged work remains on `claude/multi-fork-session-routing-koesjw`.
+
+STATUS: CHECKPOINT
+Completed: Landed Turn 31's `repo-mixing.md` work on `main`, verified against the real remote state rather than assuming success. Tightened `repo-mixing.md` §5/§9 for explicit per-guest declaration and multi-guest mixing-log mechanics, prompted directly by the human's own questions.
+Next: Still not adopted by any actual fork.
+Waiting for: Direction on the next task.

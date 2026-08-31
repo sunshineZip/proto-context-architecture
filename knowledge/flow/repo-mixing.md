@@ -4,7 +4,7 @@ type: flow
 
 # Repo Mixing
 
-Version 1.0 | 2026-08-31 | Production
+Version 1.1 | 2026-08-31 | Production
 
 ---
 
@@ -87,10 +87,12 @@ Put these in home's own `ROUTING.md` Hard Constraints once adopted (adapt names,
 
 At the start of a session that will mix repos, before Step 1 of home's `ROUTING.md` completes, state explicitly:
 
-- Which fork is **home** for this session.
-- Which fork(s) are **guest**, and roughly why they're being brought in (which project or topic this serves).
+- Which fork is **home** for this session. Exactly one — never a set, never "whichever one turns out to matter most."
+- Which fork(s) are **guest**, and roughly why each is being brought in (which project or topic it serves).
 
-If this isn't stated and more than one fork's files are reachable in the session, ask — the same "ambiguous, ask one question" discipline `ROUTING.md` Step 2 already applies to an unmatched request. Do not guess home from whichever repo's directory the session happens to be sitting in; that's an artifact of how the environment mounted things, not a routing decision.
+This is always a human statement, not something a session infers or self-assigns. The signal that a repo is *technically reachable* (mounted, cloned, sitting in the same workspace) is not the same signal as "declared for this mix" — a session with three forks checked out for unrelated reasons has zero guests until a human names one. If home isn't stated and more than one fork's files are reachable, ask which one is home before doing anything else — the same "ambiguous, ask one question" discipline `ROUTING.md` Step 2 already applies to an unmatched request. Do not guess home from whichever repo's directory the session happens to be sitting in; that's an artifact of how the environment mounted things, not a routing decision.
+
+**With three or more forks present**, declare each guest individually rather than as a block — "guest: the career fork, for its leave-policy content; guest: the homelab fork, for its authentication-security domain" — not "the other two are guests." Two reasons this matters more as the guest count grows: first, §6's export registry and §7's sensitivity gate are evaluated per guest, against that guest's own domain scope and tagging conventions, which can differ fork to fork — a blanket declaration invites treating all guests as equally reviewed when they aren't. Second, a fork reachable in the session but never named as a guest stays exactly as off-limits as if it weren't mounted at all — being on disk is not itself a declaration, however many forks that turns out to be true of at once.
 
 Once declared, Step 1's sync-check (`ROUTING.md` Step 1) should run for every mounted repo, home and guest alike — staleness in a guest is exactly as real a risk to trust as staleness in home, since Step 4 loads content from it the same way.
 
@@ -126,7 +128,9 @@ This isn't a new rule invented for this document — it generalizes a constraint
 
 ## 9. The Mixing Log
 
-Once a mixing session has pulled anything durable into home (per §8), record that it happened — not the content itself — in home's `projects/system/mixing-log.md`. One row per mixing session that produced a durable write, appended chronologically, never edited (same append-only spirit as `session-log.md`, though this file isn't subject to the turn-protocol machinery — a plain running table, mirroring `extraction-procedure.md` §6's log). Columns: date, guest repo, domains/sections drawn from, the home project or domain the content landed in, and a one-line note on any 🔒 content included or ⛔ content flagged-and-declined.
+Once a mixing session has pulled anything durable into home (per §8), record that it happened — not the content itself — in home's `projects/system/mixing-log.md`. One row per **(session, guest, destination)** that produced a durable write, appended chronologically, never edited (same append-only spirit as `session-log.md`, though this file isn't subject to the turn-protocol machinery — a plain running table, mirroring `extraction-procedure.md` §6's log). Columns: date, guest repo, domains/sections drawn from, the home project or domain the content landed in, and a one-line note on any 🔒 content included or ⛔ content flagged-and-declined.
+
+A session mixing more than one guest gets one row per guest that actually contributed a durable write, not one merged row — a guest that was declared but never ended up contributing anything durable doesn't get a row at all. This keeps the log answerable per-guest later ("what has ever crossed from the career fork specifically") without having to parse which part of a combined row came from where.
 
 Create the file, with a header row, the first time this procedure actually produces a durable write — don't pre-create it speculatively. A session that only used guest content transiently in conversation, without writing anything durable into home, doesn't need a log entry.
 
@@ -177,3 +181,4 @@ Nothing here required merging the two forks, moving the career fork's content pe
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-08-31 | Initial creation. Designed after a real cross-fork question — mixing a children's-learning fork with a personal-career fork for a specific session — grounded against two real forks (`familien-boe`, `hh-learning`) rather than written in the abstract: `hh-learning`'s existing "restate, don't link" convention for `familien-boe` content generalized into §8; `familien-boe`'s two-tier sensitivity system and `extraction-procedure.md` generalized into §6-7 and §9 rather than inventing a parallel mechanism; `restricted-tier.md` §11's single-routing-authority reasoning generalized from the access-gated case to the peer-fork case in §3. See `projects/system/session-log.md` Turn 31. |
+| 1.1 | 2026-08-31 (later) | §5 clarified: home/guest is always an explicit human statement, never inferred from which repos happen to be mounted or reachable — and with three or more forks present, each guest is declared individually rather than as a block, since §6/§7 gating is evaluated per guest against that guest's own domain scope and tagging. §9's mixing log clarified to one row per (session, guest, destination) rather than one merged row per session, so a multi-guest session stays answerable per guest later. Prompted by a direct question on both points. See `projects/system/session-log.md` Turn 32. |
