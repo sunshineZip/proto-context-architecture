@@ -31,6 +31,7 @@ For the full structural design: see [Architecture.md](Architecture.md).
 6. Create your first project — copy `projects/_template/`, rename, write Turn 1 in `session-log.md`.
 7. Delete `example-domain/` and `example-project/` once replaced.
 8. (Optional) If this instance will systematically handle real sensitive/confidential third-party material at volume — not just the occasional secret — set up the companion-repository pattern in `knowledge/flow/restricted-tier.md` before ingesting real source material. Most forks won't need this; occasional sensitive content is already covered by `ROUTING.md`'s Hard Constraints and pre-commit secret check.
+9. (Optional) If you run more than one fork of this template and want to deliberately combine them in a single session — e.g. pulling one fork's domain knowledge into another's project — see `knowledge/flow/repo-mixing.md` before mixing repos for the first time. Most single-fork setups won't need this.
 
 For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](knowledge/domains/authoring-guidelines.md).
 
@@ -100,3 +101,4 @@ For domain authoring standards: see [knowledge/domains/authoring-guidelines.md](
 | 1.3 | 2026-07-25 | Folder structure diagram updated for the "deep well" → "reference work" rename and the dropped `library/deep-wells/` subfolder — see `knowledge/domains/authoring-guidelines.md` §9.2. |
 | 1.4 | 2026-08-11 | Setup checklist gained an optional step pointing to the new `knowledge/flow/restricted-tier.md` companion-repository pattern, for instances handling sensitive material systematically. See `projects/system/session-log.md` Turn 18. |
 | 1.5 | 2026-08-11 | Folder structure diagram gained the new top-level `incoming/` folder — a generic, git-tracked landing zone for sharing files with a session, distinct from the gitignored `temp/`. See `Architecture.md` §2 and `projects/system/session-log.md` Turn 21. |
+| 1.6 | 2026-08-31 | Setup checklist gained an optional step pointing to the new `knowledge/flow/repo-mixing.md` pattern, for people running multiple forks who want to deliberately combine them in one session. See `projects/system/session-log.md` Turn 31. |
