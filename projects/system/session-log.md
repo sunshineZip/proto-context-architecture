@@ -942,3 +942,34 @@ STATUS: CHECKPOINT
 Completed: Landed Turn 31's `repo-mixing.md` work on `main`, verified against the real remote state rather than assuming success. Tightened `repo-mixing.md` §5/§9 for explicit per-guest declaration and multi-guest mixing-log mechanics, prompted directly by the human's own questions.
 Next: Still not adopted by any actual fork.
 Waiting for: Direction on the next task.
+
+---
+
+## [Claude] — Turn 33 | 2026-09-02
+
+Relayed finding from `familien-boe`, handed to this session as a ready-to-paste prompt (per the `[FLAG FOR UPSTREAM]` shape in `operating-principles.md` §5): that fork's `ROUTING.md` carries a "Proactive document capture" Standing Rule (classify every uploaded/quoted/forwarded document as evidentiary-source material or not, store the former under `sources/` unasked, always disclose which way — even on the "no" branch), backed only by the model's own instinct re-firing every time, with no equivalent to the mechanical pre-commit hook backing "structural changes must be logged." Concrete failure observed there: a document uploaded early in a conversation was correctly classified and stored; a second qualifying document (an official pension-provider letter) arrived many turns later, attached to a question about what it meant rather than about storage, and the session answered well but never re-ran classification or disclosed the gap — surfaced only because the human noticed and asked directly.
+
+That Standing Rule itself doesn't exist in this template — it's `familien-boe`-specific content, never ported up. The generic mechanism it depends on (`sources/`, evidentiary-source classification) does live here, in `authoring-guidelines.md` §9.1, so the fix is porting a generalized version of the rule here, the same pattern as Turn 8's "work directly on `main`" port.
+
+**Evaluated the three options the relay proposed rather than applying one blindly:**
+1. Strengthen `ROUTING.md` wording to make re-running classification on every qualifying upload explicit, regardless of depth into the conversation or the surface question attached — adopted.
+2. A mechanical backstop the way the structural-changes hook backs its own constraint — assessed and rejected as infeasible for this specific rule, not just skipped. `pre-commit-check.ps1` works because it inspects a *diff*: a real, git-visible artifact of what changed. A skipped classification produces no artifact at all — there's no file a hook could inspect to notice "a document arrived and nothing happened." The branch-default constraint's own honesty precedent (`ROUTING.md` Hard Constraints: "a session-launch environment assigning a branch before any local command runs... remains a real, structural limit this repo cannot close from the inside") applies just as directly here. Documented as an explicit limitation rather than silently dropped.
+3. A worked negative example — adopted, in `authoring-guidelines.md` §9.1, reusing the fork's own concrete incident (mid-conversation upload, attached to an unrelated question, silently skipped) rather than inventing a generic one.
+
+**Files changed:**
+- `ROUTING.md` (1.19 → 1.20) — new Standing Rule requiring document classification to re-run on every qualifying upload for the life of a session, disclosed on both branches, cross-referencing `authoring-guidelines.md` §9.1 and naming why no mechanical backstop applies.
+- `knowledge/domains/authoring-guidelines.md` (1.10 → 1.11) — §9.1 gained a "Proactive classification, every time" subsection with the same instruction, the worked negative example, and the same explicit no-backstop note.
+
+**Not run this turn:** `scripts/validate.ps1` — this sandbox has no `pwsh` available (consistent with the Windows-path limitation already noted in Turn 30's testing). Checked manually instead: both files' header `Version` lines match their new latest Version History row, both Version History tables were only appended to (no prior row edited), frontmatter untouched, and the Index in `authoring-guidelines.md` needs no update since §9.1 is an existing indexed section gaining a subsection, not a new top-level one.
+
+### Session close
+
+Knowledge candidates: None — structural/authoring-standard change, not a domain fact.
+Open flags: None — this turn is itself the resolution of an already-confirmed `[FLAG FOR UPSTREAM]` relay, not a new one.
+Push status: Pending — will push immediately after this turn is logged, to `claude/document-capture-backstop-05absg`.
+Note on branch: this session was launched by an external harness against a GitHub issue, which assigned `claude/document-capture-backstop-05absg` and instructed pushing there specifically (a designated review branch feeding a pull request), not `main`, and not by this repo's own habit or a silent default. Disclosed per the Hard Constraint on harness-vs-repo conflicts and its own recorded precedent (Turn 31): treated this as the constraint's named exception — "a specific, stated reason for needing isolation" — since an issue-triggered, PR-reviewed workflow is a deliberate isolation request from the calling system, not the generic branch-by-habit instinct the constraint exists to override. Landing this on `main` is therefore left to the human's PR review, not done unilaterally by this session.
+
+STATUS: CHECKPOINT
+Completed: Ported a generalized "classify every qualifying document upload, every time" Standing Rule and matching `authoring-guidelines.md` §9.1 mechanics (plus a worked negative example) into the template, relayed from a real `familien-boe` incident. Evaluated a mechanical backstop and concluded, with reasoning documented in both files, that none is feasible here the way the structural-changes hook is — classification leaves no diff-visible artifact for a hook to check.
+Next: Not yet ported back down into `familien-boe` itself, which is where the original gap was actually observed — that fork still needs this Standing Rule added to its own `ROUTING.md` (informed by, but not identical to, the version here, since its own rule is more domain-specific — family legal/financial documents specifically, not the generic "any domain with `sources/`" framing used here). This turn's branch also still needs landing on `main` once the PR is reviewed and merged — flagged per the "never leave a branch silently unmerged" Standing Rule.
+Waiting for: PR review and merge to `main`.
