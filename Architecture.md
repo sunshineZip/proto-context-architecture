@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.9 | 2026-08-18 | Production
+Version 1.10 | 2026-09-09 | Production
 
 ---
 
@@ -72,6 +72,9 @@ The session log only ever grows — no entries are deleted or edited after the f
     domains/
       index.md                        ← Domain registry
       authoring-guidelines.md         ← Standards for writing domain knowledge
+      _template/                      ← Skeleton for a new domain — copy this, not a sibling
+        description.md
+        knowledge.md
       [domain-name]/
         description.md                ← Scope, constraints, when to load
         knowledge.md                  ← Domain reference material
@@ -194,7 +197,7 @@ To fork this template for a new initiative:
 1. **Rename** the repo to `[initiative-name]-context-architecture`.
 2. **Configure your LLM entry point** — in VS Code with GitHub Copilot, update `.github/copilot-instructions.md` and replace `[Project Name]` with your initiative name. For other setups (Cursor, Claude Projects, custom system prompts), load `ROUTING.md` directly at session start through your environment's equivalent mechanism.
 3. **Update `ROUTING.md`** — replace the document purpose, update routing table rows.
-4. **Define your knowledge domains** — copy `knowledge/domains/example-domain/`, rename, fill in `description.md` and `knowledge.md`.
+4. **Define your knowledge domains** — copy `knowledge/domains/_template/`, rename, fill in `description.md` and `knowledge.md`. Copy the template rather than a sibling domain you already created, however similar it looks.
 5. **Register domains** in `knowledge/domains/index.md`.
 6. **Create your first project** — copy `projects/_template/`, rename, write Turn 1 in `session-log.md`.
 7. **Remove example content** — delete `example-domain/` and `example-project/` once replaced.
@@ -219,3 +222,4 @@ To fork this template for a new initiative:
 | 1.7 | 2026-08-11 | §5 gained a fourth Subproject Transcendence row for template-level findings — routed to the fork's own Upstream Feedback Log (`knowledge/flow/upstream-sync.md` §7) via `[FLAG FOR UPSTREAM]`, never written directly to the upstream repo. See `projects/system/session-log.md` Turn 20. |
 | 1.8 | 2026-08-11 | §2 gained a new top-level `incoming/` folder — a generic, git-tracked landing zone for sharing files with a session, distinct from the gitignored, ephemeral `temp/`. Added because `restricted-tier.md`'s `incoming/` (companion-repo-only) had inadvertently become the template's only documented `incoming/` concept, leaving forks without that pattern with no sanctioned durable file-sharing folder at all. See `projects/system/session-log.md` Turn 21. |
 | 1.9 | 2026-08-18 | §6 step 10 reworded from "activate the pre-commit hook" to "activate the git hooks" — one `core.hooksPath` command now also activates the new `pre-push` hook (`scripts/pre-push-check.ps1`), which enforces the promoted `main`-by-default Hard Constraint. See `ROUTING.md` and `projects/system/session-log.md` Turn 23. |
+| 1.10 | 2026-09-09 | §2's File Structure diagram gained `knowledge/domains/_template/`, and §6 step 4 now points at it rather than `example-domain/` — closing the asymmetry where `projects/_template/` existed but domains had no starting artifact, so every new domain was created by copying a sibling. See `projects/system/session-log.md` Turn 36. |

@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.6 | 2026-09-09 | Production
+Version 1.7 | 2026-09-09 | Production
 
 ---
 
@@ -138,6 +138,7 @@ Format:
 - Do not skip levels (e.g. do not jump from `##` to `####`).
 - Name sections after the **knowledge domain or content type** they contain, not after the workflow step or phase where they are used.
 - Use an `## Index` section with anchor links in any document longer than four sections. Place it immediately after Document Purpose.
+- **Exception:** `knowledge/domains/[name]/description.md` carries no Index regardless of section count. It is capped at roughly one page and loaded whole on every request matched to its domain (see its own Brevity constraint), so an Index would add load cost on every session while helping none of them. Every other document over four sections needs one.
 
 ### When to use each content type
 
@@ -252,3 +253,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 | 1.4 | 2026-07-25 | Fixed a header/changelog version mismatch: the header still read "1.2" after the 1.3 edit shipped its own row. Found during `longstraw`'s upstream-sync port, not by the Version History discipline check meant to catch exactly this — that check had its own bug (§10's numbered heading, `## 10. Version History`, didn't match the check's unnumbered-only pattern, so this file was silently skipped entirely). Both fixed together; see `scripts/validate.ps1` and `projects/system/session-log.md` Turn 15. |
 | 1.5 | 2026-08-11 | §8 — clarified that `[SENSITIVE]` is a post-hoc documentation tag, not a gate; cross-referenced the new pause-and-ask Hard Constraint in `ROUTING.md` that governs whether sensitive content gets written down in the first place. See `projects/system/session-log.md` Turn 18. |
 | 1.6 | 2026-09-09 | §2 now names which files actually require a Version History section, instead of saying "Required in every file" — no file under `projects/` has ever carried one, so the rule as written was broader than any fork has followed and could not be enforced as stated. `scripts/validate.ps1` gained a matching check in the same change; previously a file omitting the section entirely was skipped silently while a file that had one was checked closely. See `projects/system/session-log.md` Turn 35. |
+| 1.7 | 2026-09-09 | §3 gained an explicit exception for domain `description.md`, which has six sections and so nominally required an Index it should never have — the file is capped at one page and loaded whole by design. Surfaced while building `knowledge/domains/_template/`, which forced the question; the shipped `example-domain/description.md` had been quietly violating the rule as written since creation. See `projects/system/session-log.md` Turn 36. |

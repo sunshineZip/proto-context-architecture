@@ -109,7 +109,7 @@ if (-not (Test-Path (Join-Path $domainsPath "authoring-guidelines.md"))) {
     Add-ValidationWarning "Missing knowledge/domains/authoring-guidelines.md"
 }
 
-$domainDirs = Get-ChildItem -Path $domainsPath -Directory -ErrorAction SilentlyContinue
+$domainDirs = Get-ChildItem -Path $domainsPath -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne "_template" }
 foreach ($domainDir in $domainDirs) {
     $descPath = Join-Path $domainDir.FullName "description.md"
     $knowledgeFilePath = Join-Path $domainDir.FullName "knowledge.md"

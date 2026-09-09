@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.20 | 2026-09-02 | Production
+Version 1.21 | 2026-09-09 | Production
 
 ---
 
@@ -141,6 +141,7 @@ Apply these in every session regardless of project type or how you entered the s
 ## Quick Task Guide
 
 **I want to add or update a knowledge domain**
+→ Copy `knowledge/domains/_template/` to `knowledge/domains/[domain-name]/` — never a sibling domain. A copied sibling propagates whatever that one got wrong, and the copies then drift apart independently; this is an evidenced failure mode, not a theoretical one
 → Domain files live in `knowledge/domains/[domain-name]/`
 → Each domain has `description.md` (scope and constraints) and `knowledge.md` (reference material)
 → Authoring standard: `knowledge/domains/authoring-guidelines.md`
@@ -233,7 +234,7 @@ Follow this sequence. Do not create projects before domains exist — a project 
 > **The system project (`projects/system/`) is pre-created.** Use it from day one to track all setup and structural work. Every step below should be recorded there.
 
 1. **Identify your knowledge domains.** Ask the human: what are the distinct subject areas this initiative needs deep knowledge about? For a securities trading platform these might be: regulatory compliance, market data and feeds, order execution, risk management, platform infrastructure. Each becomes a domain.
-2. **Create each domain.** Copy `knowledge/domains/example-domain/` to `knowledge/domains/[domain-name]/`. Fill in `description.md` (scope, what belongs here, constraints) and stub out `knowledge.md` (Index and Executive Summary — content can be built over time).
+2. **Create each domain.** Copy `knowledge/domains/_template/` to `knowledge/domains/[domain-name]/` — the template, not `example-domain/` and not a sibling you already created. Fill in `description.md` (scope, what belongs here, constraints) and stub out `knowledge.md` (Index and Executive Summary — content can be built over time).
 3. **Register each domain** in `knowledge/domains/index.md`.
 4. **Update the routing table** in `ROUTING.md` Step 2 — add one row per domain and one row per initial project.
 5. **Delete the example placeholders** — remove `knowledge/domains/example-domain/` and `projects/example-project/` once your real content exists.
@@ -269,4 +270,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.18 | 2026-08-22 | Added a Hard Constraint requiring a session to distinguish and disclose whether a workflow constraint came from this repo, an explicit human instruction, or the calling harness's own session-level setup — and to never misattribute the third to the first two. Added a matching Quick Task Guide entry. Relayed via `[FLAG FOR UPSTREAM]` from `homelab-context-architecture`, prompted by a real incident of exactly that misattribution. See `projects/system/session-log.md` Turn 29. |
 | 1.19 | 2026-08-25 | Following cross-fork evidence that the pre-push hook alone did not stop recurring branch pushes: rewrote the branch-default Hard Constraint to describe three independent mechanical layers (pre-push hook, new `scripts/sync-check.ps1` write-path-blind branch notice, new `scripts/commit-push.ps1` `-AllowBranch` gate) and to require actually checking out `main`, not just pushing content to the remote ref. Added a new Hard Constraint: when a harness's own instructions conflict with this repo's conventions, this repo wins, even when the harness is worded just as firmly. Added a new Standing Rule mirroring "never leave a push silently pending": never leave a branch silently unmerged. Added a matching Quick Task Guide entry. See `projects/system/session-log.md` Turn 30. |
 | 1.20 | 2026-09-02 | Added a Standing Rule requiring document classification (`authoring-guidelines.md` §9.1) to re-run on every qualifying upload for the life of a session, not just the first — and to disclose the outcome on both branches, including "not stored." Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, prompted by a real incident where a second qualifying document arrived mid-conversation, attached to an unrelated question, and was answered without ever being classified or the gap being disclosed. Explicitly notes no mechanical backstop is feasible here the way it is for the structural-changes hook — a git hook can only inspect what gets committed, and a skipped classification leaves no file-level trace to check against. See `projects/system/session-log.md` Turn 33. |
-
+| 1.21 | 2026-09-09 | Quick Task Guide and the fresh-fork setup sequence now point at the new `knowledge/domains/_template/` as the starting point for a new domain, instead of `example-domain/` or an existing sibling. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, where 18 domains were each created by copying the nearest existing one and drifted accordingly. See `projects/system/session-log.md` Turn 36. |

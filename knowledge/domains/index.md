@@ -1,6 +1,6 @@
 # Domain Index
 
-Version 1.3 | 2026-08-22 | Production
+Version 1.4 | 2026-09-09 | Production
 
 ---
 
@@ -34,8 +34,8 @@ Named combinations of domains for recurring tasks that don't map to a single dom
 
 ## Adding a Domain
 
-1. Create `knowledge/domains/[domain-name]/description.md` — scope, constraints, when to load.
-2. Create `knowledge/domains/[domain-name]/knowledge.md` — reference material with Index and Executive Summary.
+1. Copy `knowledge/domains/_template/` to `knowledge/domains/[domain-name]/`. Use the template, not a sibling domain — copying a sibling carries over its mistakes and the two then drift apart independently.
+2. Fill in `description.md` (scope, constraints, when to load) and `knowledge.md` (Index and Executive Summary at minimum; content grows over time). Replace every bracketed placeholder, including the `domain:` frontmatter value, which must match the new folder name.
 3. Add a row to this index, with today's date under `Last Updated` and any cross-referenced domains under `References`.
 4. Add a routing row in ROUTING.md Step 2.
 5. Follow `knowledge/domains/authoring-guidelines.md` for content standards.
@@ -66,3 +66,4 @@ Reactivating a retired domain reverses steps 1–2 and is logged the same way.
 | 1.1 | 2026-07-15 | Added `Last Updated` and `References` columns to the registry and a Cross-Domain Query Recipes section — addresses discovery staleness, asymmetric cross-references, and cross-cutting queries with no fixed home. |
 | 1.2 | 2026-07-25 | Added a `Status` column (Active/Retired) to the registry and a "Retiring a Domain" procedure — archive-in-place, not delete, per `MarkdownConventions.md` §1. `scripts/validate.ps1` now checks this column stays consistent with each domain's own header Status. |
 | 1.3 | 2026-08-22 | Added step 7 to "Adding a Domain" — grep the repo for stale mentions of the new domain (scope-exclusion placeholders in sibling `description.md` files, superseded raw-file references) at onboarding time, when it's cheap. Relayed via `[FLAG FOR UPSTREAM]`. See `projects/system/session-log.md` Turn 27. |
+| 1.4 | 2026-09-09 | Adding a Domain steps 1–2 now start from the new `knowledge/domains/_template/` instead of describing files to create from scratch, which in practice meant copying the nearest sibling domain. See `projects/system/session-log.md` Turn 36. |

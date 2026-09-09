@@ -1072,3 +1072,45 @@ STATUS: CHECKPOINT
 Completed: Fixed all three orphan-section-check bugs, verified with positive and negative controls, and measured the result: the fork's warning count drops 70 → 32 with zero orphan warnings left, while the newly-enforced Version History rule surfaces exactly the one real violation it was predicted to find.
 Next: Entry 2 — `knowledge/domains/_template/`.
 Waiting for: Nothing.
+
+---
+
+## [Claude] — Turn 36 | 2026-09-09
+
+Entry 2 of the relayed queue: there is no `knowledge/domains/_template/`, so every new domain gets created by copying a sibling.
+
+**The asymmetry is real and visible in this repo's own files.** `projects/_template/` exists and `ROUTING.md`'s Quick Task Guide says to copy it. Domains had no equivalent: `Architecture.md` §2's diagram listed `projects/_template/` but showed only `index.md`, `authoring-guidelines.md` and `[domain-name]/` under `domains/`, and the Adding a Domain procedure said "Create `description.md`" and "Create `knowledge.md`" with no starting artifact. In practice that means copying the nearest existing domain, which propagates whatever that one got wrong and then lets the copies drift apart.
+
+The relayed evidence is a natural experiment, not an inference: across 18 domains in `familien-boe`, the header Status field carries a value outside `MarkdownConventions.md` §1's vocabulary in 17 of them — and the single exception is the one domain authored directly from `authoring-guidelines.md` rather than copied. Same author, same standards, different starting point, different outcome.
+
+**Built `knowledge/domains/_template/` from `authoring-guidelines.md` §3 and `MarkdownConventions.md` §1 rather than by copying `example-domain/`**, which would have reproduced the exact failure being fixed. `description.md` and `knowledge.md` carry correct frontmatter with a `[domain-name]` placeholder, a correct header block, the mandatory section structure, and inline pointers naming the rule behind each element. Status defaults to `Draft` — the correct opening value from §1's vocabulary, and the field the fork got wrong 17 times.
+
+`example-domain/` is left in place and unchanged. The two now do different jobs, mirroring how `projects/_template/` and `projects/example-project/` already coexist: the template is the skeleton you copy, the example is the illustrative filled-in version a fork deletes at setup.
+
+**Scoping correction against the relayed entry.** It calls for the template to carry "the canonical Notation Legend copied verbatim from `MarkdownConventions.md` §8.1." **This template has no §8.1 and no Notation Legend concept** — both are `familien-boe` extensions that were never ported up, along with the two-tier `[SENSITIVE: severe]` signal its §8 defines. Nothing was copied that does not exist here. The legend drift the entry describes is real in that fork but is not currently a template-level problem, and inventing the mechanism upstream purely to satisfy the relay would be a blind port of exactly the kind this queue is meant to avoid.
+
+**A second finding, forced by the work.** `description.md` has six `##` sections, and `MarkdownConventions.md` §3 requires an Index in "any document longer than four sections" — so writing the template raised the question of whether it needed one. It should not: `description.md` is capped at roughly one page and loaded whole on every request matched to its domain, so an Index would cost load on every session and help none. The shipped `example-domain/description.md` has been quietly violating the rule as written since creation, and `validate.ps1` could never have flagged it (no Index means the check skips the file). Added an explicit exception to §3 rather than adding a pointless Index to every domain.
+
+**Files changed:**
+- `knowledge/domains/_template/description.md`, `knowledge.md` — new.
+- `scripts/validate.ps1` — `$domainDirs` now excludes `_template`, mirroring the existing `$projectDirs` exclusion. Verified this is load-bearing rather than assumed: with the exclusion removed, `_template` produces two frontmatter folder-name-mismatch errors.
+- `ROUTING.md` (1.20 → 1.21) — Quick Task Guide and fresh-fork setup step 2.
+- `Architecture.md` (1.9 → 1.10) — §2 diagram and §6 step 4.
+- `knowledge/domains/index.md` (1.3 → 1.4) — Adding a Domain steps 1–2.
+- `knowledge/domains/authoring-guidelines.md` (1.11 → 1.12) — §3 now names the template as the starting point.
+- `MarkdownConventions.md` (1.6 → 1.7) — §3 `description.md` Index exception.
+
+`validate.ps1` passes clean on the result.
+
+**Deferred, not dropped:** the entry's closing suggestion of a template for `projects/[name]/context/` files, on the evidence that ten such files in that fork diverge from the markdown baseline three different ways. This template ships no `context/` files at all and `projects/_template/` has no `context/` folder, so adding one means deciding whether every project should carry an empty folder and a placeholder file — a larger design question than this entry, and one worth putting to the human rather than settling in passing.
+
+### Session close
+
+Knowledge candidates: None — structural.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Added `knowledge/domains/_template/`, built from the authoring standard rather than copied from an existing domain, and repointed all five places that previously sent an author to `example-domain/` or an unnamed starting point. Corrected the relayed entry's scope where it assumed template features that only exist in the fork.
+Next: Entry 3 — moving the Upstream Feedback Log out of `projects/system/TODO.md` into its own file.
+Waiting for: Nothing.

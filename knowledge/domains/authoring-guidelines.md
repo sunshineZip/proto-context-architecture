@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.11 | 2026-09-02 | Production
+Version 1.12 | 2026-09-09 | Production
 
 ---
 
@@ -76,6 +76,8 @@ Both `description.md` and `knowledge.md` also require the frontmatter block defi
 ---
 
 ## 3. Section Architecture
+
+Start from `knowledge/domains/_template/`, which carries this structure already. Do not start from a sibling domain: a copied sibling propagates whatever that one got wrong, and the copies drift independently from then on.
 
 ### Required sections, in order
 
@@ -407,3 +409,4 @@ Before submitting any knowledge document for human approval:
 | 1.9 | 2026-08-11 | Added a missing "12. Version History" Index entry — this file's own Version History section had never been indexed, a real pre-existing gap found by the new Index structural-integrity check in `scripts/validate.ps1`. See `projects/system/session-log.md` Turn 22. |
 | 1.10 | 2026-08-22 | §5 and §8: a one-directional cross-reference is no longer treated as uniformly suspect — split into genuine scope-exclusion pointers (permanently one-way, no action needed) versus real content dependencies (worth fixing), matching `scripts/validate.ps1`'s new differentiated warning wording. §8 also gained a checklist item for re-checking a domain's own stale "(not yet created)" placeholder prose, backstopping the new onboarding-time check in `knowledge/domains/index.md` § Adding a Domain step 7. Both relayed via `[FLAG FOR UPSTREAM]`. See `projects/system/session-log.md` Turn 27. |
 | 1.11 | 2026-09-02 | §9.1 gained "Proactive classification, every time" — the mechanics for re-running document classification on every qualifying upload for the life of a session, not just the first, plus a worked negative example (a document arriving mid-conversation, attached to an unrelated question, never classified or disclosed). Notes explicitly that no mechanical backstop is feasible here, unlike the structural-changes hook. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`. See new matching Standing Rule in `ROUTING.md` (1.19 → 1.20) and `projects/system/session-log.md` Turn 33. |
+| 1.12 | 2026-09-09 | §3 now points at the new `knowledge/domains/_template/` as the starting point for a new domain document, rather than leaving the required structure to be reproduced by hand or inherited by copying a sibling. See `projects/system/session-log.md` Turn 36. |
