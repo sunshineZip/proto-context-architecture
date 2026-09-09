@@ -1,6 +1,6 @@
 # Upstream Template Sync
 
-Version 1.3 | 2026-08-11 | Production
+Version 1.4 | 2026-09-09 | Production
 
 ---
 
@@ -52,7 +52,7 @@ Each fork records its sync state in a **System Maintenance Pass** section of its
 
 This is the only state the mechanism depends on. It lives in the fork's own repo (not in any session's local environment) specifically because sessions here are ephemeral — nothing set up locally survives between them, so anything this depends on has to be committed.
 
-The same System Maintenance Pass section also holds the **Upstream Feedback Log** — the reverse-direction counterpart to this marker, for findings flowing back to the upstream template instead of changes flowing down from it. See §7.
+The reverse-direction counterpart to this marker — findings flowing back up to the template instead of changes flowing down from it — lives in its own file, `projects/system/upstream-feedback.md`, not in this section. See §7.
 
 ---
 
@@ -124,14 +124,18 @@ A fork inevitably finds bugs or gaps in what it inherited from the template — 
 
 **Raising it:** the same confirm-before-writing gate as any other flag (`knowledge/flow/operating-principles.md` §5, "Upstream feedback flags") — surface it as a one-line question in the next CHECKPOINT turn, wait for the human to confirm it's worth capturing, only then write the full `[FLAG FOR UPSTREAM]` block and the log entry below.
 
-**Where it lands:** a new **Upstream Feedback Log** subsection inside `projects/system/TODO.md`'s System Maintenance Pass section (§2), alongside the sync marker:
+**Where it lands:** its own file, `projects/system/upstream-feedback.md`, in the fork. Create it the first time a finding is actually confirmed — do not pre-create it speculatively, the same way `repo-mixing.md` §9's mixing log is only created once that procedure produces its first durable write. A fork that never files a finding never grows the file.
+
+Give it the standard header block (`MarkdownConventions.md` §1), a Document Purpose, and its own copy of the lifecycle and entry rules below, so the file explains itself to a session that opens it cold. Add a one-line pointer to it from `projects/system/TODO.md`'s System Maintenance Pass section (§2), next to the sync marker, so the two halves of this mechanism stay findable from one place.
+
+This log lived inside `projects/system/TODO.md` until 2026-09-09, and both problems that forced the move get *worse* the better the mechanism works, so they are worth stating rather than just correcting:
+
+- **It was invisible to the repo's own navigation.** A `**bold paragraph**` was the only parent of a growing list of `###` entries, so it appeared in no heading scan, no section listing, and no table of contents — while its individual entries showed up as top-level-looking headings in a task file, with nothing explaining what they were. A fork's human asked three separate times where findings were being written, having been told each time.
+- **It outgrew its host.** Every accepted finding appends 15–30 lines of self-contained prose, necessarily so, since each entry must be a ready-to-paste prompt. In one fork eleven entries reached 237 lines of a 333-line `TODO.md` — 71%, leaving that file's actual Open and Done lists at 21%. A session routed to the System project to check a task loaded a majority-irrelevant file.
+
+Entry format:
 
 ```
-**Upstream Feedback Log**
-*(Confirmed template-level findings — not yet relayed, or relayed but not yet
-confirmed landed upstream. Delete an entry once the next Check Procedure (§4)
-shows it landed, or the human says it's been handled otherwise.)*
-
 ### [Short, scannable title]
 
 Status: Open
@@ -158,3 +162,4 @@ Write the bracketed body as a ready-to-paste prompt, not a note that needs trans
 | 1.1 | 2026-07-25 | Added `.githooks/*` to the Tracked Paths list — the new `.githooks/pre-commit` hook (`scripts/pre-commit-check.ps1`) is a system-layer file like the others. |
 | 1.2 | 2026-07-25 | Wording fix in §3: "deep-well" → "reference-work" to match the rename in `knowledge/domains/authoring-guidelines.md` §9.2. No path or mechanics change. |
 | 1.3 | 2026-08-11 | Added new §7 "Downstream Feedback" — the reverse-direction counterpart to this file's existing check/apply mechanism: how a fork reports a template-level finding to the human for relay, via a new Upstream Feedback Log subsection in `projects/system/TODO.md`'s System Maintenance Pass section, without ever writing to the upstream repo directly. §2 cross-references it. Document Purpose updated to cover both directions. Old §7 Version History renumbered to §8. See `knowledge/flow/operating-principles.md` §5 ("Upstream feedback flags") for the flag format, and `projects/system/session-log.md` Turn 20. |
+| 1.4 | 2026-09-09 | §7 moves the Upstream Feedback Log out of `projects/system/TODO.md` and into its own `projects/system/upstream-feedback.md`, created on first use rather than shipped. Fixes two compounding problems a fork measured directly: the log was introduced by a bold paragraph rather than a heading, so it was invisible to every navigation mechanism this template relies on, and eleven entries had grown to 71% of the task file hosting them. §2 updated to match. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, which had already prototyped the move. See `projects/system/session-log.md` Turn 37. |

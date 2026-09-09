@@ -1,6 +1,6 @@
 # Operating Principles
 
-Version 1.3 | 2026-08-22 | Production
+Version 1.4 | 2026-09-09 | Production
 
 ---
 
@@ -125,7 +125,7 @@ why, the finding, a concrete proposed fix if one exists, and explicit instructio
 for what that session should do]
 ```
 
-Same confirm-before-writing gate as above: surface it as a one-line question first, write the full flag only once the human confirms it's worth capturing. Once confirmed, append the entry to `projects/system/TODO.md`'s Upstream Feedback Log — see `knowledge/flow/upstream-sync.md` §7 for the log format and lifecycle.
+Same confirm-before-writing gate as above: surface it as a one-line question first, write the full flag only once the human confirms it's worth capturing. Once confirmed, append the entry to `projects/system/upstream-feedback.md`, creating that file if this is the fork's first finding — see `knowledge/flow/upstream-sync.md` §7 for the log format and lifecycle.
 
 **This fork never writes the finding directly into the upstream repo, regardless of whether repo access is available in-session.** The human decides if and when to relay it — the same review a human-submitted finding would get applies equally to one this session identified itself.
 
@@ -153,3 +153,4 @@ Same confirm-before-writing gate as above. Once confirmed, log it per `knowledge
 | 1.1 | 2026-07-25 | §5 gained a note to actively watch for behavioral/argumentative-style signal when processing correspondence from a party already covered by a domain, not just the logistical content — same flag-and-confirm gate, no automatic capture. See `knowledge/domains/authoring-guidelines.md` §4 (Behavioral and communication-style notes). |
 | 1.2 | 2026-08-11 | §5 gained "Upstream feedback flags" — a third flag type, `[FLAG FOR UPSTREAM]`, for template-level findings a fork identifies in itself. Explicitly never written directly to the upstream repo even when access is available; logged locally in `projects/system/TODO.md` for the human to relay. See `knowledge/flow/upstream-sync.md` §7 and `projects/system/session-log.md` Turn 20. |
 | 1.3 | 2026-08-22 | §5 gained "External review flags" — a fourth flag type, `[FLAG FOR EXTERNAL REVIEW]`, for findings that need confirmation from a specific named party who isn't the session's own user. Relayed via `[FLAG FOR UPSTREAM]` from a fork (`kej-context-architecture`) whose work is conducted on behalf of exactly such a party. See new `knowledge/flow/external-review.md` and `projects/system/session-log.md` Turn 26. |
+| 1.4 | 2026-09-09 | §5's upstream-feedback flag now points at `projects/system/upstream-feedback.md` as the destination for a confirmed finding, following the move of that log out of `projects/system/TODO.md`. See `knowledge/flow/upstream-sync.md` §7 and `projects/system/session-log.md` Turn 37. |

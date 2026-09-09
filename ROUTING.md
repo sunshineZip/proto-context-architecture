@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.21 | 2026-09-09 | Production
+Version 1.22 | 2026-09-09 | Production
 
 ---
 
@@ -192,7 +192,7 @@ Apply these in every session regardless of project type or how you entered the s
 
 **I found something that looks like a template-level bug or gap, not specific to this fork** (forks only)
 → Confirm with the human first — surface it as a one-line question, don't write the full flag unprompted (`knowledge/flow/operating-principles.md` §5)
-→ Once confirmed, log it as `[FLAG FOR UPSTREAM]` in `projects/system/TODO.md`'s Upstream Feedback Log, written as a self-contained, ready-to-paste prompt for a future session working on the template — see `knowledge/flow/upstream-sync.md` §7
+→ Once confirmed, log it as `[FLAG FOR UPSTREAM]` in `projects/system/upstream-feedback.md`, written as a self-contained, ready-to-paste prompt for a future session working on the template — create that file if this is the fork's first finding, and see `knowledge/flow/upstream-sync.md` §7 for its format and lifecycle
 → Never write it directly into the upstream repo, even if this session has access to it — the human relays it when and if they choose to
 
 **I want to retire a domain or project**
@@ -271,3 +271,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.19 | 2026-08-25 | Following cross-fork evidence that the pre-push hook alone did not stop recurring branch pushes: rewrote the branch-default Hard Constraint to describe three independent mechanical layers (pre-push hook, new `scripts/sync-check.ps1` write-path-blind branch notice, new `scripts/commit-push.ps1` `-AllowBranch` gate) and to require actually checking out `main`, not just pushing content to the remote ref. Added a new Hard Constraint: when a harness's own instructions conflict with this repo's conventions, this repo wins, even when the harness is worded just as firmly. Added a new Standing Rule mirroring "never leave a push silently pending": never leave a branch silently unmerged. Added a matching Quick Task Guide entry. See `projects/system/session-log.md` Turn 30. |
 | 1.20 | 2026-09-02 | Added a Standing Rule requiring document classification (`authoring-guidelines.md` §9.1) to re-run on every qualifying upload for the life of a session, not just the first — and to disclose the outcome on both branches, including "not stored." Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, prompted by a real incident where a second qualifying document arrived mid-conversation, attached to an unrelated question, and was answered without ever being classified or the gap being disclosed. Explicitly notes no mechanical backstop is feasible here the way it is for the structural-changes hook — a git hook can only inspect what gets committed, and a skipped classification leaves no file-level trace to check against. See `projects/system/session-log.md` Turn 33. |
 | 1.21 | 2026-09-09 | Quick Task Guide and the fresh-fork setup sequence now point at the new `knowledge/domains/_template/` as the starting point for a new domain, instead of `example-domain/` or an existing sibling. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, where 18 domains were each created by copying the nearest existing one and drifted accordingly. See `projects/system/session-log.md` Turn 36. |
+| 1.22 | 2026-09-09 | Quick Task Guide now names `projects/system/upstream-feedback.md` as where a confirmed template-level finding actually lands, rather than pointing only at the procedure in `upstream-sync.md` §7 — the previous wording named the procedure but not the destination, which was itself part of why the log was hard to find. See `projects/system/session-log.md` Turn 37. |

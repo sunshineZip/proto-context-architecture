@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.10 | 2026-09-09 | Production
+Version 1.11 | 2026-09-09 | Production
 
 ---
 
@@ -184,7 +184,7 @@ A session focused on Project A may produce findings that belong in Project B (or
 | Knowledge correction or new domain fact | Knowledge layer (`knowledge/domains/`) | Raise `[FLAG FOR KNOWLEDGE UPDATE]` — do not edit directly |
 | Structural or routing improvement to the system itself | System project `session-log.md` | Raise `[FLAG FOR SYSTEM]` and append a handoff turn at session end |
 | Project-specific discovery | Source project's `context/` | Document in-session in the appropriate context file |
-| Template-level finding — a bug or gap inherited from the upstream template, not specific to this fork | Fork's own `projects/system/TODO.md` (Upstream Feedback Log) | Raise `[FLAG FOR UPSTREAM]` — never write directly to the upstream repo, even if it's accessible; the human relays confirmed entries. See `knowledge/flow/upstream-sync.md` §7. |
+| Template-level finding — a bug or gap inherited from the upstream template, not specific to this fork | Fork's own `projects/system/upstream-feedback.md` | Raise `[FLAG FOR UPSTREAM]` — never write directly to the upstream repo, even if it's accessible; the human relays confirmed entries. See `knowledge/flow/upstream-sync.md` §7. |
 
 Do not act on knowledge-layer or system-layer changes from within another project's session. Surface them as flags, hand off via session-log, and resolve in the correct project.
 
@@ -223,3 +223,4 @@ To fork this template for a new initiative:
 | 1.8 | 2026-08-11 | §2 gained a new top-level `incoming/` folder — a generic, git-tracked landing zone for sharing files with a session, distinct from the gitignored, ephemeral `temp/`. Added because `restricted-tier.md`'s `incoming/` (companion-repo-only) had inadvertently become the template's only documented `incoming/` concept, leaving forks without that pattern with no sanctioned durable file-sharing folder at all. See `projects/system/session-log.md` Turn 21. |
 | 1.9 | 2026-08-18 | §6 step 10 reworded from "activate the pre-commit hook" to "activate the git hooks" — one `core.hooksPath` command now also activates the new `pre-push` hook (`scripts/pre-push-check.ps1`), which enforces the promoted `main`-by-default Hard Constraint. See `ROUTING.md` and `projects/system/session-log.md` Turn 23. |
 | 1.10 | 2026-09-09 | §2's File Structure diagram gained `knowledge/domains/_template/`, and §6 step 4 now points at it rather than `example-domain/` — closing the asymmetry where `projects/_template/` existed but domains had no starting artifact, so every new domain was created by copying a sibling. See `projects/system/session-log.md` Turn 36. |
+| 1.11 | 2026-09-09 | §5's template-level-finding row now names `projects/system/upstream-feedback.md`, following the move of the Upstream Feedback Log out of `projects/system/TODO.md`. See `knowledge/flow/upstream-sync.md` §7 and `projects/system/session-log.md` Turn 37. |

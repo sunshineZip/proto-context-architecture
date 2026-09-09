@@ -1114,3 +1114,45 @@ STATUS: CHECKPOINT
 Completed: Added `knowledge/domains/_template/`, built from the authoring standard rather than copied from an existing domain, and repointed all five places that previously sent an author to `example-domain/` or an unnamed starting point. Corrected the relayed entry's scope where it assumed template features that only exist in the fork.
 Next: Entry 3 — moving the Upstream Feedback Log out of `projects/system/TODO.md` into its own file.
 Waiting for: Nothing.
+
+---
+
+## [Claude] — Turn 37 | 2026-09-09
+
+Entry 3 of the relayed queue, and the one that fixes the mechanism these entries themselves travel through: the Upstream Feedback Log outgrows its host and is hard to find where §7 put it.
+
+**The two problems, as the fork measured them.** §7 specified the log as a subsection inside `projects/system/TODO.md`'s System Maintenance Pass, introduced by a bold paragraph rather than a heading.
+
+1. **Invisible to the repo's own navigation.** A `**bold paragraph**` was the only parent of a growing list of `###` entries, so the log appeared in no heading scan, no section listing, no table of contents — while its entries showed up as top-level-looking headings inside a task file with nothing marking them as not-tasks. That fork's human asked three separate times where findings were being written, having been told the path each time. `ROUTING.md` pointed at the procedure (§7) but never at the destination, which is part of why.
+2. **It outgrew its host.** Each accepted finding appends 15–30 lines of self-contained prose — necessarily, since §7 correctly requires every entry to be a ready-to-paste prompt. Eleven entries reached 237 lines of a 333-line `TODO.md`: **71%**, leaving that file's actual Open and Done lists at 21%.
+
+Both get worse the better the mechanism works, which is what makes this worth fixing structurally rather than tidying.
+
+**Evaluated the three options the entry offered, and did not take its recommendation.** The entry recommends option 2 (keep it in `TODO.md`, promote to a `##` heading, add a size-triggered split) on the stated grounds that it "matches a pattern the template already uses and already validates" — namely `MarkdownConventions.md` §2's Version History archival mechanism.
+
+**That premise is false in this template.** There is no Version History archival mechanism here, and no split threshold, and nothing in `validate.ps1` that validates one. It is a `familien-boe` extension — its §2 has a "Version History archival" subsection with a 20-row threshold and a `<basename>-history.md` sibling convention; this repo's §2 has none of it. Porting the log fix upstream by mirroring an upstream pattern that does not exist upstream would have meant inventing a threshold and a split mechanism from scratch, for a mechanism this repo never instantiates at all.
+
+Its own objection to option 1 also does not hold here: "it adds a file to every fork's `projects/system/`, including forks that never file a single finding." **This template never ships the log** — `upstream-sync.md`'s scope note excludes `proto-context-architecture` itself, and Turn 20 deliberately left `projects/system/TODO.md` untouched for that reason. §7 only *specifies where a fork creates it*. With an explicit create-on-first-use rule, a fork that never files a finding never grows the file.
+
+**Chose option 1, with create-on-first-use** — a dedicated `projects/system/upstream-feedback.md`. It fixes both halves permanently rather than deferring growth to an invented threshold, and the create-on-first-use half reuses a precedent this repo genuinely does have: `repo-mixing.md` §9's mixing log, which is created the first time that procedure produces a durable write and "not pre-created speculatively." That is the pattern the entry was reaching for; it exists here, just not where the entry looked.
+
+**Files changed:**
+- `knowledge/flow/upstream-sync.md` (1.3 → 1.4) — §7's "Where it lands" rewritten for the dedicated file, create-on-first-use, a self-explanatory header, and a pointer stub back from §2's Maintenance Pass section so both halves of the mechanism stay findable from one place. Both measured problems are stated in §7 itself rather than only corrected, since they recur in any fork that lets the log grow in place. §2's cross-reference updated.
+- `ROUTING.md` (1.21 → 1.22) — Quick Task Guide now names the destination, not just the procedure.
+- `knowledge/flow/operating-principles.md` (1.3 → 1.4) — §5's upstream-feedback flag points at the new file.
+- `Architecture.md` (1.10 → 1.11) — §5's Subproject Transcendence row updated.
+
+Nothing to change in `scripts/validate.ps1`: its project-file frontmatter check is scoped to `TODO.md` and `session-log.md` by name, so an additional file in a project folder is unconstrained. Confirmed by reading the check, and by the validator passing clean on the result.
+
+**Note for the fork that raised this:** it has already made the move locally and deliberately left `upstream-sync.md` §7 unchanged, pending this decision. §7 now blesses that location, so its prototype and the template agree — but its own `upstream-feedback.md` should gain the self-explanatory header and the `TODO.md` pointer stub §7 now requires, if it does not already have them.
+
+### Session close
+
+Knowledge candidates: None — structural.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Moved the Upstream Feedback Log to its own file across all four places that referenced it, choosing against the relayed entry's recommendation after finding that the upstream pattern it was built on exists only in the fork — and substituting a create-on-first-use precedent that does exist here.
+Next: Entry 4 — the enforcement map and the `MarkdownConventions.md` §4 backslash-escape rule. This is the first entry the human asked to review before I proceed.
+Waiting for: Human direction on Entry 4.
