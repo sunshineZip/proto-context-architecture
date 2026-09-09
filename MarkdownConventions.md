@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.5 | 2026-08-11 | Production
+Version 1.6 | 2026-09-09 | Production
 
 ---
 
@@ -113,7 +113,11 @@ Start all documents at `1.0`.
 
 ### Version History section
 
-Required in every file. Always the last section. Format:
+Required in every root document (`README.md`, `ROUTING.md`, `Architecture.md`, this file) and every file under `knowledge/` and `library/`. Always the last section.
+
+Project-layer files are the deliberate exception and carry none: `session-log.md` is append-only and already versioned by turn number, and `TODO.md` is a live task list rather than a document with revisions. `.github/copilot-instructions.md` (an editor entry point) and anything in `incoming/` (a transient landing zone) are likewise out of scope. `scripts/validate.ps1` enforces exactly this scope — a file that requires the section and omits it is now warned about rather than silently skipped, which is how a domain document in a fork lost its Version History entirely without anything noticing.
+
+Format:
 
 ```
 ## Version History
@@ -247,3 +251,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 | 1.3 | 2026-07-25 | Added `Retired` to the Status vocabulary and a Retirement subsection to §1, defining the archive-in-place convention (status field + one-line blockquote) for domains and projects that have become permanently irrelevant. Deletion is explicitly a separate, human-confirmed action, not part of retirement. |
 | 1.4 | 2026-07-25 | Fixed a header/changelog version mismatch: the header still read "1.2" after the 1.3 edit shipped its own row. Found during `longstraw`'s upstream-sync port, not by the Version History discipline check meant to catch exactly this — that check had its own bug (§10's numbered heading, `## 10. Version History`, didn't match the check's unnumbered-only pattern, so this file was silently skipped entirely). Both fixed together; see `scripts/validate.ps1` and `projects/system/session-log.md` Turn 15. |
 | 1.5 | 2026-08-11 | §8 — clarified that `[SENSITIVE]` is a post-hoc documentation tag, not a gate; cross-referenced the new pause-and-ask Hard Constraint in `ROUTING.md` that governs whether sensitive content gets written down in the first place. See `projects/system/session-log.md` Turn 18. |
+| 1.6 | 2026-09-09 | §2 now names which files actually require a Version History section, instead of saying "Required in every file" — no file under `projects/` has ever carried one, so the rule as written was broader than any fork has followed and could not be enforced as stated. `scripts/validate.ps1` gained a matching check in the same change; previously a file omitting the section entirely was skipped silently while a file that had one was checked closely. See `projects/system/session-log.md` Turn 35. |

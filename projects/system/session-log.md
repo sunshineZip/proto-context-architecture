@@ -1016,3 +1016,59 @@ STATUS: CHECKPOINT
 Completed: Read the five required documents in full, installed PowerShell and actually ran `validate.ps1` against this repo, and established that its clean pass coexists with three real self-conformance violations it cannot detect. Fixed two of them across four flow files, verified with a positive-control run.
 Next: Entry 1 — the orphan-section check's three bugs, independently reproduced against `familien-boe` (38 of 70 warnings: 19 Version History, 18 Executive Summary, 1 non-ASCII heading).
 Waiting for: Nothing — the human directed proceeding through the mechanical entries and stopping at the judgement calls.
+
+---
+
+## [Claude] — Turn 35 | 2026-09-09
+
+Entry 1 of the relayed queue: `scripts/validate.ps1`'s orphan-section check. Three separate bugs in one code block, all three fixed here.
+
+**Reproduced the finding independently before touching anything.** Attached `familien-boe` read-only and ran its validator: 4 errors, 70 warnings (69 at the commit that fork audited). Of the 70, **38 were orphan-section warnings and none were real**, breaking down exactly as the relayed entry claimed:
+
+| Heading flagged | Count | Real? |
+|---|---|---|
+| `Version History` | 19 | No — mandatory section, deliberately unindexed |
+| `Executive Summary` | 18 | No — mandatory section, deliberately unindexed |
+| `7. Børneopsparing tax treatment` | 1 | No — separate Unicode bug |
+
+19 domains × 2 mandatory-but-unindexed sections = 38. Confirmed at source in `insurance/knowledge.md`: `## Executive Summary` at line 42, `## Version History` at line 1248, and an Index listing only the numbered content sections.
+
+**Bug 1 — structural sections counted as orphans.** The check excluded exactly two headings, `Document Purpose` and `Index`, but `authoring-guidelines.md` §3 mandates four structural sections in fixed positions. Executive Summary and Version History are required to exist, carry no routing information an Index entry could add, and were flagged in every domain that has them.
+
+Fixed by exempting all four from the orphan direction **only**. They deliberately stay in `$realSlugs` rather than being skipped outright: this template's own `example-domain/knowledge.md` *does* index both, and removing them from the resolvable set would have converted 38 spurious warnings into spurious *errors* — a worse regression than the bug being fixed. Indexing them is now optional rather than either required or wrong, which resolves a real conflict the relayed entry did not mention: the fork's convention omits them, while `authoring-guidelines.md` 1.9 and `example-domain/knowledge.md` 1.2 both treated an unindexed Version History as "a real pre-existing gap" and added one. Both readings are now valid. Matching ignores a numeric prefix, since `MarkdownConventions.md` numbers its own final section `## 10. Version History`.
+
+**Bug 2 — non-ASCII headings.** `Get-GithubAnchorSlug` stripped `[^a-z0-9\- ]` and the anchor-extraction regex was `[a-z0-9\-]+`, but GitHub's real algorithm preserves non-ASCII letters. A heading like `## 7. Børneopsparing tax treatment`, whose Index link works correctly on GitHub, had its anchor skipped by the extraction regex and its heading reported as an orphan. Both patterns now use `\p{L}\p{Nd}`. Any fork not working in English hits this on its first domain.
+
+**Bug 3 — the rule nothing enforced.** The Version History loop opened with `if ($scanText -notmatch '^## …Version History') { continue }`, so a file that omitted the section entirely was skipped silently, while a file that had one was checked closely. `MarkdownConventions.md` §2 states this requirement more plainly than almost any other rule in the template, and it was the one rule with no enforcement at all behind it.
+
+Fixed with a scoped check. Scope mattered: §2 said "Required in every file," but **no file under `projects/` has ever carried a Version History table**, in this template or any fork — `session-log.md` is append-only and versioned by turn number, `TODO.md` is a live task list. Enforcing the rule as literally written would have produced 20+ warnings per fork on files that are correct. So §2 was corrected in the same change to name the real scope (root, `knowledge/`, `library/`; project files, `.github/copilot-instructions.md` and `incoming/` excluded) rather than shipping a checker quietly narrower than the rule it enforces — that gap is the same failure mode this whole entry queue is about.
+
+**Measured outcome, both repos:**
+
+| Repo | Before | After |
+|---|---|---|
+| `familien-boe` | 4 errors, 70 warnings | 4 errors, **32 warnings** |
+| This template | 0 errors, 0 warnings | 0 errors, 0 warnings |
+
+All 38 orphan warnings gone, zero remaining. The new missing-Version-History check fires exactly once across the fork — on `knowledge/domains/boerneopsparing/knowledge.md`, precisely the file the relayed entry predicted was invisible.
+
+**Verification, run rather than reasoned about:**
+- Positive control for the exemption: `example-domain/knowledge.md` indexes both structural sections and still validates clean, confirming no stale-entry regression.
+- Positive and negative control for the Unicode fix, in a scratch copy: a correctly-anchored `## 6. Børneopsparing Håndtering` section now passes clean, and deliberately corrupting its anchor to `#6-børneopsparing-haandtering` produces the expected stale-entry error plus orphan warning. Before the fix these two outcomes were inverted — the correct form warned, the broken form was ignored.
+
+**Files changed:**
+- `scripts/validate.ps1` — the three fixes above.
+- `MarkdownConventions.md` (1.5 → 1.6) — §2 now names which files actually require a Version History section.
+
+**Not adopted, deliberately:** the relayed entry's alternative of requiring Executive Summary and Version History in every Index. It would add two entries per domain to the section the loading hierarchy reads at Level 2, and worsen the Index entry-count heaviness warning that is itself a separate open entry in this queue.
+
+### Session close
+
+Knowledge candidates: None — tooling fix.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Fixed all three orphan-section-check bugs, verified with positive and negative controls, and measured the result: the fork's warning count drops 70 → 32 with zero orphan warnings left, while the newly-enforced Version History rule surfaces exactly the one real violation it was predicted to find.
+Next: Entry 2 — `knowledge/domains/_template/`.
+Waiting for: Nothing.

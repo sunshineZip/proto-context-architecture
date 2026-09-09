@@ -691,12 +691,41 @@ function Get-VersionHistoryRows {
 $allMdFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter "*.md" -File -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch '[\\/]temp[\\/]' -and $_.FullName -notmatch '[\\/]\.git[\\/]' }
 
+# Which files MarkdownConventions.md §2's "Required in every file" actually
+# means. Project-layer files are the deliberate exception and always have
+# been: session-log.md is append-only and versioned by turn number, TODO.md
+# is a live task list, and neither has ever carried a Version History table
+# in this template or any fork of it. .github/copilot-instructions.md is an
+# editor entry point, and incoming/ is a transient landing zone. Everything
+# else — the four root documents, all of knowledge/, all of library/ —
+# carries one. Scoping the check this way is what lets a missing section be
+# an actionable warning rather than noise; see §2, which now names this
+# scope so the rule and the check say the same thing.
+function Test-RequiresVersionHistory {
+    param([string]$RelativePath)
+    if ($RelativePath -match '^projects/') { return $false }
+    if ($RelativePath -match '^incoming/') { return $false }
+    if ($RelativePath -eq '.github/copilot-instructions.md') { return $false }
+    if ($RelativePath -match '^(knowledge|library)/') { return $true }
+    return ($RelativePath -in @('README.md', 'ROUTING.md', 'Architecture.md', 'MarkdownConventions.md'))
+}
+
 foreach ($mdFile in $allMdFiles) {
     $rawText = Get-Content -Path $mdFile.FullName -Raw
     $scanText = Remove-CodeFences -Text $rawText
-    if ($scanText -notmatch '(?m)^## (?:\d+\.\s*)?Version History\s*$') { continue }
-
     $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
+
+    if ($scanText -notmatch '(?m)^## (?:\d+\.\s*)?Version History\s*$') {
+        # A file with no Version History section used to be skipped here, which
+        # meant the one rule MarkdownConventions.md §2 states most plainly was
+        # the one rule nothing enforced: a file omitting the section entirely
+        # passed silently, while a file that had one was checked closely.
+        if (Test-RequiresVersionHistory -RelativePath $relPath) {
+            Add-ValidationWarning "'$relPath' has no '## Version History' section — required in every knowledge, library, and root document (MarkdownConventions.md §2)"
+        }
+        continue
+    }
+
     $headerVersion = Get-HeaderVersion -Text $scanText
     $rows = @(Get-VersionHistoryRows -Text $scanText)
 
@@ -743,7 +772,7 @@ function Get-GithubAnchorSlug {
     # authoring-guidelines.md's real, correct anchor for exactly this case.
     param([string]$HeadingText)
     $slug = $HeadingText.Trim().ToLowerInvariant()
-    $slug = [regex]::Replace($slug, '[^a-z0-9\- ]', '')
+    $slug = [regex]::Replace($slug, '[^\p{L}\p{Nd}\- ]', '')
     $slug = $slug.Replace(' ', '-')
     return $slug
 }
@@ -758,16 +787,35 @@ foreach ($mdFile in $allMdFiles) {
     $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
     $indexLinkAnchors = @{}
     if ($indexMatch.Success) {
-        foreach ($linkMatch in [regex]::Matches($indexMatch.Groups[1].Value, '\[[^\]]+\]\(#([a-z0-9\-]+)\)')) {
+        foreach ($linkMatch in [regex]::Matches($indexMatch.Groups[1].Value, '\[[^\]]+\]\(#([\p{L}\p{Nd}\-]+)\)')) {
             $indexLinkAnchors[$linkMatch.Groups[1].Value] = $true
         }
     }
 
+    # Structural sections, exempt from the orphan direction only. All four are
+    # mandated in fixed positions (authoring-guidelines.md §3: Document Purpose,
+    # Index, Executive Summary immediately after it, Version History always
+    # last), so their presence is guaranteed by convention and an Index entry
+    # for them carries no routing information — the Index exists so a session
+    # can pick which *content* sections to load. A house convention that
+    # indexes only numbered content sections is therefore correct, not drift.
+    # They stay in $realSlugs rather than being skipped outright, so a file
+    # that does index them (this template's own example-domain/knowledge.md
+    # indexes both Executive Summary and Version History) still has those
+    # anchors resolve instead of being reported as stale entries. Indexing
+    # them is optional, not wrong. Matching ignores a numeric prefix, since
+    # MarkdownConventions.md numbers its own final section as
+    # "## 10. Version History".
+    $structuralHeadings = @("document purpose", "index", "executive summary", "version history")
+
     $realSlugs = @{}
+    $orphanExempt = @{}
     foreach ($headingMatch in [regex]::Matches($scanText, '(?m)^## (.+?)\s*$')) {
         $headingText = $headingMatch.Groups[1].Value.Trim()
-        if ($headingText -eq "Document Purpose" -or $headingText -eq "Index") { continue }
-        $realSlugs[(Get-GithubAnchorSlug -HeadingText $headingText)] = $headingText
+        $bareHeading = ($headingText -replace '^\d+\.\s*', '').ToLowerInvariant()
+        $slug = Get-GithubAnchorSlug -HeadingText $headingText
+        $realSlugs[$slug] = $headingText
+        if ($structuralHeadings -contains $bareHeading) { $orphanExempt[$slug] = $true }
     }
 
     foreach ($anchor in $indexLinkAnchors.Keys) {
@@ -777,6 +825,7 @@ foreach ($mdFile in $allMdFiles) {
     }
 
     foreach ($slug in $realSlugs.Keys) {
+        if ($orphanExempt.ContainsKey($slug)) { continue }
         if (-not $indexLinkAnchors.ContainsKey($slug)) {
             Add-ValidationWarning "'$relPath': section '$($realSlugs[$slug])' has no corresponding Index entry — orphan section"
         }
