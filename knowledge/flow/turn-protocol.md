@@ -1,6 +1,6 @@
 # Turn Protocol
 
-Version 1.1 | 2026-07-15 | Production
+Version 1.2 | 2026-09-09 | Production
 
 ---
 
@@ -15,6 +15,17 @@ Defines the structured turn format, STATUS signal vocabulary, and BLOCKED signal
 > **Routing check:** This file defines turn format for work that has already been approved. If you have not completed ROUTING.md routing and received explicit human confirmation to proceed, stop and do that first.
 
 > **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
+---
+
+## Index
+
+1. [Turn Format](#1-turn-format)
+2. [Status Signals](#2-status-signals)
+3. [BLOCKED Signal Format](#3-blocked-signal-format)
+4. [CHECKPOINT Format](#4-checkpoint-format)
+5. [PROJECT COMPLETE Convention](#5-project-complete-convention)
+6. [Version History](#version-history)
 
 ---
 
@@ -125,3 +136,4 @@ If only system-level findings exist, emit `STATUS: COMPLETE, SYSTEM FLAGS PENDIN
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic turn protocol adapted from NightCrew agent-turn-protocol.md, migration signals removed. |
 | 1.1 | 2026-07-15 | Added a `Push status` field to the CHECKPOINT (§4) and Session close/PROJECT COMPLETE (§5) formats, and made explicit that a project cannot be marked complete with unpushed changes. |
+| 1.2 | 2026-09-09 | Added the `## Index` section `MarkdownConventions.md` §3 requires of any document longer than four sections — this file has seven and had never had one. Found by auditing the template against its own conventions rather than by `scripts/validate.ps1`, whose Index check skips any file with no Index at all and so could not have caught this. See `projects/system/session-log.md` Turn 34. |

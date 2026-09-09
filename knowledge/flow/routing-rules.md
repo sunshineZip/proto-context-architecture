@@ -1,6 +1,6 @@
 # Routing Rules
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-09-09 | Production
 
 ---
 
@@ -13,6 +13,17 @@ Defines the routing logic used after each session turn. An operational reference
 > **Routing check:** This file describes how turns are routed once work is underway. If you have not completed ROUTING.md routing and received explicit human confirmation to begin work, stop and do that first.
 
 > **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
+---
+
+## Index
+
+1. [Routing Inputs](#routing-inputs)
+2. [Priority Order](#priority-order)
+3. [Core Rules](#core-rules)
+4. [Universal Signal Map](#universal-signal-map)
+5. [Project-Specific Signal Maps](#project-specific-signal-maps)
+6. [Version History](#version-history)
 
 ---
 
@@ -97,3 +108,4 @@ Add phase signal chains here as your instance adds structured project types. See
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic routing rules adapted from NightCrew routing-rules.md, migration signal map removed. |
+| 1.1 | 2026-09-09 | Added the `## Index` section `MarkdownConventions.md` §3 requires of any document longer than four sections — this file has seven and had never had one. See `projects/system/session-log.md` Turn 34. |

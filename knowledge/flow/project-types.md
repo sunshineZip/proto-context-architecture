@@ -1,6 +1,6 @@
 # Project Types
 
-Version 1.0 | 2026-06-29 | Production
+Version 1.1 | 2026-09-09 | Production
 
 ---
 
@@ -13,6 +13,18 @@ Defines the standard project types and their default phase templates. Use these 
 > **Routing check:** This file contains phase templates for already-approved work. If you have not completed ROUTING.md routing and received explicit human confirmation to proceed, stop and do that first.
 
 > **Edit guard:** Changes to this file are system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing.
+
+---
+
+## Index
+
+1. [Project Types](#project-types)
+2. [Multi-phase Delivery Template](#1-multi-phase-delivery-template)
+3. [Development Template](#2-development-template)
+4. [Documentation Template](#3-documentation-template)
+5. [General Template](#4-general-template)
+6. [Operational Template](#5-operational-template)
+7. [Version History](#version-history)
 
 ---
 
@@ -117,3 +129,4 @@ Use for recurring operational tasks: health checks, maintenance verification, st
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-06-29 | Initial creation. Generic project templates adapted from NightCrew project-types.md. |
+| 1.1 | 2026-09-09 | Added the `## Index` section `MarkdownConventions.md` §3 requires of any document longer than four sections — this file has eight and had never had one. See `projects/system/session-log.md` Turn 34. |

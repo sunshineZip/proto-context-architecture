@@ -973,3 +973,46 @@ STATUS: CHECKPOINT
 Completed: Ported a generalized "classify every qualifying document upload, every time" Standing Rule and matching `authoring-guidelines.md` §9.1 mechanics (plus a worked negative example) into the template, relayed from a real `familien-boe` incident. Evaluated a mechanical backstop and concluded, with reasoning documented in both files, that none is feasible here the way the structural-changes hook is — classification leaves no diff-visible artifact for a hook to check.
 Next: Not yet ported back down into `familien-boe` itself, which is where the original gap was actually observed — that fork still needs this Standing Rule added to its own `ROUTING.md` (informed by, but not identical to, the version here, since its own rule is more domain-specific — family legal/financial documents specifically, not the generic "any domain with `sources/`" framing used here). This turn's branch also still needs landing on `main` once the PR is reviewed and merged — flagged per the "never leave a branch silently unmerged" Standing Rule.
 Waiting for: PR review and merge to `main`.
+
+---
+
+## [Claude] — Turn 34 | 2026-09-09
+
+Opening turn of a multi-entry session working through 13 template-level findings relayed from `familien-boe`, which ran the first repo-wide structural health check ever done on that fork (59 findings, nine root causes, all nine template-level). This turn is scoped to the template's own conformance with its own conventions — the precondition for trusting anything the rest of the session measures.
+
+**Read in full first**, per the human's instruction: `ROUTING.md`, `Architecture.md`, `MarkdownConventions.md`, `knowledge/domains/authoring-guidelines.md`, and all nine files under `knowledge/flow/`.
+
+**Then actually ran `scripts/validate.ps1` against this repo rather than reading it and inferring.** This required installing PowerShell first — see the environment finding below. Result: **0 errors, 0 warnings.**
+
+That clean result is the finding. This repo violates its own documented conventions in at least three places, and the validator is structurally incapable of seeing any of them:
+
+| Violation | Convention | Why `validate.ps1` misses it |
+|---|---|---|
+| `turn-protocol.md` (7 sections), `routing-rules.md` (7), `project-types.md` (8) have no `## Index` | `MarkdownConventions.md` §3 — required over four sections | The Index check opens with `if ($scanText -notmatch '^## Index') { continue }`. A file with no Index is skipped entirely. The check can only police an Index that already exists. |
+| `repo-mixing.md` carried a `type: flow` frontmatter block — the only flow file with one | `MarkdownConventions.md` §1 — root, flow, and registry files do not use frontmatter | Frontmatter is validated for domain and project files only. |
+| `repo-mixing.md` §7 cites `extraction-procedure.md` six times and `[SENSITIVE: severe]` | Neither exists in this template — both are `familien-boe` files/extensions referenced but never ported up | Nothing checks cross-file references outside `sources/` and `library/`. |
+
+This is the sharpest form of the relayed finding that nothing runs `validate.ps1` against the template itself: running it would not have caught these anyway. A fork inherits all three as its starting state.
+
+**Fixed this turn** (the first two; the third is substantive and belongs with the severe-tier entry later in this session, not here):
+- `knowledge/flow/turn-protocol.md` (1.1 → 1.2), `routing-rules.md` (1.0 → 1.1), `project-types.md` (1.0 → 1.1) — added the missing `## Index`, placed after the guard blockquotes to match the six flow files that already had one, with bare anchor links matching that same local style rather than the descriptive-entry form `authoring-guidelines.md` §3 requires of domain knowledge documents specifically.
+- `knowledge/flow/repo-mixing.md` (1.1 → 1.2) — removed the frontmatter block.
+
+**Verification, positive control run rather than assumed:** `validate.ps1` passes clean on the modified state. Because a clean pass is exactly what a silently-skipped check also produces, deliberately broke one anchor and deleted one Index entry in a scratch copy and re-ran: the check correctly produced 1 stale-entry error and 2 orphan-section warnings against `routing-rules.md`. The green result on the real tree is a real pass, not a skip.
+
+**Environment finding, and a correction to Turn 33's diagnosis.** `.claude/hooks/session-start.sh` sets `core.hooksPath=.githooks` and *then* installs PowerShell. In this session the first succeeded and the second did not: `CLAUDE_CODE_REMOTE=true`, hooks active, no `pwsh` on PATH. `.githooks/pre-commit` is `pwsh …; exit $?`, and a missing command exits 127 — so **the session began in a state where every `git commit` and `git push` would fail**, reporting a PowerShell error rather than anything a session did. The script's `set -euo pipefail` also means `sync-check.ps1` never ran, so `ROUTING.md` Step 1 was skipped silently. Running the same install commands by hand succeeded in about two minutes (PowerShell 7.6.6), so this is a partial-execution failure, not an unsupported platform.
+
+Turn 33 recorded "this sandbox has no `pwsh` available" and validated by hand instead, reading it as an environment limitation. It is the same root cause, and it is a template bug: the hook orders activation before the dependency the activated hooks need, with no verification that the install succeeded. Logged for the entry sequence rather than fixed here — the fix is a hook-ordering change, not a conformance fix.
+
+**Branch provenance, disclosed per the Hard Constraint.** The harness that launched this session assigned `claude/template-audit-findings-bhgir9` and instructed pushing there and never elsewhere. That is not the human's instruction and not this repo's convention. Raised it with the human, who directed landing each entry on `main` as it completes. Working directly on `main` accordingly. `sync-check.ps1`'s "NOT ON 'main'" banner fired correctly once run by hand — the mechanism works; it simply never got the chance to run.
+
+### Session close
+
+Knowledge candidates: None — conformance and tooling, not a domain fact.
+Open flags: None. The 13 relayed entries are the human's own confirmed queue, worked one at a time from here.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Read the five required documents in full, installed PowerShell and actually ran `validate.ps1` against this repo, and established that its clean pass coexists with three real self-conformance violations it cannot detect. Fixed two of them across four flow files, verified with a positive-control run.
+Next: Entry 1 — the orphan-section check's three bugs, independently reproduced against `familien-boe` (38 of 70 warnings: 19 Version History, 18 Executive Summary, 1 non-ASCII heading).
+Waiting for: Nothing — the human directed proceeding through the mechanical entries and stopping at the judgement calls.

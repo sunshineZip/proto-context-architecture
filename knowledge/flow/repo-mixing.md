@@ -1,10 +1,6 @@
----
-type: flow
----
-
 # Repo Mixing
 
-Version 1.1 | 2026-08-31 | Production
+Version 1.2 | 2026-09-09 | Production
 
 ---
 
@@ -182,3 +178,4 @@ Nothing here required merging the two forks, moving the career fork's content pe
 |---|---|---|
 | 1.0 | 2026-08-31 | Initial creation. Designed after a real cross-fork question — mixing a children's-learning fork with a personal-career fork for a specific session — grounded against two real forks (`familien-boe`, `hh-learning`) rather than written in the abstract: `hh-learning`'s existing "restate, don't link" convention for `familien-boe` content generalized into §8; `familien-boe`'s two-tier sensitivity system and `extraction-procedure.md` generalized into §6-7 and §9 rather than inventing a parallel mechanism; `restricted-tier.md` §11's single-routing-authority reasoning generalized from the access-gated case to the peer-fork case in §3. See `projects/system/session-log.md` Turn 31. |
 | 1.1 | 2026-08-31 (later) | §5 clarified: home/guest is always an explicit human statement, never inferred from which repos happen to be mounted or reachable — and with three or more forks present, each guest is declared individually rather than as a block, since §6/§7 gating is evaluated per guest against that guest's own domain scope and tagging. §9's mixing log clarified to one row per (session, guest, destination) rather than one merged row per session, so a multi-guest session stays answerable per guest later. Prompted by a direct question on both points. See `projects/system/session-log.md` Turn 32. |
+| 1.2 | 2026-09-09 | Removed the `type: flow` frontmatter block this file shipped with. `MarkdownConventions.md` §1 states that root, flow, and registry files do not use frontmatter; this was the only file under `knowledge/flow/` carrying any, and nothing checked it — `scripts/validate.ps1` validates frontmatter for domain and project files only. See `projects/system/session-log.md` Turn 34. |
