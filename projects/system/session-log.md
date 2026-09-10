@@ -1426,6 +1426,38 @@ Completed: Entry 7. The repo can now state consent rather than only convention, 
 Next: Entry 8 — every self-check the template defines is opportunistic, so none of them ever run. The largest and most debatable of the queue.
 Waiting for: A decision on whether to record a `.branch-authorization` for this repo itself.
 
+---
+
+## [Copilot] — Turn 44 | 2026-09-10
+
+The relayed queue's oldest entry — proactive document capture has no mechanical backstop — checked against the current repo rather than reimplemented. **It is already closed. No changes made.**
+
+The handover flagged it as "probably already landed" by Turn 33 and asked for verification rather than a redo. Verified against the files themselves, not against Turn 33's own account of what it did, since a log entry claiming a change is not evidence the change is still there.
+
+| The entry proposed | State in this repo |
+|---|---|
+| 1. Strengthen the `ROUTING.md` Standing Rule so classification re-runs on every qualifying upload, whatever question it arrives attached to | Present. The Standing Rule is titled "Classify every qualifying document upload — every time, not just the first," names the mid-conversation case explicitly, and states that answering the surface question well is not a substitute |
+| 2. Consider a mechanical backstop | Considered and rejected, with the reasoning written into both `ROUTING.md` and `authoring-guidelines.md` §9.1: a hook can only inspect a diff, and a classification that never happened leaves no artifact to inspect |
+| 3. Add a worked negative example | Present in §9.1 as a blockquote, built from the fork's own incident and generalized — including a "what should have happened instead" that names the required disclosure on both branches |
+
+Both halves of the never-silent requirement survive intact, which is the part most likely to have been lost in a reword: a session must state the outcome even when the answer is "not a source," because a human who never hears "no" cannot tell that a session stopped checking.
+
+One thing worth recording beyond the entry: it is also already registered in `knowledge/flow/convention-enforcement.md` §3 as **Judgement**, with the no-artifact-for-a-hook reason. That was added in Turn 38 for an unrelated reason, so the closure is corroborated by a second file written independently of the first.
+
+**A gap in the mechanism itself, not in this entry.** All thirteen relayed entries still read `Status: Open` in the fork's own log, including the seven now closed here. Nothing carries status back downstream when a fix lands upstream, and `upstream-sync.md` §7 describes only the outbound direction. So a fork's log grows monotonically and steadily overstates what is outstanding — which is how a closed entry gets re-worked by a later session. Noted rather than fixed: the fix belongs in §7, and it is a design question about who owns the status field, not a correction.
+
+### Session close
+
+Knowledge candidates: None.
+Open flags: None.
+Push status: This turn changes no other file; pushing the log entry itself.
+
+STATUS: CHECKPOINT
+Completed: Verified the document-capture entry closed against the current text of both files it touches, rather than redoing work already landed, and recorded the evidence so the next session does not re-verify it.
+Next: `validate.ps1`'s size and entry-count warnings read as hard thresholds, contradicting `authoring-guidelines.md` §8's own text — 20 of the fork's remaining 32 warnings.
+Waiting for: Nothing.
+
+
 
 
 
