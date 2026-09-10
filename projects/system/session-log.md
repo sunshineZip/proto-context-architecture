@@ -1660,6 +1660,44 @@ Completed: Replaced three independently-invented `description.md` markers with a
 Next: Entry 9 — a reusable fork health-check procedure.
 Waiting for: Nothing blocking.
 
+---
+
+## [Copilot] — Turn 50 | 2026-09-10
+
+Entry 9: ship a reusable fork health-check procedure. The entry asks the receiving session to decide first whether this belongs in the template at all, since it is a new capability rather than a fix and adds a file every fork inherits.
+
+**Decided yes, and the deciding argument is not the one the entry leads with.** The entry frames this as a missing capability. It is also a **live misdirection in shipped text**: `authoring-guidelines.md` §8 closed by saying "for the equivalent housekeeping at the repo/instance level — including checking whether the upstream template has changed — see `knowledge/flow/upstream-sync.md`." That file covers changes arriving *from* the template. It has never covered a fork's own accumulated drift. So the template did not merely lack the middle scope; it actively directed anyone looking for it to a file that does not provide it. Correcting that requires something real to point at, which settles the question.
+
+Supporting, but secondary: the method is unusually well evidenced. It produced 59 findings and nine root causes in one pass, and this session has now worked eleven of the resulting thirteen entries — every one landed, several after correcting the entry's own premise. That is a stronger track record than most procedures ship with.
+
+**The tension with Entry 8, stated rather than glossed.** Entry 8's complaint is that every self-check this template defines is opportunistic and therefore never runs, naming four such mechanisms. Shipping this file adds a fifth. I did not pretend otherwise: §1 says plainly that nothing schedules it, that the trigger problem is circular, and that the existence of the file is not a claim the audit happens on its own. Whatever Entry 8 decides can then treat this uniformly with the other four instead of having to rediscover it.
+
+**Three deliberate departures from the entry's prompt.**
+
+1. **The branch-authorization preamble was not carried over.** The source prompt opens with several paragraphs granting permission to land on `main`. That is now handled by `.branch-authorization`, the `sync-check.ps1` banner, `ROUTING.md`'s Hard Constraints and `.github/copilot-instructions.md` — four places as of Turn 43. A fifth restatement inside a procedure file is exactly the duplication this repo keeps finding, and it would drift from the others the moment any of them changed.
+2. **The "known findings" list was not shipped as a list.** The entry suggests including the template-level findings already known, so a fork can check them off rather than rediscovering them. As a static list it would have been stale the day after it was written — eleven of the twelve items it names were fixed during this session. It points at `convention-enforcement.md` §6 and `projects/system/session-log.md` instead, both of which are maintained. Encoding a snapshot into a procedure about detecting staleness would have been a poor joke.
+3. **"Run it, don't read it" gained a second failure mode.** The entry records one: a session concluding PowerShell was absent when it was on `PATH`. §2 adds the one this repo hit directly — a session that *did* run it and read a clean pass as evidence of conformance, while six of its own conventions were being violated. Both failures produce a confident wrong answer, and only naming both makes clear that running it is necessary rather than sufficient.
+
+**One addition of my own.** Phase 3's split-candidate item now says to record the outcome as a `Split assessed` declaration. Without that, an audit that correctly decides a domain should stay whole leaves no trace, and the next audit re-litigates it — the recurrence problem closed one turn ago, which this procedure would otherwise walk straight back into.
+
+**Files changed:** `knowledge/flow/health-check.md` (new, 1.0); `knowledge/domains/authoring-guidelines.md` (1.15 → 1.16) — §8's misdirection corrected.
+
+**Not added to `validate.ps1`'s required-flow-files list**, matching the reasoning Turn 38 used for `convention-enforcement.md`: a fork that has not yet synced cannot have the file, and a hard error for that is not proportionate. It is reachable from §8 and from `upstream-sync.md`'s scope.
+
+**Two `ROUTING.md` additions proposed rather than made**, batched so they need one approval: a Quick Task Guide entry pointing at this procedure, and the still-pending one-sentence cross-reference from the append-only Hard Constraint to `turn-protocol.md` §1's miscount recovery.
+
+### Session close
+
+Knowledge candidates: None — a procedure, not a domain fact.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Entry 9. Added the whole-fork audit procedure, fixed the shipped misdirection that had been sending people looking for it to the wrong file, and declined three parts of the source prompt that would have duplicated or staled on contact.
+Next: Entry 8 — the last of the thirteen, and the one needing a human decision on posture.
+Waiting for: Two `ROUTING.md` additions, batched for one approval.
+
+
 
 
 

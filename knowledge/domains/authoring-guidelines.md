@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.15 | 2026-09-10 | Production
+Version 1.16 | 2026-09-10 | Production
 
 ---
 
@@ -254,7 +254,7 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] Consider whether this domain has become genuinely irrelevant, not just stale — if so, retire it (`knowledge/domains/index.md` § Retiring a Domain) rather than leaving it silently unmaintained
 - [ ] Grep this domain's own `description.md` for placeholder phrasing like "(not yet created)" and confirm it's still accurate — a sibling domain may have been onboarded since this was written (see `knowledge/domains/index.md` § Adding a Domain step 7, which now handles this at onboarding time going forward; this check is the backstop for anything onboarded before that existed, or missed the first time)
 
-This pass is scoped to a single domain document. For the equivalent housekeeping at the repo/instance level — including checking whether the upstream template has changed — see `knowledge/flow/upstream-sync.md`.
+This pass is scoped to a single domain document. Two other scopes exist and this one does not reach them: a whole-repo audit of this fork's own accumulated content is `knowledge/flow/health-check.md`, and checking whether the upstream template itself has changed is `knowledge/flow/upstream-sync.md`. Until 2026-09-10 this paragraph pointed at the second for both, which left a fork's own repo-level drift belonging to no procedure at all — the gap where a two-month-old fork accumulated 59 unnoticed findings.
 
 ---
 
@@ -436,3 +436,4 @@ Before submitting any knowledge document for human approval:
 | 1.13 | 2026-09-10 | Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`, which maps every rule in this document and in `MarkdownConventions.md` to whether anything actually checks it. Several rules here are labelled Judgement there — genuinely unmechanisable, which is a decision rather than an omission — and several are labelled Gap. See `projects/system/session-log.md` Turn 38. |
 | 1.14 | 2026-09-10 | §3's Executive Summary guidance and §6's claim-level signal rule now both point at `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content. §6 also states why claim-level tagging matters: a classification held at section level does not survive being copied, so the copy arrives untagged — which is exactly how a fork's severe-tier item reached the section Step 4 loads by default. See `projects/system/session-log.md` Turn 42. |
 | 1.15 | 2026-09-10 | §3 gained "Domain declarations" — a register for the standing per-domain decisions recorded in `description.md`, after three of them accreted independently in three separate changes with no shared format and no way for a script to read any of them. Adding a fourth now requires registering it. §8 gained a Maintenance Pass item to re-examine `Split assessed`, since that declaration suppresses warnings. See `projects/system/session-log.md` Turn 49. |
+| 1.16 | 2026-09-10 | §8's closing paragraph corrected: it sent repo-level housekeeping to `upstream-sync.md`, which covers only changes arriving from the template, not a fork's own drift. That scope now belongs to the new `knowledge/flow/health-check.md`. The misdirection was itself the gap it described. See `projects/system/session-log.md` Turn 50. |
