@@ -1582,6 +1582,36 @@ Completed: Ported Version History archival, verified with a real split plus two 
 Next: Entry 9 — the template should ship a reusable fork health-check procedure. Then Entry 8, which needs a human decision.
 Waiting for: Nothing blocking. Four open questions, all listed in the report.
 
+---
+
+## [Copilot] — Turn 48 | 2026-09-10
+
+Two human decisions applied, and one danger found by applying them.
+
+**`.branch-authorization` recorded**, in the human's own words, dated and attributed to the repo owner. One line added that they did not dictate: the guardrails — not force-pushing, not another branch, not `--no-verify`. It narrows the authorization rather than widening it, the banner states the same three independently, and the file may be read on its own by something that never runs the banner. Rendered and read back through `sync-check.ps1` to confirm the authorized path prints correctly with real content rather than the earlier throwaway fixture. Written in pure ASCII deliberately: the banner prints it through `Write-Host`, and a console using an OEM codepage would mangle an em dash on the one machine least likely to notice.
+
+**`ROUTING.md` split, the first real use of the archival exception added in Turn 47.** Done on this file first because it is the one document Step 1 makes mandatory in every session, so its changelog was the most expensive in the repo. Rows 1.0–1.5 relocated verbatim to `ROUTING-history.md`, leaving 20 live and a pointer where they were.
+
+**Safety review, since the human asked for caution on this specific change.** The full diff of `ROUTING.md` outside the Version History rows is three lines: the header version bump, the pointer line, and the blank line before it. Nothing in Route Steps 1–4, the Hard Constraints, the Standing Rules or the Quick Task Guide moved. The Index needs no change — Version History is still a real section, entry 5, in place. The live table now starts at 1.6, which the start-at-1.0 check tolerates by design (it warns only on a first row *below* 1.0). `validate.ps1` reports 0 errors, 0 warnings, and its reconstruction check is what confirms the six rows were moved rather than lost.
+
+**The danger the caution instruction actually caught, and it was not in the split.** It was in the authorization file. `Architecture.md` §6 step 11 said the file "is deliberately not shipped: only a fork's own owner can give it." That was true of the template right up until this repo recorded its own — and this repo is both the template and a working repo. The file is tracked, so **a fork now inherits the template owner's consent for a repo the template owner does not own**. A session in that fork would read a dated, named, apparently valid standing authorization and act on it.
+
+Fixed by making step 11 say to delete the inherited file and write your own, and by stating why. Worth noting how it surfaced: no check caught it, and nothing about the split caught it. It appeared only because a general instruction to watch for danger was applied to a change whose danger lay somewhere else entirely — which is an argument for that kind of instruction, not against it.
+
+**Files changed:** `.branch-authorization` (new), `ROUTING.md` (1.24 → 1.25, six rows relocated), `ROUTING-history.md` (new archive), `Architecture.md` (1.13 → 1.14, §6 step 11).
+
+### Session close
+
+Knowledge candidates: None.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Recorded the branch authorization, performed the first archival split on the repo's most-loaded file, and closed a consent-inheritance hole that the act of recording the authorization had itself opened.
+Next: Entry 9 — a reusable fork health-check procedure.
+Waiting for: A suggestion answered and a question restated in the report; neither blocks Entry 9.
+
+
 
 
 

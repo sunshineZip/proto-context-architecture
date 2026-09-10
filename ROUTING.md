@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.24 | 2026-09-10 | Production
+Version 1.25 | 2026-09-10 | Production
 
 ---
 
@@ -258,14 +258,10 @@ Follow this sequence. Do not create projects before domains exist — a project 
 
 ## Version History
 
+> Earlier history archived in `ROUTING-history.md`.
+
 | Version | Date | Summary |
 |---|---|---|
-| 1.0 | 2026-06-29 | Initial creation. Extracted from README.md — routing instructions now live here, README.md reserved for human readers. |
-| 1.1 | 2026-06-29 | Added first-time setup workflow to Quick Task Guide — covers domain-first initialization sequence for fresh forks. |
-| 1.2 | 2026-07-15 | Expanded the Commit and push standing rule with cadence guidance (per-increment vs per-segment) and an explicit requirement to flag the human when a push is deferred. |
-| 1.3 | 2026-07-15 | Step 4 now points to the new Cross-Domain Query Recipes section in `knowledge/domains/index.md` for recurring multi-domain tasks. |
-| 1.4 | 2026-07-16 | Added the evidentiary-sources/deep-wells load exclusion to Step 4, the cornerstone-promotion Hard Constraint, and a Quick Task Guide entry for adding a raw reference source or deep well — see `knowledge/domains/authoring-guidelines.md` §9. |
-| 1.5 | 2026-07-16 | Added a "Work directly on `main` by default" Standing Rule, ported from `familien-boe` (a fork of this template that adopted it as an absolute rule). Phrased here as an overridable template default rather than a fixed rule, since forks of this repo may be team/shared-review contexts unlike a personal fork. |
 | 1.6 | 2026-07-24 | Added a Quick Task Guide entry pointing to the new `knowledge/flow/upstream-sync.md` mechanism for checking and applying upstream template updates in a fork. |
 | 1.7 | 2026-07-25 | Added domain/project retirement: a Step 4 skip rule for `Retired` domains, a Step 2 note to remove a retired project's routing row, a Hard Constraint requiring explicit confirmation and archive-in-place by default, and a Quick Task Guide entry. See `MarkdownConventions.md` §1 and `knowledge/domains/index.md` § Retiring a Domain for the underlying convention. |
 | 1.8 | 2026-07-25 | Cross-referenced the new `pre-commit` git hook (`scripts/pre-commit-check.ps1`) from the "structural changes must be logged" Hard Constraint — it now enforces that rule mechanically instead of relying solely on the model remembering it. |
@@ -285,3 +281,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.22 | 2026-09-09 | Quick Task Guide now names `projects/system/upstream-feedback.md` as where a confirmed template-level finding actually lands, rather than pointing only at the procedure in `upstream-sync.md` §7 — the previous wording named the procedure but not the destination, which was itself part of why the log was hard to find. See `projects/system/session-log.md` Turn 37. |
 | 1.23 | 2026-09-10 | Added the `## Index` this file has needed since it passed four sections — it has six. Found by a new `scripts/validate.ps1` check, added the same day, for a rule `MarkdownConventions.md` §3 has always stated and nothing has ever enforced. Matters more here than in most files: the Hard Constraints blockquote instructs a session to re-read a specific constraint mid-session, which until now meant scrolling a 250-line document with no map. See `projects/system/session-log.md` Turn 38. |
 | 1.24 | 2026-09-10 | Hard Constraints gained a standing-authorization rule for landing work on `main`, pointing at a fork-owned `.branch-authorization` file. Every existing rule on this subject stated a convention; none stated consent, so a session also holding a harness instruction demanding "explicit permission" had nothing to satisfy it and asked the human in every new session. Absence of the file is deliberately not read as consent. See `Architecture.md` §6, `scripts/sync-check.ps1`, and `projects/system/session-log.md` Turn 43. |
+| 1.25 | 2026-09-10 | Version History rows 1.0 through 1.5 relocated verbatim to `ROUTING-history.md`, the first use of the archival exception added to `MarkdownConventions.md` §2 the same day. Nothing was deleted: `scripts/validate.ps1` verifies that the archive and this table together still reconstruct the committed history. Done here first because this file is loaded in every session at Step 1, so its changelog was the most expensive in the repo. See `projects/system/session-log.md` Turn 48. |
