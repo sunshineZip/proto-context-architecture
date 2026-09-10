@@ -1,6 +1,6 @@
 # Upstream Template Sync
 
-Version 1.4 | 2026-09-09 | Production
+Version 1.5 | 2026-09-10 | Production
 
 ---
 
@@ -110,7 +110,7 @@ Only after a human has reviewed the check's findings and said to proceed. This i
 
 ## 6. When to Run This
 
-Opportunistically, not on a schedule — the same discipline as the domain-level Maintenance Pass (`knowledge/domains/authoring-guidelines.md` §8): "on request, or when things have visibly diverged," not a recurring automated job. A session working in the System project with spare capacity, or asked to "tidy up," should glance at the sync marker in `projects/system/TODO.md` and run the check (§4) if it looks stale. See that file's own maintenance note for exactly where this is surfaced.
+Opportunistically, not on a schedule — the same discipline as the domain-level Maintenance Pass (`knowledge/domains/authoring-guidelines.md` §8): "on request, or when things have visibly diverged," not a recurring automated job. A session working in the System project with spare capacity, or asked to "tidy up," should glance at the sync marker in `projects/system/TODO.md` and run the check (§4) if it looks stale. See that file's own maintenance note for exactly where this is surfaced. For what "opportunistically" costs when every mechanism says it, see `Architecture.md` §7.
 
 ---
 
@@ -163,3 +163,4 @@ Write the bracketed body as a ready-to-paste prompt, not a note that needs trans
 | 1.2 | 2026-07-25 | Wording fix in §3: "deep-well" → "reference-work" to match the rename in `knowledge/domains/authoring-guidelines.md` §9.2. No path or mechanics change. |
 | 1.3 | 2026-08-11 | Added new §7 "Downstream Feedback" — the reverse-direction counterpart to this file's existing check/apply mechanism: how a fork reports a template-level finding to the human for relay, via a new Upstream Feedback Log subsection in `projects/system/TODO.md`'s System Maintenance Pass section, without ever writing to the upstream repo directly. §2 cross-references it. Document Purpose updated to cover both directions. Old §7 Version History renumbered to §8. See `knowledge/flow/operating-principles.md` §5 ("Upstream feedback flags") for the flag format, and `projects/system/session-log.md` Turn 20. |
 | 1.4 | 2026-09-09 | §7 moves the Upstream Feedback Log out of `projects/system/TODO.md` and into its own `projects/system/upstream-feedback.md`, created on first use rather than shipped. Fixes two compounding problems a fork measured directly: the log was introduced by a bold paragraph rather than a heading, so it was invisible to every navigation mechanism this template relies on, and eleven entries had grown to 71% of the task file hosting them. §2 updated to match. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, which had already prototyped the move. See `projects/system/session-log.md` Turn 37. |
+| 1.5 | 2026-09-10 | §6 now points at the new `Architecture.md` §7 for what "opportunistically, not on a schedule" costs once every maintenance mechanism says it independently. This file states the posture for the upstream sync; §7 states it once for all five. See `projects/system/session-log.md` Turn 52. |

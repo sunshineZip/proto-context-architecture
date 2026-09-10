@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.16 | 2026-09-10 | Production
+Version 1.17 | 2026-09-10 | Production
 
 ---
 
@@ -239,7 +239,7 @@ Follow `MarkdownConventions.md` §2. Additionally for knowledge documents:
 
 ## 8. Maintenance Pass
 
-A structural health check, distinct from the per-edit updates above. Per-edit updates keep a single change correct; a Maintenance Pass catches drift that accumulates silently across many small edits over time. Run it periodically — on request, or when a domain's Index and content have visibly diverged — not on every edit.
+A structural health check, distinct from the per-edit updates above. Per-edit updates keep a single change correct; a Maintenance Pass catches drift that accumulates silently across many small edits over time. Run it periodically — on request, or when a domain's Index and content have visibly diverged — not on every edit. Nothing triggers it: see `Architecture.md` §7 for what that means in practice across all five of this system's maintenance mechanisms.
 
 - [ ] Confirm every Index entry (§3) still points to a section that exists, under the correct number
 - [ ] Check for the same fact stated in two places with different confidence signals (§6); consolidate under one owning section per the rule in §4
@@ -437,3 +437,4 @@ Before submitting any knowledge document for human approval:
 | 1.14 | 2026-09-10 | §3's Executive Summary guidance and §6's claim-level signal rule now both point at `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content. §6 also states why claim-level tagging matters: a classification held at section level does not survive being copied, so the copy arrives untagged — which is exactly how a fork's severe-tier item reached the section Step 4 loads by default. See `projects/system/session-log.md` Turn 42. |
 | 1.15 | 2026-09-10 | §3 gained "Domain declarations" — a register for the standing per-domain decisions recorded in `description.md`, after three of them accreted independently in three separate changes with no shared format and no way for a script to read any of them. Adding a fourth now requires registering it. §8 gained a Maintenance Pass item to re-examine `Split assessed`, since that declaration suppresses warnings. See `projects/system/session-log.md` Turn 49. |
 | 1.16 | 2026-09-10 | §8's closing paragraph corrected: it sent repo-level housekeeping to `upstream-sync.md`, which covers only changes arriving from the template, not a fork's own drift. That scope now belongs to the new `knowledge/flow/health-check.md`. The misdirection was itself the gap it described. See `projects/system/session-log.md` Turn 50. |
+| 1.17 | 2026-09-10 | §8 now points at `Architecture.md` §7 for what "nothing triggers it" costs across all five of this system's maintenance mechanisms. This file states the posture for one of them; §7 states it once for all of them. See `projects/system/session-log.md` Turn 52. |

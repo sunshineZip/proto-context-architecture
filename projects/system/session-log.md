@@ -1732,6 +1732,46 @@ Completed: Landed the two approved `ROUTING.md` additions, and gathered the side
 Next: Entry 8, the last entry, pending the human's decision between three options.
 Waiting for: That decision.
 
+---
+
+## [Copilot] — Turn 52 | 2026-09-10
+
+Entry 8, the last of the thirteen: every self-check this template defines is opportunistic, so none of them ever runs. Human chose option 3 — keep the posture, state it honestly — over the staleness-date and session-start-nudge options.
+
+**Implemented as one statement, not five.** The obvious reading of option 3 is "add a sentence to §8." That would have been wrong, and the entry says why without quite drawing the conclusion: the point "only becomes visible when all four statements are read side by side, which is precisely why it went unnoticed." A sixth scattered sentence would have reproduced the exact condition being fixed. A fix for accretion is a register, not another accretion — the same shape as the declaration register two turns ago.
+
+So `Architecture.md` gained **§7, Maintenance Posture**: the posture stated once, the five mechanisms tabulated in one place, and what follows from all five together, which none of them says alone.
+
+**Five, not the four the entry lists.** Reading them side by side found `MarkdownConventions.md` §2's archival note and `health-check.md` §1 as well — and both of those were written *this session*, one of them deliberately, after I had read Entry 8 and explained to the human why it was debatable. That is the part worth recording: the posture is not an unexamined inherited default. It keeps being re-chosen, including by a session holding the argument against it.
+
+**What §7 actually says, beyond restating "unscheduled":**
+- Nothing is ever due, nothing surfaces how long it has been, no mechanism reports its own age.
+- The trigger conditions are circular — "run it when things have visibly diverged" needs someone to have already noticed the thing the pass exists to notice.
+- The observed result is that they do not run: a two-month-old fork in near-daily use accumulated 59 findings, none hidden, every one found because a human asked.
+- **The practical consequence, stated plainly:** this system's quality depends on a human periodically deciding to look. A fork for which that does not hold should schedule it *outside* the repo — a calendar reminder, a CI job, a recurring task wherever that fork's work is actually tracked — rather than assume these mechanisms will fire.
+
+That last point is the one that makes the disclosure useful rather than merely honest. Option 3 as written would tell a fork the mechanism is unreliable and stop there. Naming where scheduling can actually live gives them somewhere to go.
+
+**§7 also records that the alternative was considered and remains available**, with the date. A future session finding the disclosure insufficient does not have to re-derive the options.
+
+**Three pointers, not five.** `authoring-guidelines.md` §8, `health-check.md` §1 and `upstream-sync.md` §6 now point at §7 — the three a session actually reads while doing maintenance. `MarkdownConventions.md` §2 and the `ROUTING.md` Quick Task Guide were left alone: one is about archival permission and the other is a lookup table, and adding pointers there would have cost more than it returned.
+
+**Files changed:** `Architecture.md` (1.14 → 1.15, new §7 and Index entry), `knowledge/domains/authoring-guidelines.md` (1.16 → 1.17), `knowledge/flow/health-check.md` (1.0 → 1.1), `knowledge/flow/upstream-sync.md` (1.4 → 1.5).
+
+**The relayed queue is now complete: thirteen of thirteen.** Nine worked in this session (Turns 39–52), four in the preceding one (Turns 34–38). One of the thirteen required no change and was closed by verification instead. Five had their premise corrected before implementation, in every case because the entry cited a feature that exists only in the fork that raised it.
+
+### Session close
+
+Knowledge candidates: None — a design disclosure, not a domain fact.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Entry 8, and with it the thirteen-entry queue. Stated the maintenance posture once with its cost named and a route to scheduling outside the repo, rather than adding a sixth scattered sentence to the pile that made the problem invisible.
+Next: Nothing queued.
+Waiting for: Direction. The queue is finished; the fork's own log still shows all thirteen as Open, since nothing carries status back downstream.
+
+
 
 
 

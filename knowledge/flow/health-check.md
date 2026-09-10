@@ -1,6 +1,6 @@
 # Fork Health Check
 
-Version 1.0 | 2026-09-10 | Production
+Version 1.1 | 2026-09-10 | Production
 
 ---
 
@@ -39,7 +39,7 @@ Three maintenance mechanisms exist, at three scopes, and the gap between the fir
 
 The middle row is the one that was missing. A fork two months old and in near-daily use ran this for the first time and found 59 issues, none hidden and none previously looked for. Roughly two-thirds turned out to be properties of the template rather than of that fork — which is the other reason to run it: what it finds is often not yours.
 
-**Nothing schedules this.** It runs when a human asks. That is a real limitation, stated here rather than left to be discovered: a procedure whose trigger is "when things have visibly diverged" requires someone to have already noticed the thing the procedure exists to notice. Do not read the existence of this file as a claim that the audit happens on its own.
+**Nothing schedules this.** It runs when a human asks. That is a real limitation, stated here rather than left to be discovered: a procedure whose trigger is "when things have visibly diverged" requires someone to have already noticed the thing the procedure exists to notice. Do not read the existence of this file as a claim that the audit happens on its own. This is true of every maintenance mechanism here, not just this one — `Architecture.md` §7 states the posture once and names what follows from it.
 
 ---
 
@@ -131,3 +131,4 @@ Two further constraints on the report itself:
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-09-10 | Initial creation. Generalises a one-time whole-repo audit run by the `familien-boe` fork, which produced 59 findings and nine root causes and whose relayed entries drove twelve changes to this template. Fills the gap between the per-domain Maintenance Pass and the upstream sync, which `authoring-guidelines.md` §8 had been pointing at `upstream-sync.md` to cover — a misdirection, since that file covers template drift rather than a fork's own. The embedded branch-authorization preamble from the source prompt was deliberately not carried over; that is handled by `.branch-authorization` and `ROUTING.md`'s Hard Constraints, and restating consent in a fifth place would be its own drift. See `projects/system/session-log.md` Turn 50. |
+| 1.1 | 2026-09-10 | §1's "nothing schedules this" note now points at the new `Architecture.md` §7, which states the posture once for all five maintenance mechanisms rather than leaving each to state it alone. See `projects/system/session-log.md` Turn 52. |

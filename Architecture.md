@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.14 | 2026-09-10 | Production
+Version 1.15 | 2026-09-10 | Production
 
 ---
 
@@ -20,7 +20,8 @@ Describes how a context architecture works: the session interface, the file and 
 4. [Dynamic Routing](#4-dynamic-routing)
 5. [Subproject Transcendence](#5-subproject-transcendence)
 6. [Setting Up a New Instance](#6-setting-up-a-new-instance)
-7. [Version History](#version-history)
+7. [Maintenance Posture](#7-maintenance-posture)
+8. [Version History](#version-history)
 
 ---
 
@@ -221,6 +222,32 @@ Which of these is mechanically enforced, and which is honour-system, is recorded
 
 ---
 
+## 7. Maintenance Posture
+
+**Every maintenance mechanism in this system is triggered by a human asking. None of them runs on its own, and none of them notices that it has not run.** This is a deliberate decision, and this section exists so that a fork adopting the template knows it is the deal rather than discovering it later.
+
+Five mechanisms say so independently, in their own words:
+
+| Mechanism | Where |
+|---|---|
+| Per-domain Maintenance Pass | `knowledge/domains/authoring-guidelines.md` §8 |
+| Whole-repo health check | `knowledge/flow/health-check.md` §1 |
+| Upstream template sync | `knowledge/flow/upstream-sync.md` §6 |
+| Version History archival | `MarkdownConventions.md` §2 |
+| Quick Task Guide framing of the above | `ROUTING.md` |
+
+Each is individually defensible. Forcing this work into every session would be worse than not doing it, and most of it is genuinely not urgent. But the five together have a cost that none of them states alone, and it is worth stating once:
+
+- **Nothing is ever due**, nothing surfaces how long it has been, and no mechanism reports its own age.
+- **The trigger conditions are circular.** "Run it when things have visibly diverged" requires someone to have already noticed the thing the pass exists to notice.
+- **The observed result is that they do not run.** A fork two months old and in near-daily use accumulated 59 structural findings, none hidden. Every one was found by a human asking for an audit; none was surfaced by any self-check. Roughly two-thirds turned out to be properties of the template rather than that fork.
+
+**So the practical reading is: this system's quality depends on a human periodically deciding to look.** If that does not fit how a given fork is used, the honest response is to add scheduling outside the repo — a calendar reminder, a CI job, a recurring task wherever that fork's work is actually tracked — rather than to assume the mechanisms above will fire.
+
+This was reconsidered on 2026-09-10 against a proposal to add staleness dates and a session-start nudge, and the posture was kept, with this section added as the counterweight. The proposal remains available if the disclosure alone proves insufficient.
+
+---
+
 ## Version History
 
 | Version | Date | Summary |
@@ -240,3 +267,4 @@ Which of these is mechanically enforced, and which is honour-system, is recorded
 | 1.12 | 2026-09-10 | §6 gained a Script portability subsection — scripts and hooks stay pure ASCII, locate `git` rather than assuming `PATH`, and resolve their interpreter between `pwsh` and `powershell.exe`; `.gitattributes` pins hook line endings to LF. Step 10 now notes that hooks need PowerShell present before activation. Written after a session in which all four mechanical layers were simultaneously and silently inert on a stock Windows machine. See `projects/system/session-log.md` Turn 39. |
 | 1.13 | 2026-09-10 | §6 gained step 11, recording a branch-landing authorization in a fork-owned `.branch-authorization` file (previous step 11 renumbered to 12). Without one, a session launched onto a harness-assigned branch asks permission to land on `main` in every new session: the repo stated a convention and never stated consent. The file is deliberately not shipped, since only a fork's owner can give that consent and an empty placeholder would be read as one. See `ROUTING.md` Hard Constraints and `projects/system/session-log.md` Turn 43. |
 | 1.14 | 2026-09-10 | §6 step 11 now says to delete an inherited `.branch-authorization` and write your own. This repo is both the template and a working repo, so once it recorded its own authorization the file started shipping after all — meaning a fork inherits the template owner's consent, for a repo they do not own. Caught while performing the first archival split rather than by any check. See `projects/system/session-log.md` Turn 48. |
+| 1.15 | 2026-09-10 | New §7, Maintenance Posture. Five mechanisms each independently stated that maintenance here is unscheduled; none stated what follows from all five together, and the point was invisible unless they were read side by side — which is why it went unnoticed through a two-month fork accumulating 59 findings. States the posture once, names its cost, and points a fork at scheduling outside the repo if the disclosure is not enough. See `projects/system/session-log.md` Turn 52. |
