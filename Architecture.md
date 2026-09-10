@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.15 | 2026-09-10 | Production
+Version 1.16 | 2026-09-10 | Production
 
 ---
 
@@ -70,6 +70,13 @@ The session log only ever grows — no entries are deleted or edited after the f
       turn-protocol.md                ← Turn format and STATUS signals
       routing-rules.md                ← Routing logic reference
       project-types.md                ← Project type definitions and phase templates
+      convention-enforcement.md       ← Which conventions are checked, judged, or unenforced
+      health-check.md                 ← Whole-repo structural audit procedure
+      upstream-sync.md                ← Template updates in, findings out
+      git-collaboration.md            ← Multi-writer push and rebase discipline
+      external-review.md              ← Findings needing a named third party's confirmation
+      repo-mixing.md                  ← Opt-in pattern for using two forks in one session
+      restricted-tier.md              ← Opt-in companion repo for sensitive material
     domains/
       index.md                        ← Domain registry
       authoring-guidelines.md         ← Standards for writing domain knowledge
@@ -268,3 +275,4 @@ This was reconsidered on 2026-09-10 against a proposal to add staleness dates an
 | 1.13 | 2026-09-10 | §6 gained step 11, recording a branch-landing authorization in a fork-owned `.branch-authorization` file (previous step 11 renumbered to 12). Without one, a session launched onto a harness-assigned branch asks permission to land on `main` in every new session: the repo stated a convention and never stated consent. The file is deliberately not shipped, since only a fork's owner can give that consent and an empty placeholder would be read as one. See `ROUTING.md` Hard Constraints and `projects/system/session-log.md` Turn 43. |
 | 1.14 | 2026-09-10 | §6 step 11 now says to delete an inherited `.branch-authorization` and write your own. This repo is both the template and a working repo, so once it recorded its own authorization the file started shipping after all — meaning a fork inherits the template owner's consent, for a repo they do not own. Caught while performing the first archival split rather than by any check. See `projects/system/session-log.md` Turn 48. |
 | 1.15 | 2026-09-10 | New §7, Maintenance Posture. Five mechanisms each independently stated that maintenance here is unscheduled; none stated what follows from all five together, and the point was invisible unless they were read side by side — which is why it went unnoticed through a two-month fork accumulating 59 findings. States the posture once, names its cost, and points a fork at scheduling outside the repo if the disclosure is not enough. See `projects/system/session-log.md` Turn 52. |
+| 1.16 | 2026-09-10 | §2's File Structure diagram listed four `knowledge/flow/` files; the folder holds eleven. Seven were missing, including three added the same week. Noticed in Turn 39 and carried unfixed through fifteen turns of work that kept adding to the folder — a small illustration of §7's point, in the document that now makes it. See `projects/system/session-log.md` Turn 55. |

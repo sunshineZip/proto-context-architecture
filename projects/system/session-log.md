@@ -1837,6 +1837,38 @@ Completed: Replaced the feedback log's deletion step with a durable `Landed` sta
 Next: Nothing queued.
 Waiting for: Direction.
 
+---
+
+## [Copilot] — Turn 55 | 2026-09-10
+
+Human asked whether this session could be archived without losing context — whether the repo alone carries everything a new session would need. Checked rather than answered from confidence, since this session opened by discovering that the *previous* one had exactly this gap: its thirteen-entry queue existed nowhere in the repo, surviving only as a one-line `Next:` in Turn 38.
+
+**Verified state:** working tree clean, level with `origin/main`, 54 turns committed, every change of this session pushed. So nothing is unsaved. But "saved" and "findable" are different questions, and two things failed the second one.
+
+**Gap 1 — `Architecture.md` §2's File Structure diagram listed four `knowledge/flow/` files. There are eleven.** Seven missing, three of them added this week, one of them added by me. I noticed this in Turn 39, recorded it as "noted, not fixed," and then carried it unfixed through fifteen turns of work that kept adding files to that folder. Now fixed, with all eleven listed and described.
+
+It is worth naming what that is: a documented, known, trivially-fixable piece of drift that survived a session explicitly about drift, because nothing ever made it due. That is `Architecture.md` §7's own argument, demonstrated in the document that now makes it, by the session that wrote it.
+
+**Gap 2 — everything genuinely open lived only as prose inside a 55-turn append-only log.** `projects/system/TODO.md`, the file `ROUTING.md` Step 2 loads for anyone routed to this project, still carried nothing but fresh-fork setup boilerplate dated 2026-08-18. A new session would have loaded it, seen six setup tasks, and learned nothing about today unless it read the log's tail — and Step 3 asks for the last three turns, which would have surfaced some of it and missed the rest.
+
+`TODO.md` now carries a "Carried forward" section with the four genuinely outstanding items: relaying closed status back to `familien-boe`, the parked staleness-date decision, the duplicated-text-in-forks question, and the deferred `projects/[name]/context/` template. Each states enough to act on without reading the log, and points at where the reasoning lives.
+
+**This is the same failure this session began by finding**, one layer up. Turn 39 recorded that the relayed queue, the hook-ordering bug and the diagram drift all existed only inside session-log turns and were absent from `TODO.md`. That observation was correct, and then the session proceeded to work sixteen more turns without acting on it — adding new open items to the same log as it went. Recording a structural problem is not the same as fixing it, and the gap between those two was sixteen turns wide here.
+
+**Files changed:** `Architecture.md` (1.15 → 1.16), `projects/system/TODO.md` (1.3 → 1.4).
+
+### Session close
+
+Knowledge candidates: None.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Answered the archive question by verifying rather than asserting, and closed the two gaps that verification found — a stale structure diagram known since Turn 39, and a task file that recorded none of this session's actual outputs.
+Next: Nothing queued. `TODO.md` now states what is outstanding.
+Waiting for: Nothing. The session can be archived.
+
+
 
 
 

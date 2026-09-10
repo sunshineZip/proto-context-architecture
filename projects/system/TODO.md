@@ -5,7 +5,7 @@ project: system
 
 # System — TODO
 
-Version 1.3 | 2026-08-18 | Active
+Version 1.4 | 2026-09-10 | Active
 
 > **Routing check:** This is a task tracking file, not a work queue. Do not start work on any item here unless you have completed ROUTING.md routing and received explicit human confirmation for this session.
 
@@ -14,6 +14,17 @@ Version 1.3 | 2026-08-18 | Active
 ---
 
 ## Open
+
+### Carried forward from the 2026-09-10 template-audit session
+
+The thirteen relayed findings from `familien-boe` are all closed (`session-log.md` Turns 34–54). These are what is genuinely outstanding after them. They live here rather than only in the session log because a session routed to this project loads this file, and reading 55 turns to find four open items is not a plan.
+
+- [ ] **Relay the closed status back to `familien-boe`.** All thirteen entries in that fork's `projects/system/upstream-feedback.md` still read `Status: Open`. Under the lifecycle in `knowledge/flow/upstream-sync.md` §7 they should be `Relayed`, then `Landed` against commits `7e1dff6`–`e04109a`. Requires a session with that fork as home — it is a read-only guest from here (`repo-mixing.md` §4)
+- [ ] **Decide whether §7's disclosure is enough on its own.** `Architecture.md` §7 records that maintenance here is human-triggered and names the cost. The alternative considered and parked on 2026-09-10 was per-domain staleness dates plus a session-start nudge. Revisit if the disclosure alone proves insufficient
+- [ ] **Look at conventions that instruct forks to duplicate text.** `upstream-sync.md` §7 tells a fork to keep its own copy of the feedback-log rules, and nothing keeps that copy current — the 2026-09-10 lifecycle change made every existing fork's copy stale on the spot. §7 now says to refresh it, but the general shape is worth a harder look than one sentence
+- [ ] **Decide whether `projects/[name]/context/` should get a template**, the way domains now do. Deferred from Turn 36: a fork has ten context files diverging from the markdown baseline three different ways, and this template ships none, so it means deciding whether every project carries an empty folder
+
+### Fresh-fork setup
 
 - [ ] Replace `knowledge/domains/example-domain/` with your first real knowledge domain
 - [ ] Replace `projects/example-project/` with your first real initiative project
