@@ -53,6 +53,16 @@ Constraints that apply to any work in this domain. Delete this section if the do
 
 ---
 
+## Declarations
+
+Standing decisions about this domain as a whole. Registered set — see `knowledge/domains/authoring-guidelines.md` §3 for the permitted keys, their values, and what each means when absent. Delete any line you have not actually decided: a missing declaration correctly reads as "not reviewed", while a guessed one reads as a decision nobody made.
+
+Mixable into other forks: [no | yes, ordinary content only]
+Sensitive throughout: [yes | no]
+Split assessed: [YYYY-MM-DD, keep whole]
+
+---
+
 ## Key Contacts and Ownership
 
 | Role | Responsible for | Notes |

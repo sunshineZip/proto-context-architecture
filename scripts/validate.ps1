@@ -1062,18 +1062,38 @@ foreach ($domainDir in $domainDirs) {
     $knowledgeFilePath = Join-Path $domainDir.FullName "knowledge.md"
     if (-not (Test-Path $knowledgeFilePath)) { continue }
 
+    # --- A "Split assessed" declaration in description.md (authoring-guidelines.md
+    #     section 3) records that someone looked at this domain and decided. Without
+    #     it the two split proxies below recur on every run against a domain already
+    #     judged cohesive, which is how a correct human decision gets re-litigated.
+    #     A malformed line is warned about rather than ignored: it would otherwise
+    #     fail to suppress while its author believed it had. ---
+    $splitAssessed = $false
+    $domainDescriptionPath = Join-Path $domainDir.FullName "description.md"
+    if (Test-Path $domainDescriptionPath) {
+        $descriptionText = Get-Content -Path $domainDescriptionPath -Raw -Encoding UTF8
+        $splitDeclarationMatch = [regex]::Match($descriptionText, '(?m)^Split assessed:\s*(.+?)\s*$')
+        if ($splitDeclarationMatch.Success) {
+            if ($splitDeclarationMatch.Groups[1].Value -match '^\d{4}-\d{2}-\d{2}\s*,\s*\S') {
+                $splitAssessed = $true
+            } else {
+                Add-ValidationWarning "Domain '$($domainDir.Name)/description.md': 'Split assessed' declaration is not in the required 'YYYY-MM-DD, decision' form, so it does not count as an assessment (authoring-guidelines.md section 3)"
+            }
+        }
+    }
+
     $rawText = Get-Content -Path $knowledgeFilePath -Raw -Encoding UTF8
     $scanText = Remove-CodeFences -Text $rawText
     $lineCount = @($rawText -split "`r?`n").Count
 
-    if ($lineCount -gt $domainSizeLineWarnThreshold) {
+    if (($lineCount -gt $domainSizeLineWarnThreshold) -and (-not $splitAssessed)) {
         Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' is $lineCount lines. That is a proxy, not a limit -- authoring-guidelines.md section 8 sets no size threshold. Its actual test: does a task ever need the whole document, or consistently only one part of it? A large but genuinely interdependent domain is correct as it stands."
     }
 
     $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
     if ($indexMatch.Success) {
         $entryCount = @([regex]::Matches($indexMatch.Groups[1].Value, '(?m)^\d+\.\s')).Count
-        if ($entryCount -gt $domainIndexEntryWarnThreshold) {
+        if (($entryCount -gt $domainIndexEntryWarnThreshold) -and (-not $splitAssessed)) {
             Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' has $entryCount Index entries. That is a proxy, not a limit -- authoring-guidelines.md section 8 asks whether two sections are ever needed by the same task, not how many sections exist."
         }
     }

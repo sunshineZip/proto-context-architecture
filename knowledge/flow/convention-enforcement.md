@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.6 | 2026-09-10 | Production
+Version 1.7 | 2026-09-10 | Production
 
 ---
 
@@ -100,7 +100,8 @@ Source: `knowledge/domains/authoring-guidelines.md`.
 | Signals applied per claim, not per section | §6 | Judgement | Same reason as §8 above |
 | Version History row names the section changed | §7 | Judgement | Editorial |
 | Maintenance Pass items | §8 | Judgement | A procedure, not a rule a file can violate |
-| Domain size and Executive Summary heaviness | §8 | Checked | Three warning thresholds, deliberately lagging indicators rather than limits. Each warning states §8's actual test in its own text, because citing §8 while printing a fixed-sounding number was read as a threshold rule and nearly caused two wrong splits. Note the warnings cannot be suppressed: a domain judged cohesive keeps being flagged, and that judgement is recorded nowhere |
+| Domain size and Executive Summary heaviness | §8 | Checked | Three warning thresholds, deliberately lagging indicators rather than limits. Each warning states §8's actual test in its own text, because citing §8 while printing a fixed-sounding number was read as a threshold rule and nearly caused two wrong splits. The two split proxies are suppressed by a `Split assessed` declaration (§3), so a domain judged cohesive stops being re-flagged; the Executive Summary warning is not suppressible, since it measures a concrete load cost rather than offering a heuristic |
+| Domain declarations are registered, not free-form | §3 | Checked | Partially — only `Split assessed` is machine-read, and only its format is validated. `Mixable into other forks` and `Sensitive throughout` are read by a session, so nothing checks them |
 | Source manifest exists and rows resolve both ways | §9.1 | Checked | Errors for missing files, warnings for orphans |
 | Every stored source is cited from the owning document | §9.1 | Gap | A stored source cited nowhere is invisible; a fork had five |
 | Document classification runs on every qualifying upload | §9.1 | Judgement | Documented explicitly as having no mechanical backstop — a skipped classification leaves no artifact for a hook to inspect |
@@ -168,3 +169,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 | 1.4 | 2026-09-10 | §3's domain-heaviness row records that the three warnings now carry §8's actual split test in their own text, and that a domain judged cohesive has nowhere to record that judgement, so the warning recurs indefinitely. See `projects/system/session-log.md` Turn 45. |
 | 1.5 | 2026-09-10 | §4's turn-numbering row splits into two severities — a reused number stays an error, a skipped one becomes a warning, since append-only makes the latter uncorrectable. First case in this map where a check's severity is set by whether the finding can be acted on at all, rather than by how serious it is. See `knowledge/flow/turn-protocol.md` §1 and `projects/system/session-log.md` Turn 46. |
 | 1.6 | 2026-09-10 | §2's append-only row records the new Version History archival exception and what the check actually verifies. Deliberately no warning at the 20-row threshold: it grants permission to archive, it does not instruct anyone to. See `MarkdownConventions.md` §2 and `projects/system/session-log.md` Turn 47. |
+| 1.7 | 2026-09-10 | §3 gains a row for the new domain-declaration register, and the heaviness row records that a `Split assessed` declaration now suppresses the two split proxies — closing the recurrence problem this map recorded one version earlier. See `projects/system/session-log.md` Turn 49. |

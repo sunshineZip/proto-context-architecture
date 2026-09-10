@@ -1,6 +1,6 @@
 # Repo Mixing
 
-Version 1.3 | 2026-09-10 | Production
+Version 1.4 | 2026-09-10 | Production
 
 ---
 
@@ -98,7 +98,7 @@ Once declared, Step 1's sync-check (`ROUTING.md` Step 1) should run for every mo
 
 Not everything in a guest repo should be assumed fair game just because it's readable. Each fork that expects to ever be a guest should mark, in its own domain registry (`knowledge/domains/index.md` in the standard layout — the registry that actually plays this role if a fork's structure diverges, per §11), which domains are meant to be pulled into another of the same person's forks. A domain absent from this list is not mixable by default, the same way `restricted-tier.md` §4 treats an unnamed file as off-limits by default.
 
-A minimal way to mark this without inventing new machinery: add a line to the domain's row, or to its `description.md` Working Constraints, stating a mixing posture — e.g. "Mixable into other forks: yes, ordinary content only" or "Mixable into other forks: no." Domains that were never written with any outside audience in mind should default to **not mixable** until someone deliberately reviews and marks them otherwise — the same "not yet reviewed, not cleared" posture §7 applies to untagged content.
+A minimal way to mark this without inventing new machinery: add a `Mixable into other forks` line to the domain's `## Declarations` section — a registered set of standing per-domain decisions, defined in `knowledge/domains/authoring-guidelines.md` §3. Domains that were never written with any outside audience in mind should default to **not mixable** until someone deliberately reviews and marks them otherwise — which is exactly what an absent declaration means, and the same "not yet reviewed, not cleared" posture §7 applies to untagged content.
 
 ---
 
@@ -182,3 +182,4 @@ Nothing here required merging the two forks, moving the career fork's content pe
 | 1.1 | 2026-08-31 (later) | §5 clarified: home/guest is always an explicit human statement, never inferred from which repos happen to be mounted or reachable — and with three or more forks present, each guest is declared individually rather than as a block, since §6/§7 gating is evaluated per guest against that guest's own domain scope and tagging. §9's mixing log clarified to one row per (session, guest, destination) rather than one merged row per session, so a multi-guest session stays answerable per guest later. Prompted by a direct question on both points. See `projects/system/session-log.md` Turn 32. |
 | 1.2 | 2026-09-09 | Removed the `type: flow` frontmatter block this file shipped with. `MarkdownConventions.md` §1 states that root, flow, and registry files do not use frontmatter; this was the only file under `knowledge/flow/` carrying any, and nothing checked it — `scripts/validate.ps1` validates frontmatter for domain and project files only. See `projects/system/session-log.md` Turn 34. |
 | 1.3 | 2026-09-10 | Eleven dangling references removed across §1, §6, §7, §9, §12 and §13. This file was generalized from a fork's own mechanisms (see the 1.0 row) but kept citing them by name: six citations to an `extraction-procedure.md` that does not exist in this template, and five to a `[SENSITIVE: severe]`/⛔ tier that §8 here has never defined. §7 is titled The Sensitivity Gate, and for any fork other than the one it was drawn from it resolved to nothing but its own fallback paragraph. It now states its handling rules inline against §8's single `[SENSITIVE]` signal, warns against treating an Executive Summary as pre-cleared, and defers explicitly to a guest fork's own stronger tier where one exists rather than assuming the template defines it. See `projects/system/session-log.md` Turn 42. |
+| 1.4 | 2026-09-10 | §6's mixing posture is now a registered `Mixable into other forks` declaration (`knowledge/domains/authoring-guidelines.md` §3) rather than a free-form line this section described on its own. It was one of three such markers that had accreted separately into `description.md` with no shared format. See `projects/system/session-log.md` Turn 49. |

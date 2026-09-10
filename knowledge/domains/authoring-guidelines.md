@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.14 | 2026-09-10 | Production
+Version 1.15 | 2026-09-10 | Production
 
 ---
 
@@ -111,6 +111,22 @@ The Executive Summary gives an LLM the critical facts it needs before reading an
 - Any critical gotchas or non-obvious behaviours
 
 Because `ROUTING.md` Step 4 Level 3 loads this section on nearly every query to the domain, a `[SENSITIVE]` claim must not appear here — name the mechanism and point at the section holding it instead. See `MarkdownConventions.md` §8, which states the rule and its one carve-out.
+
+### Domain declarations (`description.md`)
+
+Three separate conventions independently reached for `description.md` as the place to record a standing decision about a whole domain: how it may be mixed into another fork, whether it is sensitive throughout, and whether a split has been assessed. Each was written free-form, in a different change, without knowing about the others. Left that way they are three undocumented markers sharing one file, which nothing can read reliably and which invites a fourth. So they are a registered set, and this is the register.
+
+Put them in an optional `## Declarations` section, one per line, exactly as `Key: value`. Omit the section entirely when every default below applies. Absence is meaningful and always means the same thing — not reviewed, rather than reviewed and fine.
+
+| Declaration | Values | Meaning when absent | Read by |
+|---|---|---|---|
+| `Mixable into other forks` | `no`, or `yes` with a qualifier naming what may cross | Not mixable (`knowledge/flow/repo-mixing.md` §6) | A session, during a mixing pass |
+| `Sensitive throughout` | `yes` / `no` | `no` — `MarkdownConventions.md` §8's per-claim placement rule applies normally | A session, when writing or extracting |
+| `Split assessed` | `YYYY-MM-DD, keep whole` or `YYYY-MM-DD, split planned` | Never assessed | `scripts/validate.ps1` |
+
+**Adding a fourth declaration means adding it to this table first.** That rule is the whole point of the register: the three above accreted separately without it.
+
+**`Split assessed` is the only one a script reads**, so it is the only one whose format is load-bearing — an ISO date, a comma, then the decision. Recording it suppresses the domain-size and Index-entry warnings for that domain, which otherwise recur indefinitely against a domain someone has already correctly decided to keep whole. It deliberately does not suppress the Executive Summary warning: that one measures a concrete per-session load cost rather than offering a split heuristic, so a split decision says nothing about it.
 
 ---
 
@@ -232,6 +248,7 @@ A structural health check, distinct from the per-edit updates above. Per-edit up
 - [ ] Compact fully-resolved entries: once something is no longer actionable, collapse it to a one-line outcome and date rather than keeping the full history
 - [ ] Confirm `knowledge/domains/index.md`'s References column still matches the actual `> See also:` callouts in this domain's `knowledge.md`. `scripts/validate.ps1` now flags one-directional links mechanically (§5) — run it as part of this check rather than eyeballing the column by hand, but only chase warnings that don't carry the scope-exclusion wording (§5); those are confirmed-fine by pattern, not drift.
 - [ ] Consider whether this domain should split in two: warning signs are routinely needing the Full file (ROUTING.md §4, level 5) because sections are too interdependent to load separately, or two sections that are never needed by the same task. There's no fixed size threshold — judge by whether a task ever needs the whole document versus consistently needing only one part of it
+- [ ] If `description.md` carries a `Split assessed` declaration (§3), re-examine it — it suppresses the size warnings, so a decision made when the domain was half its current size keeps holding unless someone looks
 - [ ] If this domain has a `sources/` folder, run `scripts/validate.ps1` and confirm it reports no referential-integrity issues for this domain (§9.4)
 - [ ] Confirm `description.md` and `knowledge.md` both have correct frontmatter (`MarkdownConventions.md` §1) — `scripts/validate.ps1` checks this on every run, but worth a manual glance if either file was ever created by copying another domain's files rather than the template
 - [ ] Consider whether this domain has become genuinely irrelevant, not just stale — if so, retire it (`knowledge/domains/index.md` § Retiring a Domain) rather than leaving it silently unmaintained
@@ -418,3 +435,4 @@ Before submitting any knowledge document for human approval:
 | 1.12 | 2026-09-09 | §3 now points at the new `knowledge/domains/_template/` as the starting point for a new domain document, rather than leaving the required structure to be reproduced by hand or inherited by copying a sibling. See `projects/system/session-log.md` Turn 36. |
 | 1.13 | 2026-09-10 | Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`, which maps every rule in this document and in `MarkdownConventions.md` to whether anything actually checks it. Several rules here are labelled Judgement there — genuinely unmechanisable, which is a decision rather than an omission — and several are labelled Gap. See `projects/system/session-log.md` Turn 38. |
 | 1.14 | 2026-09-10 | §3's Executive Summary guidance and §6's claim-level signal rule now both point at `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content. §6 also states why claim-level tagging matters: a classification held at section level does not survive being copied, so the copy arrives untagged — which is exactly how a fork's severe-tier item reached the section Step 4 loads by default. See `projects/system/session-log.md` Turn 42. |
+| 1.15 | 2026-09-10 | §3 gained "Domain declarations" — a register for the standing per-domain decisions recorded in `description.md`, after three of them accreted independently in three separate changes with no shared format and no way for a script to read any of them. Adding a fourth now requires registering it. §8 gained a Maintenance Pass item to re-examine `Split assessed`, since that declaration suppresses warnings. See `projects/system/session-log.md` Turn 49. |

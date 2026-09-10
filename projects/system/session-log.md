@@ -1611,6 +1611,56 @@ Completed: Recorded the branch authorization, performed the first archival split
 Next: Entry 9 — a reusable fork health-check procedure.
 Waiting for: A suggestion answered and a question restated in the report; neither blocks Entry 9.
 
+---
+
+## [Copilot] — Turn 49 | 2026-09-10
+
+Three standing per-domain decisions had accreted into `description.md` in three separate changes, each unaware of the others: a mixing posture (`repo-mixing.md` §6), a sensitive-throughout declaration (Turn 42), and a proposed split-assessed marker (Turn 45, deliberately not built for exactly this reason). Human approved turning them into a register.
+
+**`authoring-guidelines.md` §3 now owns the set**, because §3 owns `description.md`'s structure. Three keys, their permitted values, what each means when absent, and who reads it. The rule that matters most is the one about the fourth: **adding a declaration means adding it to that table first.** Without it a fourth would accrete the same way the first three did — the register is not the table, it is that rule.
+
+**A dedicated `## Declarations` section rather than more prose in Working Constraints.** Working Constraints is prose about how to work in a domain; these are fixed-key metadata, one of them machine-read. Merging the two is what produced the mess. `knowledge/domains/_template/description.md` carries the section as placeholders with an instruction to delete any line not actually decided — a guessed declaration reads as a decision nobody made, which is worse than none.
+
+**Absence means unreviewed, never means fine.** Same rule that made `.branch-authorization` safe in Turn 48, applied to all three keys.
+
+**Only `Split assessed` is machine-read, and that asymmetry is stated rather than left implicit.** It suppresses the two split proxies, which closes the recurrence problem recorded four turns ago: a domain someone correctly decided to keep whole stops being re-flagged on every run. It deliberately does **not** suppress the Executive Summary warning — that one measures a concrete per-session load cost rather than offering a split heuristic, so a split decision says nothing about it.
+
+**A malformed declaration warns rather than failing silently.** A line reading `Split assessed: yes, we looked at it` would otherwise not suppress anything while its author believed it had. It now says so, and still fails safe.
+
+**Suppression is not silent in the other direction either.** `authoring-guidelines.md` §8's Maintenance Pass gained an item to re-examine the declaration, since a decision made when a domain was half its current size otherwise keeps holding unexamined forever.
+
+**Verified with three controls, using a threshold-lowered throwaway copy of the validator so the shipped example domain would trip the proxies:**
+
+| Control | Expected | Result |
+|---|---|---|
+| No declaration | Both proxies fire | 2 warnings |
+| `Split assessed: 2026-09-10, keep whole` | Both suppressed | 0 warnings |
+| `Split assessed: yes, we looked at it` | Malformed warning, proxies still fire | 3 warnings |
+
+The third is the one worth having: it confirms the suppression is opt-in by correct format, not by the mere presence of a line beginning with the right words.
+
+**Files changed:**
+- `knowledge/domains/authoring-guidelines.md` (1.14 → 1.15) — §3's register; §8's Maintenance Pass item.
+- `knowledge/domains/_template/description.md` — the `## Declarations` section.
+- `scripts/validate.ps1` — reads the declaration, suppresses the two proxies, warns on a malformed line.
+- `MarkdownConventions.md` (1.10 → 1.11) — §8's carve-out names the registered key.
+- `knowledge/flow/repo-mixing.md` (1.3 → 1.4) — §6's mixing posture names the registered key.
+- `knowledge/flow/convention-enforcement.md` (1.6 → 1.7) — a row for the register; the heaviness row records the suppression.
+
+**Still open, unchanged:** the one-sentence `ROUTING.md` cross-reference from the append-only Hard Constraint to `turn-protocol.md` §1's miscount recovery. Restated to the human; not made, since `ROUTING.md` is not updated silently.
+
+### Session close
+
+Knowledge candidates: None — conventions.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Replaced three independently-invented `description.md` markers with a registered set that has a rule against a fourth, and used the one machine-read member of it to close the unsuppressible-warning problem from Turn 45.
+Next: Entry 9 — a reusable fork health-check procedure.
+Waiting for: Nothing blocking.
+
+
 
 
 
