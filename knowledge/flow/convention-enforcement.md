@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.0 | 2026-09-10 | Production
+Version 1.1 | 2026-09-10 | Production
 
 ---
 
@@ -132,6 +132,7 @@ These run but map to no rule in the convention documents. They are structural pr
 
 - Required root files, entry point, flow files and git hook scripts all exist.
 - `core.hooksPath` is actually set to `.githooks` in this clone — warning, because a fresh clone does not inherit it and the hooks are inert until it is.
+- Nothing under `scripts/` or `.githooks/` contains a non-ASCII character — error. Stated in `Architecture.md` §6 (Script portability) rather than in a convention document, because it is a property of executable files rather than of authored prose. A single em dash stops a `.ps1` parsing under Windows PowerShell 5.1, which takes the validator down with it: this is the one check whose failure disables every other check in this file, so it is an error rather than a warning. The rationale sits in full above the check itself in `scripts/validate.ps1`, on the assumption that whoever trips it will be reading the script, not this map.
 - Every domain has a description and a knowledge file.
 - The domain index's Last Updated column is not older than the domain's own files.
 - A retired project no longer has a live routing row.
@@ -157,3 +158,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 | Version | Date | Summary |
 |---|---|---|
 | 1.0 | 2026-09-10 | Initial creation. Maps every convention in `MarkdownConventions.md`, `knowledge/domains/authoring-guidelines.md`, `turn-protocol.md` and `operating-principles.md` to Checked, Judgement or Gap, lists checks with no corresponding stated rule, and ranks the open gaps. Built by enumerating the convention documents first and reading `scripts/validate.ps1` against that list, which is the ordering that surfaces gaps rather than confirming coverage. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, where eight documented conventions had no enforcement and had silently decayed. See `projects/system/session-log.md` Turn 38. |
+| 1.1 | 2026-09-10 | §5 gained the non-ASCII check on `scripts/` and `.githooks/` — the first check registered here whose own failure mode is disabling every other check in this file. See `Architecture.md` §6 (Script portability) and `projects/system/session-log.md` Turn 39. |

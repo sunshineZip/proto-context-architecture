@@ -1258,3 +1258,27 @@ Completed: Made all five scripts and both hooks run correctly on Windows PowerSh
 Next: Entry 5 — nothing in the template is aware of the current date. The human is retrieving the queue text from `familien-boe`'s `projects/system/upstream-feedback.md`.
 Waiting for: The Entry 5 handover, and a decision on the two proposed documentation updates.
 
+---
+
+## [Copilot] — Turn 40 | 2026-09-10
+
+Human approved both documentation updates proposed at the end of Turn 39.
+
+**`Architecture.md` §6 gained a Script portability subsection.** Turn 39's fixes lived only in script comments and this log; nothing in the system-design document said scripts had portability requirements at all, so the next session to add a script would have had no reason to know. The subsection states the three rules — pure ASCII, resolve `git` rather than assuming `PATH`, resolve the interpreter between `pwsh` and `powershell.exe` — each with the failure it prevents rather than the rule alone. The rejected BOM alternative is recorded too: a fix that works and was still wrong is the kind of thing a later session re-proposes unless the reasoning survives. Step 10 also now says hooks need PowerShell present *before* activation, which is the ordering `.claude/hooks/session-start.sh` gets backwards.
+
+**`knowledge/flow/convention-enforcement.md` §5 gained the non-ASCII check.** §5 is the right home rather than §2–§4: those map rules stated in the convention documents, and this is a property of executable files, not authored prose. Noted there as the one entry in the map whose own failure disables every other check in it — which is why it is an error rather than a warning, and why the full rationale lives above the check in `scripts/validate.ps1` rather than here. Someone who trips it will be reading the script.
+
+Both files' edit guards require this log entry; that is what this turn is. `validate.ps1` passes clean on the result, including the Index and Version History checks against the new subsection and both new rows.
+
+### Session close
+
+Knowledge candidates: None — documentation of tooling already landed.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Recorded Turn 39's portability requirements where a future session will actually encounter them — the system-design document and the enforcement map — rather than leaving them in script comments alone.
+Next: Entry 5.
+Waiting for: The Entry 5 handover text from `familien-boe`.
+
+

@@ -1,6 +1,6 @@
 # Context Architecture — System Design
 
-Version 1.11 | 2026-09-09 | Production
+Version 1.12 | 2026-09-10 | Production
 
 ---
 
@@ -203,8 +203,20 @@ To fork this template for a new initiative:
 7. **Remove example content** — delete `example-domain/` and `example-project/` once replaced.
 8. **Initialize git** — run `git init`, add remote, push.
 9. **Set up Upstream Template Sync tracking** — add the System Maintenance Pass section to your own `projects/system/TODO.md`, recording this fork's starting commit as the initial "last synced" point. See `knowledge/flow/upstream-sync.md` §2 for the exact format and the rest of this mechanism.
-10. **Activate the git hooks** — run `git config core.hooksPath .githooks` once per clone. This is local git config, not something a fresh clone inherits, so it needs re-running after every fresh clone (a Claude Code session's `.claude/hooks/session-start.sh` does this automatically; other setups need the manual command). One command activates both hooks: the pre-commit hook enforces that system-layer edits are logged in `projects/system/session-log.md` in the same commit (`scripts/pre-commit-check.ps1`); the pre-push hook enforces the Hard Constraint that pushes default to `main` unless deliberately bypassed (`scripts/pre-push-check.ps1`).
+10. **Activate the git hooks** — run `git config core.hooksPath .githooks` once per clone. This is local git config, not something a fresh clone inherits, so it needs re-running after every fresh clone (a Claude Code session's `.claude/hooks/session-start.sh` does this automatically; other setups need the manual command). One command activates both hooks: the pre-commit hook enforces that system-layer edits are logged in `projects/system/session-log.md` in the same commit (`scripts/pre-commit-check.ps1`); the pre-push hook enforces the Hard Constraint that pushes default to `main` unless deliberately bypassed (`scripts/pre-push-check.ps1`). Both hooks need PowerShell available — either `pwsh` or, on Windows, the built-in `powershell.exe`. Activate them only once that is true: activating hooks that cannot run leaves every commit failing for a reason nothing explains.
 11. **(Optional) Set up the restricted-tier companion repo** — only if this fork will systematically handle real third-party sensitive/restricted material (personal records, confidential documents, regulated data) at volume, and only before ingesting the first real source file. See `knowledge/flow/restricted-tier.md`. Most forks won't need this — occasional sensitive content is already covered by `ROUTING.md`'s pause-and-ask Hard Constraint and the pre-commit secret-pattern check.
+
+### Script portability
+
+The scripts and hooks are expected to run from more than one environment — typically a Linux container with PowerShell 7 alongside Windows machines that may have only the built-in Windows PowerShell 5.1. Three rules keep that true. All three were written after a session in which every one of them was broken at once, so the validator, the session-start sync notice, the commit guard and the branch guard were all silently inert and the session looked normal from the inside.
+
+- **Scripts and hooks contain no non-ASCII characters.** Windows PowerShell 5.1 decodes a BOM-less `.ps1` using the ANSI codepage, which turns an em dash into something its tokenizer treats as a string delimiter — the file then fails to parse entirely. `scripts/validate.ps1` enforces this as an error. Where a script genuinely needs a non-ASCII character in a pattern, write it as an escape rather than a literal. A UTF-8 BOM fixes the parse too and was rejected deliberately: PowerShell 7 writes `-Encoding utf8` without a BOM, so one session on Linux strips it invisibly and the breakage returns on Windows only. Markdown is unaffected and keeps its typography — it is never parsed by PowerShell.
+- **Scripts locate `git` rather than assuming it is on `PATH`** — `PATH` first, then GitHub Desktop's bundled copy, then a standard Git for Windows install — and say so loudly when none is found. A script that proceeds without git does not fail cleanly; it reports confident, wrong results.
+- **The hooks resolve their interpreter** — `pwsh`, then `powershell.exe` — and fail with an explanation naming the deliberate `--no-verify` bypass, rather than exiting 127 on a machine that simply lacks PowerShell 7.
+
+`.gitattributes` pins `*.sh` and `.githooks/*` to LF for the same reason: line endings otherwise depend on each machine's untracked `core.autocrlf`, and a CRLF shebang makes a hook unrunnable on Linux.
+
+Which of these is mechanically enforced, and which is honour-system, is recorded in `knowledge/flow/convention-enforcement.md` §5.
 
 ---
 
@@ -224,3 +236,4 @@ To fork this template for a new initiative:
 | 1.9 | 2026-08-18 | §6 step 10 reworded from "activate the pre-commit hook" to "activate the git hooks" — one `core.hooksPath` command now also activates the new `pre-push` hook (`scripts/pre-push-check.ps1`), which enforces the promoted `main`-by-default Hard Constraint. See `ROUTING.md` and `projects/system/session-log.md` Turn 23. |
 | 1.10 | 2026-09-09 | §2's File Structure diagram gained `knowledge/domains/_template/`, and §6 step 4 now points at it rather than `example-domain/` — closing the asymmetry where `projects/_template/` existed but domains had no starting artifact, so every new domain was created by copying a sibling. See `projects/system/session-log.md` Turn 36. |
 | 1.11 | 2026-09-09 | §5's template-level-finding row now names `projects/system/upstream-feedback.md`, following the move of the Upstream Feedback Log out of `projects/system/TODO.md`. See `knowledge/flow/upstream-sync.md` §7 and `projects/system/session-log.md` Turn 37. |
+| 1.12 | 2026-09-10 | §6 gained a Script portability subsection — scripts and hooks stay pure ASCII, locate `git` rather than assuming `PATH`, and resolve their interpreter between `pwsh` and `powershell.exe`; `.gitattributes` pins hook line endings to LF. Step 10 now notes that hooks need PowerShell present before activation. Written after a session in which all four mechanical layers were simultaneously and silently inert on a stock Windows machine. See `projects/system/session-log.md` Turn 39. |
