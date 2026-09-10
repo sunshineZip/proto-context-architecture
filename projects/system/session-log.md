@@ -1805,6 +1805,39 @@ Completed: Corrected Turn 44's false claim that `upstream-sync.md` §7 has no in
 Next: Nothing queued.
 Waiting for: A decision on whether any of the three observations above is worth acting on. Updating `familien-boe`'s own log is out of scope for any session with this repo as home.
 
+---
+
+## [Copilot] — Turn 54 | 2026-09-10
+
+Acted on observation 2 from the previous turn, and 3 fell out of the same edit. Observation 1 left alone: it is Entry 8's posture question again, decided two turns ago.
+
+**This supersedes a deliberate decision, not an oversight, and says so.** Turn 20 designed this lifecycle with "manual deletion once a later Check Procedure run shows the finding landed." Checking that first mattered — overriding a considered choice needs different grounds than fixing an omission. Two things have changed since:
+
+- **Deletion's justification has gone.** Turn 20's log lived inside `projects/system/TODO.md`, where a growing list of resolved entries crowded out a file sessions load for other reasons. Entry 3 moved it to its own file on 2026-09-09. Nothing is being crowded any more.
+- **The cost stopped being hypothetical.** Turn 44 of this log is a session spending a turn establishing whether an entry had already been implemented, while the fork's log read `Open` and the answer was yes.
+
+**`Landed: YYYY-MM-DD (commit)` replaces deletion**, with the three states tabulated so each one names who sets it and when. Reconciliation is explicitly to happen *during* the Check Procedure rather than as a task afterwards — §4 is already reading exactly the upstream commits needed, and a reconciliation step that has to be remembered separately is one nobody performs.
+
+**Observation 3 is fixed by a sentence, not a mechanism.** §7 previously called `Relayed` a status kept "purely for the human's own tracking, since this fork has no way to observe what happens next." That was true of who *sets* it and untrue of who *reads* it. §7 now says a stale status is not a harmless omission but a false statement about what is outstanding, and names the session that was misled by one.
+
+**One thing I noticed while editing rather than by looking for it.** §7 instructs a fork to give its feedback log "its own copy of the lifecycle and entry rules." That copy is a copy: this very change makes every existing fork's embedded rules stale, and an upstream sync that updates §7 while leaving the copy alone hands that fork two contradictory rule sets. §7 now says to refresh it. The general shape — a convention that instructs forks to duplicate text, with nothing keeping the duplicate current — is worth a harder look than one sentence, but not tonight and not from me on my own reading of this file today.
+
+**Not done, and not mine to do:** `familien-boe`'s thirteen entries still read `Open`. Under the new lifecycle they should be `Relayed` and then `Landed` against commits `7e1dff6` through `ec6c8ee`. That is a write to a repo which is a read-only guest in this session — `repo-mixing.md` §4 covers exactly this and says to state it and stop. It needs a session with that fork as home.
+
+**Files changed:** `knowledge/flow/upstream-sync.md` (1.5 → 1.6).
+
+### Session close
+
+Knowledge candidates: None.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Replaced the feedback log's deletion step with a durable `Landed` state, on grounds that the original justification no longer holds and the cost of a stale entry has now been observed rather than assumed.
+Next: Nothing queued.
+Waiting for: Direction.
+
+
 
 
 

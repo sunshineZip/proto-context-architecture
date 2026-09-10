@@ -1,6 +1,6 @@
 # Upstream Template Sync
 
-Version 1.5 | 2026-09-10 | Production
+Version 1.6 | 2026-09-10 | Production
 
 ---
 
@@ -126,7 +126,7 @@ A fork inevitably finds bugs or gaps in what it inherited from the template — 
 
 **Where it lands:** its own file, `projects/system/upstream-feedback.md`, in the fork. Create it the first time a finding is actually confirmed — do not pre-create it speculatively, the same way `repo-mixing.md` §9's mixing log is only created once that procedure produces its first durable write. A fork that never files a finding never grows the file.
 
-Give it the standard header block (`MarkdownConventions.md` §1), a Document Purpose, and its own copy of the lifecycle and entry rules below, so the file explains itself to a session that opens it cold. Add a one-line pointer to it from `projects/system/TODO.md`'s System Maintenance Pass section (§2), next to the sync marker, so the two halves of this mechanism stay findable from one place.
+Give it the standard header block (`MarkdownConventions.md` §1), a Document Purpose, and its own copy of the lifecycle and entry rules below, so the file explains itself to a session that opens it cold. Add a one-line pointer to it from `projects/system/TODO.md`'s System Maintenance Pass section (§2), next to the sync marker, so the two halves of this mechanism stay findable from one place. Because that copy is a copy, a fork that already has the file should refresh it when this section changes — an upstream sync that updates §7 and leaves the fork's embedded copy stale gives that fork two different sets of rules.
 
 This log lived inside `projects/system/TODO.md` until 2026-09-09, and both problems that forced the move get *worse* the better the mechanism works, so they are worth stating rather than just correcting:
 
@@ -150,7 +150,23 @@ do — apply/test/log, per its own system-layer discipline.]
 
 Write the bracketed body as a ready-to-paste prompt, not a note that needs translating later. The two real entries that reached `proto-context-architecture` this way worked specifically because they were self-contained enough to act on directly, with no back-and-forth needed to reconstruct context — model new entries on that shape.
 
-**Lifecycle:** `Open` until the human relays it (pastes the prompt block into a session working in the upstream repo) — flip to `Relayed` at that point, purely for the human's own tracking, since this fork has no way to observe what happens next. Delete the entry once a later Check Procedure run (§4) shows the corresponding upstream commit, or the human says otherwise. Don't re-relay an entry still marked `Relayed` without checking with the human first — it may already be handled.
+**Lifecycle:** three states, and an entry is never deleted.
+
+| Status | Set when | Set by |
+|---|---|---|
+| `Open` | The finding is confirmed and written down | The session that raises it |
+| `Relayed` | The human pastes the prompt block into a session working upstream | The human, or a session told that it happened |
+| `Landed: YYYY-MM-DD (commit)` | A Check Procedure run (§4) finds the upstream commit resolving it | The session running that check |
+
+Reconcile the log *during* the Check Procedure rather than as a separate task afterwards — §4 is already looking at exactly the upstream commits needed to do it.
+
+**A status left at `Open` after the work has landed is not a harmless omission. It is a false statement about what is outstanding**, and the cost is paid by whoever reads the log next. Real case: a session working upstream spent a turn establishing whether an entry had already been implemented, while the fork's log still read `Open` and the answer was yes. That is also why `Relayed` is not only for the human's own tracking, as this section previously said — a session reads this file too, and acts on what it finds.
+
+**Do not delete a landed entry.** This log is the only place in the fork where the reasoning behind a finding lives; the upstream repo keeps its own account, but a fork cannot see that without going to look. A deleted entry makes "was this ever raised?" unanswerable without git archaeology, and a finding that looks unraised gets raised again. Same instinct `MarkdownConventions.md` §2 applies to Version History: records are relocated, never removed. If the file becomes unwieldy, move landed entries to a `## Landed` section at the end rather than out of the file.
+
+This supersedes the original design (`projects/system/session-log.md` Turn 20), which specified deletion. Two things changed. The log moved into its own file (§7, 2026-09-09), so a growing list no longer crowds out an unrelated task file — which was deletion's main justification. And the cost of a stale entry stopped being hypothetical.
+
+Don't re-relay an entry still marked `Relayed` without checking with the human first — it may already be handled.
 
 ---
 
@@ -164,3 +180,4 @@ Write the bracketed body as a ready-to-paste prompt, not a note that needs trans
 | 1.3 | 2026-08-11 | Added new §7 "Downstream Feedback" — the reverse-direction counterpart to this file's existing check/apply mechanism: how a fork reports a template-level finding to the human for relay, via a new Upstream Feedback Log subsection in `projects/system/TODO.md`'s System Maintenance Pass section, without ever writing to the upstream repo directly. §2 cross-references it. Document Purpose updated to cover both directions. Old §7 Version History renumbered to §8. See `knowledge/flow/operating-principles.md` §5 ("Upstream feedback flags") for the flag format, and `projects/system/session-log.md` Turn 20. |
 | 1.4 | 2026-09-09 | §7 moves the Upstream Feedback Log out of `projects/system/TODO.md` and into its own `projects/system/upstream-feedback.md`, created on first use rather than shipped. Fixes two compounding problems a fork measured directly: the log was introduced by a bold paragraph rather than a heading, so it was invisible to every navigation mechanism this template relies on, and eleven entries had grown to 71% of the task file hosting them. §2 updated to match. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, which had already prototyped the move. See `projects/system/session-log.md` Turn 37. |
 | 1.5 | 2026-09-10 | §6 now points at the new `Architecture.md` §7 for what "opportunistically, not on a schedule" costs once every maintenance mechanism says it independently. This file states the posture for the upstream sync; §7 states it once for all five. See `projects/system/session-log.md` Turn 52. |
+| 1.6 | 2026-09-10 | §7's lifecycle gains a durable `Landed` state and drops deletion, superseding the Turn 20 design. Deletion's justification — keeping a growing list out of an unrelated task file — disappeared when the log moved to its own file, and a deleted entry makes "was this ever raised?" unanswerable, so a finding that looks unraised gets raised again. Also records that a stale status misleads a session and not only the human, observed directly. §7 now tells a fork to refresh its embedded copy of these rules when this section changes. See `projects/system/session-log.md` Turn 54. |
