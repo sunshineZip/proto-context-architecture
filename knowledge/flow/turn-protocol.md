@@ -1,6 +1,6 @@
 # Turn Protocol
 
-Version 1.2 | 2026-09-09 | Production
+Version 1.3 | 2026-09-10 | Production
 
 ---
 
@@ -53,6 +53,18 @@ Rules:
 - Turn numbers are sequential and never reused.
 - Append only — never edit a prior turn.
 - Always end with a STATUS signal on its own line.
+
+### If you miscount
+
+It will happen. A session appending turns by hand eventually numbers one wrong, and the two rules above then close every route back: renumbering the turn would edit a prior turn, and append-only holds even against a direct human request to fix it. So there is no compliant repair. Knowing that in advance is the point of this subsection — a session discovering it mid-incident otherwise has to derive it from two separate rules while under pressure to "just fix it", and then invent a response.
+
+What to do depends on which mistake it was, and they are not equally serious.
+
+**A skipped number** — Turn 79 written where 78 was next. Nothing is actually lost: no turn is missing, and every reference still resolves to exactly one turn. If it is not yet committed, correct it. If it is, the gap is permanent and that is acceptable. Say so in your next turn, in one line — "Turn 78 was skipped by a miscount; numbering continues from 79" — keep counting forward, and never reuse the skipped number. `scripts/validate.ps1` reports this as a warning, deliberately: an uncorrectable finding that stayed an error would sit red forever and teach a reader to ignore errors generally.
+
+**A reused or out-of-order number** — two turns numbered 79, or 78 appended after 79. This one does real damage: every later reference to "Turn 79" becomes ambiguous, and the never-reused guarantee is what stops two concurrent sessions colliding. Fix it before committing. `scripts/validate.ps1` reports it as an error for that reason. If it has already been committed, stop and raise it with the human rather than resolving it alone — the options all involve trade-offs against the append-only rule, and that is not a session's call to make.
+
+The same reasoning applies to any defect sealed into a committed turn, such as a missing STATUS line: it cannot be repaired in place, so note it in the next turn and carry on. Do not silently rewrite history to make a check pass.
 
 ---
 
@@ -137,3 +149,4 @@ If only system-level findings exist, emit `STATUS: COMPLETE, SYSTEM FLAGS PENDIN
 | 1.0 | 2026-06-29 | Initial creation. Generic turn protocol adapted from NightCrew agent-turn-protocol.md, migration signals removed. |
 | 1.1 | 2026-07-15 | Added a `Push status` field to the CHECKPOINT (§4) and Session close/PROJECT COMPLETE (§5) formats, and made explicit that a project cannot be marked complete with unpushed changes. |
 | 1.2 | 2026-09-09 | Added the `## Index` section `MarkdownConventions.md` §3 requires of any document longer than four sections — this file has seven and had never had one. Found by auditing the template against its own conventions rather than by `scripts/validate.ps1`, whose Index check skips any file with no Index at all and so could not have caught this. See `projects/system/session-log.md` Turn 34. |
+| 1.3 | 2026-09-10 | §1 gained "If you miscount" — a recovery convention for a turn-numbering slip, which the sequential-numbering rule and the append-only rule together made unrepairable with nothing anywhere saying what to do instead. A fork hit this for real and had to improvise. A skipped number is now accepted and warned about; a reused one stays an error, because only the second breaks the guarantee that does the work. See `scripts/validate.ps1` and `projects/system/session-log.md` Turn 46. |

@@ -372,8 +372,22 @@ foreach ($projectDir in $projectDirs) {
         $role = $m.Groups[1].Value
         $turnNum = [int]$m.Groups[2].Value
 
-        if ($turnNum -ne $expectedNext) {
-            Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn numbering breaks at 'Turn $turnNum' -- expected Turn $expectedNext (turns must be sequential, no gaps or repeats)"
+        # --- A skipped number and a reused one are different failures, and only one of
+        #     them can ever be fixed. Renumbering a committed turn would edit a prior
+        #     turn, which the append-only rule forbids outright -- so a session that
+        #     miscounts leaves a finding nobody can clear, and a permanent error trains
+        #     a reader to ignore errors, including the ones that matter. A gap costs
+        #     nothing: no turn is missing (deletion is caught separately, and stays an
+        #     error) and every reference still resolves to exactly one turn. A repeated
+        #     or backwards number does break something real -- it makes "Turn 79"
+        #     ambiguous and defeats the guarantee that stops two concurrent sessions
+        #     colliding. So: gap warns, reuse errors. See turn-protocol.md section 1. ---
+        if ($turnNum -gt $expectedNext) {
+            $skippedDescription = if (($turnNum - $expectedNext) -eq 1) { "Turn $expectedNext" } else { "Turns $expectedNext-$($turnNum - 1)" }
+            $gapLead = if ($expectedNext -eq 1) { "the log starts at Turn $turnNum" } else { "Turn $turnNum follows Turn $($expectedNext - 1)" }
+            Add-ValidationWarning "'$($projectDir.Name)/session-log.md': $gapLead, skipping $skippedDescription. If that turn is already committed the gap is permanent -- renumbering it would edit a prior turn. Note the skip in your next turn, keep counting forward, and never reuse the number (turn-protocol.md section 1)"
+        } elseif ($turnNum -lt $expectedNext) {
+            Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum is reused or out of order -- expected Turn $expectedNext. Unlike a skipped number this must be fixed before committing: a repeated number makes every later reference to it ambiguous (turn-protocol.md section 1)"
         }
         $expectedNext = $turnNum + 1
 

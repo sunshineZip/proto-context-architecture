@@ -1492,6 +1492,52 @@ Completed: Moved §8's real split test out of a source comment nobody reads and 
 Next: `turn-protocol.md` has no recovery convention for a turn-numbering slip. The fork has a live instance of it.
 Waiting for: Nothing. Two questions outstanding and not blocking — whether to record a `.branch-authorization` here, and how `description.md`'s Working Constraints field should handle its now-three conventions.
 
+---
+
+## [Copilot] — Turn 46 | 2026-09-10
+
+`turn-protocol.md` has no recovery convention for a turn-numbering slip, so the two rules that govern it close every route out and leave a session improvising.
+
+**Reproduced the live instance rather than taking the entry's word.** Running the validator against the fork returns `Turn numbering breaks at 'Turn 79' -- expected Turn 78`. It was one of 12 errors there.
+
+**The entry understates the problem in one respect and I widened the fix to match.** It frames this as a missing convention. The operative harm is that the finding is an **error nobody can ever clear**: renumbering a committed turn would edit a prior turn, append-only forbids that even against a direct human request, so the error is permanent by construction. A permanent error is not a neutral cost — it teaches whoever reads the output that errors in this repo are things you live with. The fork now carries two `TODO.md` items literally headed "Known, permanent `validate.ps1` finding — do not attempt to fix", which is that lesson already learned.
+
+**So the fix is a severity split, not only documentation.** The two failure modes are not equally serious and had been treated identically:
+
+| Failure | Severity | Why |
+|---|---|---|
+| Skipped number (79 where 78 was next) | **Warning** | Nothing is lost. No turn is missing, and every reference still resolves to exactly one turn. Uncorrectable once committed |
+| Reused or out-of-order number | **Error** | "Turn 79" becomes ambiguous, and the never-reused guarantee is what stops two concurrent sessions colliding. Fixable before commit |
+
+**Checked that downgrading the gap does not mask a deleted turn**, which was the obvious objection. It does not: deletion is caught by the separate append-only comparison against `HEAD`, which requires the new content to contain the old as a prefix, and that stays an error. The two checks cover different failures and the weakening is confined to the one that costs nothing.
+
+**`turn-protocol.md` §1 gained "If you miscount"**, which says plainly that no compliant repair exists, then gives the response for each case. A session discovering this mid-incident otherwise has to derive it from two separate rules while being asked to just fix it — which is exactly when a session invents its own answer. It also generalises to any defect sealed into a committed turn, such as a missing STATUS line: note it in the next turn, never rewrite history to make a check pass.
+
+**Measured effect.** The fork's turn-numbering error becomes a correctly-worded warning; its error count drops 12 → 11, and the finding it can never fix stops being counted among the ones it should.
+
+**Files changed:**
+- `scripts/validate.ps1` — severity split, with both messages naming what the reader should actually do.
+- `knowledge/flow/turn-protocol.md` (1.2 → 1.3) — §1's new subsection.
+- `knowledge/flow/convention-enforcement.md` (1.4 → 1.5) — §4's row now records two severities, and why.
+
+**Verification, both branches with real controls.** Appending a turn numbered 5 after Turn 1 produced exactly one warning naming the skipped range; appending a second Turn 5 produced the warning plus one error, correctly identifying reuse. Both controls reverted, and the clean result returned. The template itself passes 0/0 throughout.
+
+**Not done: the entry's option 3**, a cross-reference from `ROUTING.md`'s append-only Hard Constraint. `ROUTING.md` may not be updated silently, and a session hitting a numbering slip looks in `turn-protocol.md`, which now answers it. Proposed to the human as a one-sentence addition rather than made unilaterally.
+
+**Observed in passing, not acted on** — the fork's own `validate.ps1` and `commit-push.ps1` now begin with a UTF-8 BOM. That is the fix considered and rejected here in Turn 39, because a PowerShell 7 session writing `-Encoding utf8` strips a BOM silently and the breakage returns on Windows only. Its next upstream sync brings the ASCII fix down and makes the BOM redundant. Guest is read-only; nothing was written to it.
+
+### Session close
+
+Knowledge candidates: None — protocol and tooling.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Turned an unfixable permanent error into an accurate warning, kept the failure that actually breaks something as an error, and wrote down the recovery convention a fork previously had to invent under pressure.
+Next: Version History tables in frequently-loaded files need an archival mechanism — the fork-only mechanism several earlier entries wrongly assumed already existed here.
+Waiting for: Nothing blocking. Three questions now open for the human: the `.branch-authorization`, the `description.md` Working Constraints field, and the one-sentence `ROUTING.md` cross-reference above.
+
+
 
 
 

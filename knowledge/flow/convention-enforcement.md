@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.4 | 2026-09-10 | Production
+Version 1.5 | 2026-09-10 | Production
 
 ---
 
@@ -116,7 +116,7 @@ Source: `knowledge/flow/turn-protocol.md` and `knowledge/flow/operating-principl
 
 | Rule | Source | Status | Check or reason |
 |---|---|---|---|
-| Turn numbers are sequential, never reused | turn-protocol §1 | Checked | Error |
+| Turn numbers are sequential, never reused | turn-protocol §1 | Checked | Two severities, because only one of the two failures is fixable. A reused or out-of-order number is an error — it makes later references ambiguous. A skipped number is a warning: append-only makes it uncorrectable once committed, and an error nobody can clear teaches a reader to ignore errors |
 | Every non-HUMAN turn ends with a STATUS line | turn-protocol §1 | Checked | Error. HUMAN turns are exempt by design |
 | STATUS signal is in the known vocabulary | turn-protocol §2 | Checked | Warning, since forks legitimately add project-type signals |
 | BLOCKED carries Reason, Need and Suggested contact | turn-protocol §3 | Checked | Error |
@@ -166,3 +166,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 | 1.2 | 2026-09-10 | §5 gained the two date checks that compare repo content against today rather than against other repo dates — future-dated header and Version History rows, and passed deadlines in open items. §6 gained the deliberately deferred aged-`[TIME-SENSITIVE]` check as gap 8, with the reason it cannot be calibrated here. See `projects/system/session-log.md` Turn 41. |
 | 1.3 | 2026-09-10 | §2 gained `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content, recorded as Judgement rather than Gap. The distinction is load-bearing here: a check is not merely unwritten, it would have missed the founding instance, because that fork classified sensitivity per section rather than per claim and the offending copy was untagged. See `projects/system/session-log.md` Turn 42. |
 | 1.4 | 2026-09-10 | §3's domain-heaviness row records that the three warnings now carry §8's actual split test in their own text, and that a domain judged cohesive has nowhere to record that judgement, so the warning recurs indefinitely. See `projects/system/session-log.md` Turn 45. |
+| 1.5 | 2026-09-10 | §4's turn-numbering row splits into two severities — a reused number stays an error, a skipped one becomes a warning, since append-only makes the latter uncorrectable. First case in this map where a check's severity is set by whether the finding can be acted on at all, rather than by how serious it is. See `knowledge/flow/turn-protocol.md` §1 and `projects/system/session-log.md` Turn 46. |
