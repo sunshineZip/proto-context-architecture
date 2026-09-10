@@ -1281,4 +1281,60 @@ Completed: Recorded Turn 39's portability requirements where a future session wi
 Next: Entry 5.
 Waiting for: The Entry 5 handover text from `familien-boe`.
 
+---
+
+## [Copilot] — Turn 41 | 2026-09-10
+
+Entry 5 of the relayed queue: nothing in the template is aware of the current date, so time-bound content expires silently.
+
+**Guest handling, disclosed per `repo-mixing.md` §5.** `familien-boe` was declared a read-only guest by the human; this repo is home. Nothing was written to it — including for measurement, see the `-RepoRoot` note below. Six other forks are checked out as siblings on this machine; none was declared, so none was read or touched. The guest is on `main`, clean, in sync, at `880c0a4` — newer than the commit the handover named, and the entry has moved from line 343 to 496.
+
+**Grepped every citation before implementing, and one is fork-only.** `[TIME-SENSITIVE: source type]` is real here (`MarkdownConventions.md` §8, `authoring-guidelines.md` §6), as are `TODO.md` Open lists and the date-parsing helpers. But the entry writes the signal as "`[TIME-SENSITIVE]` / 🕐", and **the emoji form has zero occurrences in this template** — the same shape as the `⛔` two-tier signal and the §8.1 Notation Legend that tripped earlier entries. Also worth recording: Open Items / Next Actions is an *optional* section pattern here (`authoring-guidelines.md` §3), and no shipped domain uses one.
+
+**The entry's title claims more than its proposed fix delivers.** Both proposed checks address content aging. Neither addresses the half this repo demonstrated live and recorded in Turn 38: **a session has no idea what today is.** Every date check that existed compared repo dates against *each other* — the domain index's Last Updated against a domain's header date — so a repo whose dates were all consistently wrong passed clean indefinitely. Nothing anywhere established "now".
+
+**Three things shipped, one deliberately deferred.**
+
+1. **Passed-date check** — the entry's check (1). Unchecked items only, in `TODO.md` and domain Open Items sections only, never general prose. Warning.
+2. **Future-date check** — not in the entry; proposed and approved this session. Warns on a header date or Version History row later than today. Both are permanent append-only records: a wrong date in one cannot be corrected afterwards without breaking the append-only rule, which makes catching it before the commit the only chance.
+3. **`sync-check.ps1` now prints today's date** before anything else and regardless of whether git is reachable. One line, no false-positive surface, and it is the only thing in this repo that ever tells a session what day it is.
+4. **Deferred: check (2), aged `[TIME-SENSITIVE]` claims.** The entry itself says start with (1). The stronger reason to defer: this template contains no real `[TIME-SENSITIVE]` claim at all, only the instruction text describing the signal, so there is nothing here to calibrate a threshold against — and a threshold picked without calibration is how a check becomes noise. Logged as ranked gap 8 in `convention-enforcement.md` §6, with the emoji finding attached for whoever builds it.
+
+**The narrowing of check (1) was measured, not asserted — and the first version was not usable.** The entry warned that false positives would make it useless, so I ran it against the guest at each stage:
+
+| Form | Warnings | Roughly real |
+|---|---|---|
+| Location-scoped only (as the entry describes it) | **52** | ~6 |
+| Plus: item must state a deadline cue | **11** | ~6 |
+| Plus: skip a date that follows a recording verb | **8** | ~5 |
+
+The dominant false-positive shape is a date recording *when an item was raised*, or citing a past event as context — `opened 2026-07-16`, `(reviewed 2026-08-26, no changes needed)`, `his 2026-03-03 reply gave no commission rate` — not a deadline. The entry's own framing, "an unchecked item containing a date earlier than today", produces that 52. What survives at 8 includes four of the entry's five named examples: the consumer-guarantee deadline, the salary conversation described as upcoming in August, and the health follow-up whose outcome was never recorded (twice, from both the project and the domain side).
+
+I stopped tuning at 8 rather than pushing further. Precision is roughly 60%, which for a warning across a 14-project fork is triageable, and every additional rule risks over-fitting the check to one fork's prose habits.
+
+**The cue list is English, and that is stated in the script rather than hidden.** A fork working in another language will need to extend it — the same kind of documented template default as `$defaultBranch` in the branch checks. Hardcoding an English assumption invisibly is exactly the bug Entry 1 fixed in the anchor-slug regex.
+
+**`validate.ps1` gained a `-RepoRoot` parameter.** The handover sanctioned copying the validator into the guest and reverting afterwards. A parameter is better: the guest was measured four times this turn with nothing written to it at all, and no cleanup step to forget. This also makes the next cross-fork measurement non-invasive by default.
+
+**Files changed:**
+- `scripts/validate.ps1` — `-RepoRoot`; a single `$today`; the future-date and passed-date checks.
+- `scripts/sync-check.ps1` — the date line.
+- `knowledge/flow/convention-enforcement.md` (1.1 → 1.2) — §5 registers both new checks with their measured tuning; §6 gains the deferred check as ranked gap 8.
+
+**Verification, run rather than reasoned about.** Positive control: the template passes clean, 0 errors 0 warnings, with both checks live. Negative control: an injected open item with a passed deadline and an injected future header date each produced exactly one correct warning naming the file, line and date; both reverted, and the clean result returned. The measurement above is itself the calibration the entry asked for.
+
+**Not fixed, still open** — unchanged from Turn 39: the queue exists nowhere in this repo; the `session-start.sh` hook-ordering bug; `Architecture.md` §2's stale diagram.
+
+### Session close
+
+Knowledge candidates: None — tooling.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Entry 5. Shipped the passed-date check, calibrated 52 → 8 against a real fork rather than shipping the entry's unusable first form; added a future-date check the entry did not propose; and gave the session itself a source of truth for today's date, which is what the entry's title actually claimed and its proposed fix did not cover.
+Next: Entry 6 — severe-tier content in always-loaded sections, folding in `repo-mixing.md` §7's dangling references. Security-adjacent, and an evaluate-and-choose entry.
+Waiting for: Nothing — the human directed continuing through the queue, stopping at judgement calls.
+
+
 

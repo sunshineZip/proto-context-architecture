@@ -34,6 +34,20 @@ param()
 # the remote's own default-branch setting actually matches, since a
 # successful push doesn't change that setting on its own.
 
+# --- The one place a session is told what day it is.
+#
+#     Nothing else in this repo establishes the current date. validate.ps1's date
+#     checks compare dates in the repo against each other, so a session working from
+#     a stale idea of "today" passes every one of them while writing that wrong date
+#     into Version History rows, session-log turn headers and index Last Updated
+#     cells -- all permanent, append-only records that cannot be corrected later
+#     without breaking the append-only rule. A real case: the date rolled over
+#     mid-session and the session knew only because its harness happened to say so.
+#
+#     This prints before anything else and regardless of whether git is reachable,
+#     because a session that cannot sync still needs to know the date. ---
+Write-Host ("sync-check: today is {0} ({1})." -f (Get-Date -Format 'yyyy-MM-dd'), (Get-Date).DayOfWeek) -ForegroundColor Cyan
+
 # A fork using a different default branch name than "main" should change
 # $defaultBranch below -- same template-default-not-derived convention as
 # scripts/pre-push-check.ps1.

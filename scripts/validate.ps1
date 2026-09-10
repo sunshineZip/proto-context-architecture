@@ -1,6 +1,10 @@
 [CmdletBinding()]
 param(
-    [switch]$Strict
+    [switch]$Strict,
+    # Validate a different checkout than this script's own repo. Exists so a fork can be
+    # measured without copying this file into it -- writing into another repo to run a
+    # check there is how a read-only guest gets accidentally dirtied.
+    [string]$RepoRoot
 )
 
 $ErrorCount = 0
@@ -18,11 +22,17 @@ function Add-ValidationWarning {
     Write-Host "WARNING: $Message" -ForegroundColor Yellow
 }
 
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = if ($RepoRoot) { (Resolve-Path -LiteralPath $RepoRoot).Path } else { Split-Path -Parent $PSScriptRoot }
 $projectsPath = Join-Path $repoRoot "projects"
 $knowledgePath = Join-Path $repoRoot "knowledge"
 $libraryPath = Join-Path $repoRoot "library"
 $copilotInstructionsPath = Join-Path $repoRoot ".github\copilot-instructions.md"
+
+# --- The only place this script learns what "now" is. Every date check before today
+#     compared dates in the repo against each other, so a repo whose dates were all
+#     consistently wrong passed clean forever. See the passed-date and future-date
+#     checks below, and the date line sync-check.ps1 prints at session start. ---
+$today = (Get-Date).Date
 
 # --- Windows PowerShell 5.1 compatibility. This repo is used from at least three
 #     environments (a Linux container with pwsh 7, and Windows machines that may have
@@ -792,6 +802,29 @@ foreach ($mdFile in $allMdFiles) {
         }
     }
 
+    # --- Dates that have not happened yet. A session has no reliable sense of the
+    #     current date unless something tells it (see sync-check.ps1), and the header
+    #     line and Version History rows are permanent append-only records -- a wrong
+    #     date written into one is not correctable later without breaking the
+    #     append-only rule. Every other date check in this file compares repo dates
+    #     against each other, so a date in the future is invisible to all of them. ---
+    $headerDate = Get-HeaderDate -Text $scanText
+    if ($headerDate) {
+        $parsedHeaderDate = [datetime]::MinValue
+        if ([datetime]::TryParseExact($headerDate, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::None, [ref]$parsedHeaderDate) -and $parsedHeaderDate -gt $today) {
+            Add-ValidationWarning "'$relPath': header date is $headerDate, which is in the future -- check the session's idea of today's date before this lands in a permanent record"
+        }
+    }
+    foreach ($row in $rows) {
+        $rowDateMatch = [regex]::Match($row, '\b(\d{4}-\d{2}-\d{2})\b')
+        if (-not $rowDateMatch.Success) { continue }
+        $parsedRowDate = [datetime]::MinValue
+        if ([datetime]::TryParseExact($rowDateMatch.Groups[1].Value, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::None, [ref]$parsedRowDate) -and $parsedRowDate -gt $today) {
+            Add-ValidationWarning "'$relPath': Version History row dated $($rowDateMatch.Groups[1].Value) is in the future -- Version History is append-only, so a wrong date here cannot be corrected cleanly later"
+            break
+        }
+    }
+
     if ($isGitRepo) {
         $oldRawText = Get-GitHeadContent -RelativePath $relPath
         if ($null -ne $oldRawText) {
@@ -993,6 +1026,108 @@ foreach ($domainDir in $domainDirs) {
         $execLineCount = @($execMatch.Groups[1].Value -split "`r?`n" | Where-Object { $_.Trim() -ne "" }).Count
         if ($execLineCount -gt $executiveSummaryLineWarnThreshold) {
             Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' Executive Summary is $execLineCount non-blank lines (over $executiveSummaryLineWarnThreshold) -- this is what Step 4 Level 3 loads on nearly every query; move detail into a named section instead (authoring-guidelines.md section 8)"
+        }
+    }
+}
+
+# --- Passed dates in open work.
+#
+#     The template actively encourages content that goes stale on a clock -- TODO
+#     Open lists, and the optional Open Items / Next Actions sections in a domain
+#     (authoring-guidelines.md section 3) -- and nothing ever compared any of it to
+#     today. Time-blindness is the one defect class that gets strictly worse with no
+#     further edits: every instance a fork found had been correct when written.
+#
+#     Deliberately narrow, and warning-only. It looks at unchecked items only, in two
+#     named places, never at general prose: a date mentioned in a paragraph is usually
+#     history, while a date inside an item nobody has ticked may be a commitment.
+#     Month-and-year is matched as well as ISO, because the real examples that
+#     prompted this were written that way ("target start: September 2026"), and is
+#     only flagged once the whole month has passed.
+#
+#     A past date alone is not enough, and this was measured rather than assumed.
+#     Against a fork with 14 projects, the location scoping above still produced 52
+#     warnings of which roughly six were real: the dominant shape is a date recording
+#     when an item was raised or citing a past event as context ("opened 2026-07-16",
+#     "(reviewed 2026-08-26, no changes needed)", "his 2026-03-03 reply gave no
+#     commission rate"), not a deadline. So the item must also state that the date
+#     was a commitment. That narrows what this finds to "a stated deadline that has
+#     passed", which is the thing worth interrupting someone about.
+#
+#     The cue list is English. A fork working in another language should extend it --
+#     same kind of documented template default as $defaultBranch in the branch
+#     checks, not an assumption baked in where nobody can see it. ---
+$deadlineCuePattern = '(?i)\b(deadline|due|expire[sd]?|expiry|cut-?off|no later than|latest by|target|scheduled|expected|await(ing|ed)?|pending|follow-?up|re-?test|renew(al|s|ed)?|must (be )?\w+|chase|reminder)\b'
+$monthNumbers = @{
+    'january' = 1; 'february' = 2; 'march' = 3; 'april' = 4; 'may' = 5; 'june' = 6
+    'july' = 7; 'august' = 8; 'september' = 9; 'october' = 10; 'november' = 11; 'december' = 12
+}
+
+function Get-PastDateMentions {
+    param([string]$Line)
+    $mentions = @()
+
+    # A date directly after one of these is recording when something already happened
+    # ("decided 2026-08-10", "corrected 2026-08-24", "as of 2026-09-04"), not stating a
+    # deadline -- even when the item elsewhere contains a cue word. Measured: dropped
+    # the remaining false positives without losing any of the real ones.
+    $recordingVerbPattern = '(?i)\b(decided|corrected|set|split|opened|raised|added|logged|reviewed|noted|updated|revised|agreed|confirmed|as of|since|dated|per)\s*$'
+
+    foreach ($isoMatch in [regex]::Matches($Line, '\b\d{4}-\d{2}-\d{2}\b')) {
+        if ($Line.Substring(0, $isoMatch.Index) -match $recordingVerbPattern) { continue }
+        $parsed = [datetime]::MinValue
+        if ([datetime]::TryParseExact($isoMatch.Value, 'yyyy-MM-dd', [cultureinfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::None, [ref]$parsed) -and $parsed -lt $today) {
+            $mentions += $isoMatch.Value
+        }
+    }
+    foreach ($monthMatch in [regex]::Matches($Line, '(?i)\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})\b')) {
+        if ($Line.Substring(0, $monthMatch.Index) -match $recordingVerbPattern) { continue }
+        $monthEnd = (Get-Date -Year ([int]$monthMatch.Groups[2].Value) -Month $monthNumbers[$monthMatch.Groups[1].Value.ToLower()] -Day 1).Date.AddMonths(1).AddDays(-1)
+        if ($monthEnd -lt $today) { $mentions += $monthMatch.Value }
+    }
+    return $mentions
+}
+
+$openWorkTargets = @()
+foreach ($projectDir in $projectDirs) {
+    $todoPath = Join-Path $projectDir.FullName "TODO.md"
+    if (Test-Path $todoPath) {
+        $openWorkTargets += [PSCustomObject]@{ Path = $todoPath; SectionScoped = $false }
+    }
+}
+foreach ($domainDir in $domainDirs) {
+    foreach ($domainFileName in @("knowledge.md", "description.md")) {
+        $domainFilePath = Join-Path $domainDir.FullName $domainFileName
+        if (Test-Path $domainFilePath) {
+            $openWorkTargets += [PSCustomObject]@{ Path = $domainFilePath; SectionScoped = $true }
+        }
+    }
+}
+
+foreach ($target in $openWorkTargets) {
+    $targetRelPath = Get-RepoRelativePath -FullPath $target.Path
+    $targetLines = (Remove-CodeFences -Text (Get-Content -Path $target.Path -Raw -Encoding UTF8)) -split "`r?`n"
+    $inOpenSection = -not $target.SectionScoped
+
+    for ($lineIndex = 0; $lineIndex -lt $targetLines.Count; $lineIndex++) {
+        $line = $targetLines[$lineIndex]
+
+        if ($target.SectionScoped -and $line -match '^#{2,3}\s') {
+            $inOpenSection = ($line -match '(?i)(open items|next actions)')
+            continue
+        }
+        if (-not $inOpenSection) { continue }
+
+        # Unchecked checkbox anywhere; a bare bullet only inside an Open Items section,
+        # where the heading has already established that the whole list is open work.
+        $isOpenItem = ($line -match '^\s*[-*]\s*\[ \]') -or ($target.SectionScoped -and $line -match '^\s*[-*]\s+\S')
+        if (-not $isOpenItem) { continue }
+        if ($line -match '^\s*[-*]\s*\[x\]') { continue }
+        if ($line -notmatch $deadlineCuePattern) { continue }
+
+        $pastDates = @(Get-PastDateMentions -Line $line)
+        if ($pastDates.Count -gt 0) {
+            Add-ValidationWarning "'$targetRelPath' line $($lineIndex + 1): open item states a deadline of $($pastDates -join ', '), already passed -- close it, reschedule it, or record the outcome"
         }
     }
 }

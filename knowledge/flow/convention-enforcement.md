@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.1 | 2026-09-10 | Production
+Version 1.2 | 2026-09-10 | Production
 
 ---
 
@@ -133,6 +133,8 @@ These run but map to no rule in the convention documents. They are structural pr
 - Required root files, entry point, flow files and git hook scripts all exist.
 - `core.hooksPath` is actually set to `.githooks` in this clone — warning, because a fresh clone does not inherit it and the hooks are inert until it is.
 - Nothing under `scripts/` or `.githooks/` contains a non-ASCII character — error. Stated in `Architecture.md` §6 (Script portability) rather than in a convention document, because it is a property of executable files rather than of authored prose. A single em dash stops a `.ps1` parsing under Windows PowerShell 5.1, which takes the validator down with it: this is the one check whose failure disables every other check in this file, so it is an error rather than a warning. The rationale sits in full above the check itself in `scripts/validate.ps1`, on the assumption that whoever trips it will be reading the script, not this map.
+- No header line or Version History row carries a date in the future — warning. The first check in this repo that compares a date against *today* rather than against another date in the repo. Both are permanent append-only records, so a wrong date written into one cannot be corrected cleanly afterwards.
+- No unchecked item in a project `TODO.md`, or in a domain's optional Open Items / Next Actions section, states a deadline that has already passed — warning. Deliberately narrow, and the narrowing was measured rather than assumed: against a 14-project fork the unscoped form produced 52 warnings of which roughly six were real, because the dominant shape is a date recording when an item was *raised*, not a deadline. Requiring a deadline cue word and excluding dates that follow a recording verb took it to 8. Its cue list is English and a fork working in another language will need to extend it.
 - Every domain has a description and a knowledge file.
 - The domain index's Last Updated column is not older than the domain's own files.
 - A retired project no longer has a live routing row.
@@ -150,6 +152,7 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 5. **Version History is the last section** (§2). Presence is checked; position is not.
 6. **Backslash escapes outside the two named exceptions** (§4). Worth adding now that the rule is correct — a check written against the old wording would have flagged correct content.
 7. **Heading levels never skip, no HTML entities, title matches filename** (§1, §3, §4). Mechanical, low individual value, cheap in aggregate.
+8. **Aged `[TIME-SENSITIVE]` claims** (`MarkdownConventions.md` §8). The signal already means "re-verify before relying on this" and nothing records when it last was, so a warning on a file that has not been touched in N months is the obvious complement to the passed-date check in §5. Ranked last deliberately: this template contains no real `[TIME-SENSITIVE]` claim at all — only the instruction text describing the signal — so there is nothing here to calibrate N against, and a threshold picked without calibration is how a check becomes noise. Note for whoever builds it: the fork that raised this writes the signal as an emoji as well as text, and that emoji does not exist in this template. Key on the text tag.
 
 ---
 
@@ -159,3 +162,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 |---|---|---|
 | 1.0 | 2026-09-10 | Initial creation. Maps every convention in `MarkdownConventions.md`, `knowledge/domains/authoring-guidelines.md`, `turn-protocol.md` and `operating-principles.md` to Checked, Judgement or Gap, lists checks with no corresponding stated rule, and ranks the open gaps. Built by enumerating the convention documents first and reading `scripts/validate.ps1` against that list, which is the ordering that surfaces gaps rather than confirming coverage. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, where eight documented conventions had no enforcement and had silently decayed. See `projects/system/session-log.md` Turn 38. |
 | 1.1 | 2026-09-10 | §5 gained the non-ASCII check on `scripts/` and `.githooks/` — the first check registered here whose own failure mode is disabling every other check in this file. See `Architecture.md` §6 (Script portability) and `projects/system/session-log.md` Turn 39. |
+| 1.2 | 2026-09-10 | §5 gained the two date checks that compare repo content against today rather than against other repo dates — future-dated header and Version History rows, and passed deadlines in open items. §6 gained the deliberately deferred aged-`[TIME-SENSITIVE]` check as gap 8, with the reason it cannot be calibrated here. See `projects/system/session-log.md` Turn 41. |
