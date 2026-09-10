@@ -2,30 +2,46 @@
 param()
 
 # Invoked by .githooks/pre-push (requires `git config core.hooksPath
-# .githooks` — see Architecture.md §6). Blocks a push that creates or
-# updates a branch other than this repo's default branch — operationalizes
+# .githooks` -- see Architecture.md section 6). Blocks a push that creates or
+# updates a branch other than this repo's default branch -- operationalizes
 # the ROUTING.md Hard Constraint "work directly on the default branch by
 # default" mechanically, the same way pre-commit-check.ps1 already does
 # for the system-layer-logging and secret-pattern constraints, instead of
 # relying solely on the model remembering it.
 #
-# A branch deletion is never blocked — cleanup is always fine, only
+# A branch deletion is never blocked -- cleanup is always fine, only
 # creating/updating content on a non-default branch is checked. Tag
 # pushes are out of scope entirely.
 #
 # Honest limitation: this only fires when a session drives `git push`
 # itself. It cannot catch a branch a session-launch environment assigned
 # before any local git command ran, or a push made through a platform API
-# rather than local git — see ROUTING.md's Hard Constraint for what to do
+# rather than local git -- see ROUTING.md's Hard Constraint for what to do
 # if you find yourself already on a non-default branch you didn't choose.
 #
 # A fork using a different default branch name than "main" should change
-# $defaultBranch below — this is a template default, not derived
+# $defaultBranch below -- this is a template default, not derived
 # automatically, to keep the check simple and dependency-free.
 
 $defaultBranch = "main"
 
-$repoRoot = (git rev-parse --show-toplevel 2>$null)
+# Locate git rather than assuming it is on PATH: PATH first (Linux, and any normal Git
+# for Windows install), then GitHub Desktop's bundled copy, which on some Windows
+# machines is the only git present. See scripts/validate.ps1 for the full rationale.
+$gitExe = (Get-Command git -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1)
+if (-not $gitExe) {
+    $gitExe = Get-ChildItem "$env:LOCALAPPDATA\GitHubDesktop\app-*\resources\app\git\cmd\git.exe" -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending | Select-Object -ExpandProperty FullName -First 1
+}
+if (-not $gitExe -and (Test-Path "C:\Program Files\Git\cmd\git.exe")) {
+    $gitExe = "C:\Program Files\Git\cmd\git.exe"
+}
+if (-not $gitExe) {
+    Write-Host "pre-push: no git executable found, skipping check" -ForegroundColor Yellow
+    exit 0
+}
+
+$repoRoot = (& $gitExe rev-parse --show-toplevel 2>$null)
 if (-not $repoRoot) {
     Write-Host "pre-push: could not determine repo root, skipping check" -ForegroundColor Yellow
     exit 0
@@ -47,7 +63,7 @@ foreach ($line in ($stdinText -split "`r?`n")) {
     # Deletions (local side is all-zeros) are never blocked.
     if ($localOid -match '^0+$') { continue }
 
-    # Tags aren't branches — not in scope for this check.
+    # Tags aren't branches -- not in scope for this check.
     if ($remoteRef -notmatch '^refs/heads/') { continue }
 
     $branchName = $remoteRef -replace '^refs/heads/', ''
@@ -69,7 +85,7 @@ foreach ($b in $blockedBranches) {
 Write-Host ""
 Write-Host "ROUTING.md Hard Constraints: work directly on '$defaultBranch' by default." -ForegroundColor Yellow
 Write-Host "Branching is fine when the human explicitly asked for one, or there is a" -ForegroundColor Yellow
-Write-Host "specific, stated reason for needing isolation — state the reason, then use" -ForegroundColor Yellow
+Write-Host "specific, stated reason for needing isolation -- state the reason, then use" -ForegroundColor Yellow
 Write-Host "'git push --no-verify' deliberately. That bypass is visible in the push" -ForegroundColor Yellow
 Write-Host "process, not silent." -ForegroundColor Yellow
 Write-Host ""

@@ -2,9 +2,9 @@
 param()
 
 # Invoked by .githooks/pre-commit (requires `git config core.hooksPath
-# .githooks` — see Architecture.md §6). Blocks a commit that stages a
+# .githooks` -- see Architecture.md section 6). Blocks a commit that stages a
 # system-layer file without also staging projects/system/session-log.md
-# in the same commit — operationalizes the ROUTING.md Hard Constraint
+# in the same commit -- operationalizes the ROUTING.md Hard Constraint
 # "do not make structural system changes without logging them" instead
 # of relying on the model to remember it.
 #
@@ -12,32 +12,48 @@ param()
 # it to a fork): a blocked `git commit` creates no new commit. A fork's
 # sync session once ran an unconditional `git reset --soft HEAD~1` right
 # after a blocked, no-op commit attempt, assuming the attempt had
-# succeeded — it hadn't, so HEAD~1 was one commit further back than
+# succeeded -- it hadn't, so HEAD~1 was one commit further back than
 # expected, and a real, already-pushed commit got undone. Caught before
 # anything bad was pushed by diffing against origin/<branch> rather than
 # trusting local state, and recovered with `git reset --soft origin/main`.
 # Before running any reset, verify whether the commit actually happened
 # (check the exit code, or compare `git rev-parse HEAD` before and after)
-# — never assume.
+# -- never assume.
 
-$repoRoot = (git rev-parse --show-toplevel 2>$null)
+# Locate git rather than assuming it is on PATH: PATH first (Linux, and any normal Git
+# for Windows install), then GitHub Desktop's bundled copy, which on some Windows
+# machines is the only git present. See scripts/validate.ps1 for the full rationale.
+$gitExe = (Get-Command git -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1)
+if (-not $gitExe) {
+    $gitExe = Get-ChildItem "$env:LOCALAPPDATA\GitHubDesktop\app-*\resources\app\git\cmd\git.exe" -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending | Select-Object -ExpandProperty FullName -First 1
+}
+if (-not $gitExe -and (Test-Path "C:\Program Files\Git\cmd\git.exe")) {
+    $gitExe = "C:\Program Files\Git\cmd\git.exe"
+}
+if (-not $gitExe) {
+    Write-Host "pre-commit: no git executable found, skipping check" -ForegroundColor Yellow
+    exit 0
+}
+
+$repoRoot = (& $gitExe rev-parse --show-toplevel 2>$null)
 if (-not $repoRoot) {
     Write-Host "pre-commit: could not determine repo root, skipping check" -ForegroundColor Yellow
     exit 0
 }
 
-$stagedFiles = @(git -C $repoRoot diff --cached --name-only)
+$stagedFiles = @(& $gitExe -C $repoRoot diff --cached --name-only)
 if ($stagedFiles.Count -eq 0) {
     exit 0
 }
 
 # --- Secret-pattern scan (staged additions only). Deliberately narrow: ---
 #     matches recognizable token/key SHAPES (a stable prefix or delimiter),
-#     not free-form heuristics like a bare "password=" or entropy scoring —
+#     not free-form heuristics like a bare "password=" or entropy scoring --
 #     narrow keeps false positives low enough that this can safely block
 #     rather than warn. This is a mechanical backstop for the ROUTING.md
 #     Hard Constraint requiring a pause-and-ask before writing a secret or
-#     confidential detail into any tracked file — it catches what slips
+#     confidential detail into any tracked file -- it catches what slips
 #     past that judgment call, it does not replace it. See
 #     projects/system/session-log.md Turn 18.
 $secretPatterns = @(
@@ -51,7 +67,7 @@ $secretPatterns = @(
 
 $secretHits = @()
 foreach ($file in $stagedFiles) {
-    $diff = @(git -C $repoRoot diff --cached -U0 -- $file 2>$null)
+    $diff = @(& $gitExe -C $repoRoot diff --cached -U0 -- $file 2>$null)
     if ($diff.Count -eq 0) { continue }
     if ($diff -match 'Binary files .* differ') { continue }
     foreach ($line in $diff) {
@@ -80,13 +96,13 @@ if ($secretHits.Count -gt 0) {
     Write-Host ""
     Write-Host "If this is a false positive (a placeholder, an already-revoked example key)," -ForegroundColor Yellow
     Write-Host "add 'pragma: allowlist secret' on the same line, or use 'git commit --no-verify'" -ForegroundColor Yellow
-    Write-Host "deliberately — that bypass is visible in the commit process, not silent." -ForegroundColor Yellow
+    Write-Host "deliberately -- that bypass is visible in the commit process, not silent." -ForegroundColor Yellow
     Write-Host ""
     exit 1
 }
 
 # --- System-layer tracked paths. Mirrors knowledge/flow/upstream-sync.md
-#     §3's Tracked Paths list — if that list changes, update this too. ---
+#     section 3's Tracked Paths list -- if that list changes, update this too. ---
 $systemLayerPatterns = @(
     '^ROUTING\.md$',
     '^Architecture\.md$',
@@ -125,6 +141,6 @@ Write-Host "and get recorded in session-log.md before committing. Stage a turn d
 Write-Host "this change in $sessionLogPath and include it in this commit." -ForegroundColor Yellow
 Write-Host ""
 Write-Host "If this genuinely shouldn't require a log entry, use 'git commit --no-verify'" -ForegroundColor Yellow
-Write-Host "deliberately — that bypass is visible in the commit process, not silent." -ForegroundColor Yellow
+Write-Host "deliberately -- that bypass is visible in the commit process, not silent." -ForegroundColor Yellow
 Write-Host ""
 exit 1

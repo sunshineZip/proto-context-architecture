@@ -24,23 +24,75 @@ $knowledgePath = Join-Path $repoRoot "knowledge"
 $libraryPath = Join-Path $repoRoot "library"
 $copilotInstructionsPath = Join-Path $repoRoot ".github\copilot-instructions.md"
 
+# --- Windows PowerShell 5.1 compatibility. This repo is used from at least three
+#     environments (a Linux container with pwsh 7, and Windows machines that may have
+#     only the built-in Windows PowerShell 5.1). 5.1 runs on .NET Framework, which has
+#     no [System.IO.Path]::GetRelativePath -- calling it there fails 73 times in one
+#     run and every path-dependent check silently degrades. Substring off $repoRoot
+#     instead: same result, works on both. See the "no non-ASCII in scripts" check at
+#     the end of this file for the sibling compatibility rule and its full rationale. ---
+function Get-RepoRelativePath {
+    param([string]$FullPath)
+    $prefix = $repoRoot.TrimEnd('\', '/')
+    if ($FullPath.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {
+        return ($FullPath.Substring($prefix.Length).TrimStart('\', '/') -replace '\\', '/')
+    }
+    return ($FullPath -replace '\\', '/')
+}
+
+# --- Locate git rather than assuming it is on PATH, PATH first so Linux and any
+#     normal Git for Windows install just work, then GitHub Desktop's bundled copy
+#     (a real case: a Windows machine where GitHub Desktop is the only git). Without
+#     this, a missing git left $LASTEXITCODE stale, $isGitRepo wrongly true, and the
+#     append-only check below reported two files as edited that were untouched --
+#     a validator that lies is worse than one that does not run. ---
+$gitExe = (Get-Command git -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1)
+if (-not $gitExe) {
+    $gitExe = Get-ChildItem "$env:LOCALAPPDATA\GitHubDesktop\app-*\resources\app\git\cmd\git.exe" -ErrorAction SilentlyContinue |
+        Sort-Object Name -Descending | Select-Object -ExpandProperty FullName -First 1
+}
+if (-not $gitExe -and (Test-Path "C:\Program Files\Git\cmd\git.exe")) {
+    $gitExe = "C:\Program Files\Git\cmd\git.exe"
+}
+
 # --- Git helpers, needed early by the pre-commit-hook-activation check
 #     below as well as the append-only checks further down: compare the
 #     working copy against the version committed at HEAD. This only
-#     catches edits made since the last commit — matches how this script
-#     is actually used, immediately before each commit — not full repo
+#     catches edits made since the last commit -- matches how this script
+#     is actually used, immediately before each commit -- not full repo
 #     history. ---
 $isGitRepo = $false
-if (Test-Path (Join-Path $repoRoot ".git")) {
-    git -C $repoRoot rev-parse --is-inside-work-tree *> $null
+if ($gitExe -and (Test-Path (Join-Path $repoRoot ".git"))) {
+    & $gitExe -C $repoRoot rev-parse --is-inside-work-tree *> $null
     $isGitRepo = ($LASTEXITCODE -eq 0)
+}
+if (-not $gitExe) {
+    Add-ValidationWarning "git executable not found -- the append-only and hook-activation checks were skipped this run. Install Git for Windows, or run this from an environment with git on PATH."
 }
 
 function Get-GitHeadContent {
     param([string]$RelativePath)
-    $result = git -C $repoRoot show "HEAD:$RelativePath" 2>$null
-    if ($LASTEXITCODE -ne 0) { return $null }
-    return ($result -join "`n")
+    # --- Read git's stdout as UTF-8 explicitly. Windows PowerShell 5.1 decodes native
+    #     command output with the console codepage (OEM 437/850 by default), which mangles
+    #     every non-ASCII byte -- and since the comparison below is exact, that made all 17
+    #     files containing an em dash in their Version History look edited when nothing had
+    #     been touched. ProcessStartInfo.ArgumentList does not exist on .NET Framework, so
+    #     the argument string is quoted by hand. ---
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $gitExe
+    $psi.Arguments = "-C `"$repoRoot`" show `"HEAD:$RelativePath`""
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+    $psi.CreateNoWindow = $true
+
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    $stdout = $proc.StandardOutput.ReadToEnd()
+    [void]$proc.StandardError.ReadToEnd()
+    $proc.WaitForExit()
+    if ($proc.ExitCode -ne 0) { return $null }
+    return ($stdout -replace "`r`n", "`n").TrimEnd("`n")
 }
 
 function Test-LinesAppendOnly {
@@ -69,7 +121,7 @@ if (-not (Test-Path $copilotInstructionsPath)) {
 
 # --- Git hooks: files must exist, and hooksPath must actually be
 #     activated (git config core.hooksPath) for either to run. See
-#     Architecture.md §6. ---
+#     Architecture.md section 6. ---
 if (-not (Test-Path (Join-Path $repoRoot ".githooks\pre-commit"))) {
     Add-ValidationError "Missing .githooks/pre-commit"
 }
@@ -86,9 +138,9 @@ if (-not (Test-Path (Join-Path $repoRoot "scripts\sync-check.ps1"))) {
     Add-ValidationError "Missing scripts/sync-check.ps1"
 }
 if ($isGitRepo) {
-    $hooksPath = (git -C $repoRoot config --get core.hooksPath 2>$null)
+    $hooksPath = (& $gitExe -C $repoRoot config --get core.hooksPath 2>$null)
     if ($hooksPath -ne ".githooks") {
-        Add-ValidationWarning "core.hooksPath is not set to '.githooks' in this clone — the pre-commit and pre-push hooks are both inactive here. Run: git config core.hooksPath .githooks"
+        Add-ValidationWarning "core.hooksPath is not set to '.githooks' in this clone -- the pre-commit and pre-push hooks are both inactive here. Run: git config core.hooksPath .githooks"
     }
 }
 
@@ -124,14 +176,14 @@ foreach ($domainDir in $domainDirs) {
 # --- Shared regex fragment: a YYYY-MM-DD date, optionally followed by a
 #     parenthetical annotation (e.g. a same-day second edit written as
 #     "2026-08-22 (later)"). Used everywhere a header line's date field is
-#     matched, so a trailing annotation doesn't silently break detection —
+#     matched, so a trailing annotation doesn't silently break detection --
 #     this exact bug shape (a bare-date assumption) has now recurred twice
 #     independently: project Active/Retired detection below, and the
 #     identical latent gap in the turn-header regex further down, found
 #     while fixing this one. This is not a convention the template itself
-#     defines or requires — the existing version-number and turn-number
+#     defines or requires -- the existing version-number and turn-number
 #     increments already disambiguate same-day multiple edits without
-#     needing a date suffix at all — but the regex should not silently
+#     needing a date suffix at all -- but the regex should not silently
 #     misparse if a fork uses one anyway. See projects/system/
 #     session-log.md Turn 27. ---
 $dateFieldPattern = '\d{4}-\d{2}-\d{2}(?:\s*\([^)]*\))?'
@@ -157,7 +209,7 @@ foreach ($projectDir in $projectDirs) {
     }
 
     if (Test-Path $todoPath) {
-        $todoText = Get-Content -Path $todoPath -Raw
+        $todoText = Get-Content -Path $todoPath -Raw -Encoding UTF8
         if ($todoText -match "(?mi)^Version\s+.+\|\s+$dateFieldPattern\s+\|\s+Active\s*`$") {
             $activeProjects += $projectDir.Name
         } elseif ($todoText -match "(?mi)^Version\s+.+\|\s+$dateFieldPattern\s+\|\s+Retired\s*`$") {
@@ -195,9 +247,9 @@ function Get-Frontmatter {
 
 # --- Shared helper: extract the Status field from a file's standard header
 #     line ("Version X.Y | YYYY-MM-DD | Status"), used by the retirement
-#     consistency checks below. See MarkdownConventions.md §1. Uses the
+#     consistency checks below. See MarkdownConventions.md section 1. Uses the
 #     shared $dateFieldPattern (defined above) rather than a bare-date
-#     assumption — this function had the identical bare-date bug already
+#     assumption -- this function had the identical bare-date bug already
 #     fixed elsewhere in this script (project Active/Retired detection,
 #     turn-header parsing) until it was found here too. See
 #     projects/system/session-log.md Turn 29. ---
@@ -219,13 +271,13 @@ function Get-HeaderDate {
 }
 
 # --- Frontmatter: domain files ---
-# See MarkdownConventions.md §1 (Frontmatter).
+# See MarkdownConventions.md section 1 (Frontmatter).
 foreach ($domainDir in $domainDirs) {
     foreach ($fileName in @("description.md", "knowledge.md")) {
         $filePath = Join-Path $domainDir.FullName $fileName
         if (-not (Test-Path $filePath)) { continue }
 
-        $fm = Get-Frontmatter -Text (Get-Content -Path $filePath -Raw)
+        $fm = Get-Frontmatter -Text (Get-Content -Path $filePath -Raw -Encoding UTF8)
         if ($fm.Count -eq 0) {
             Add-ValidationError "'$($domainDir.Name)/$fileName' is missing frontmatter (expected type: domain, domain: $($domainDir.Name))"
             continue
@@ -240,7 +292,7 @@ foreach ($domainDir in $domainDirs) {
 
     $sourcesManifestPath = Join-Path (Join-Path $domainDir.FullName "sources") "manifest.md"
     if (Test-Path $sourcesManifestPath) {
-        $fm = Get-Frontmatter -Text (Get-Content -Path $sourcesManifestPath -Raw)
+        $fm = Get-Frontmatter -Text (Get-Content -Path $sourcesManifestPath -Raw -Encoding UTF8)
         if ($fm.Count -eq 0) {
             Add-ValidationError "'$($domainDir.Name)/sources/manifest.md' is missing frontmatter (expected type: source-manifest, domain: $($domainDir.Name))"
         } else {
@@ -260,7 +312,7 @@ foreach ($projectDir in $projectDirs) {
         $filePath = Join-Path $projectDir.FullName $fileName
         if (-not (Test-Path $filePath)) { continue }
 
-        $fm = Get-Frontmatter -Text (Get-Content -Path $filePath -Raw)
+        $fm = Get-Frontmatter -Text (Get-Content -Path $filePath -Raw -Encoding UTF8)
         if ($fm.Count -eq 0) {
             Add-ValidationError "'$($projectDir.Name)/$fileName' is missing frontmatter (expected type: project, project: $($projectDir.Name))"
             continue
@@ -277,11 +329,11 @@ foreach ($projectDir in $projectDirs) {
 # --- session-log.md: turn header format, sequential numbering, STATUS
 #     signal presence/vocabulary, BLOCKED completeness, and append-only
 #     integrity against the last commit. See knowledge/flow/turn-protocol.md
-#     and operating-principles.md §2. [HUMAN] turns are exempt from the
-#     STATUS requirement — real usage confirms the turn-protocol.md
+#     and operating-principles.md section 2. [HUMAN] turns are exempt from the
+#     STATUS requirement -- real usage confirms the turn-protocol.md
 #     [HUMAN] template carries none, and no-chaining is enforced by the
 #     conversational medium itself (a new turn requires a new human
-#     message), not by a "[HUMAN] Turn" log entry between every pair — so
+#     message), not by a "[HUMAN] Turn" log entry between every pair -- so
 #     that pattern is not checked here. ---
 $knownStatusSignals = @(
     'STATUS: BLOCKED',
@@ -296,10 +348,13 @@ $knownStatusSignals = @(
 foreach ($projectDir in $projectDirs) {
     $sessionLogPath = Join-Path $projectDir.FullName "session-log.md"
     if (-not (Test-Path $sessionLogPath)) { continue }
-    $rawContent = Get-Content -Path $sessionLogPath -Raw
+    $rawContent = Get-Content -Path $sessionLogPath -Raw -Encoding UTF8
     $scanText = Remove-CodeFences -Text $rawContent
 
-    $turnMatches = [regex]::Matches($scanText, "(?m)^## \[([^\]]+)\] — Turn (\d+) \| ($dateFieldPattern)\s*`$")
+    # \u2014 is the em dash turn-protocol.md section 1 mandates in the turn header, written as a
+    # regex escape rather than the literal character so this file stays pure ASCII -- see
+    # the non-ASCII script check near the end of this file for why that matters.
+    $turnMatches = [regex]::Matches($scanText, "(?m)^## \[([^\]]+)\] \u2014 Turn (\d+) \| ($dateFieldPattern)\s*`$")
     $expectedNext = 1
 
     for ($i = 0; $i -lt $turnMatches.Count; $i++) {
@@ -308,7 +363,7 @@ foreach ($projectDir in $projectDirs) {
         $turnNum = [int]$m.Groups[2].Value
 
         if ($turnNum -ne $expectedNext) {
-            Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn numbering breaks at 'Turn $turnNum' — expected Turn $expectedNext (turns must be sequential, no gaps or repeats)"
+            Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn numbering breaks at 'Turn $turnNum' -- expected Turn $expectedNext (turns must be sequential, no gaps or repeats)"
         }
         $expectedNext = $turnNum + 1
 
@@ -318,7 +373,7 @@ foreach ($projectDir in $projectDirs) {
 
             $statusMatch = [regex]::Match($turnBody, '(?m)^STATUS:.*$')
             if (-not $statusMatch.Success) {
-                Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum ([$role]) has no STATUS: line (turn-protocol.md §1 requires one on every non-HUMAN turn)"
+                Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum ([$role]) has no STATUS: line (turn-protocol.md section 1 requires one on every non-HUMAN turn)"
             } else {
                 $statusLine = $statusMatch.Value.Trim()
                 $recognized = $false
@@ -326,11 +381,11 @@ foreach ($projectDir in $projectDirs) {
                     if ($statusLine.StartsWith($sig)) { $recognized = $true; break }
                 }
                 if (-not $recognized) {
-                    Add-ValidationWarning "'$($projectDir.Name)/session-log.md': Turn $turnNum ([$role]) has an unrecognized STATUS signal: '$statusLine' — confirm this is an intentional project-specific phase signal (project-types.md), not a typo"
+                    Add-ValidationWarning "'$($projectDir.Name)/session-log.md': Turn $turnNum ([$role]) has an unrecognized STATUS signal: '$statusLine' -- confirm this is an intentional project-specific phase signal (project-types.md), not a typo"
                 }
                 if ($statusLine -eq 'STATUS: BLOCKED') {
                     if ($turnBody -notmatch '(?m)^Reason:' -or $turnBody -notmatch '(?m)^Need:' -or $turnBody -notmatch '(?m)^Suggested contact:') {
-                        Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum's STATUS: BLOCKED is missing one of Reason:/Need:/Suggested contact: (turn-protocol.md §3)"
+                        Add-ValidationError "'$($projectDir.Name)/session-log.md': Turn $turnNum's STATUS: BLOCKED is missing one of Reason:/Need:/Suggested contact: (turn-protocol.md section 3)"
                     }
                 }
             }
@@ -344,23 +399,23 @@ foreach ($projectDir in $projectDirs) {
             $oldLines = $oldContent -split "`r?`n"
             $newLines = $rawContent -split "`r?`n"
             if (-not (Test-LinesAppendOnly -OldLines $oldLines -NewLines $newLines)) {
-                Add-ValidationError "'$($projectDir.Name)/session-log.md' has changed content that existed at the last commit — session-log.md is append-only, never edit or remove a prior turn (operating-principles.md §2)"
+                Add-ValidationError "'$($projectDir.Name)/session-log.md' has changed content that existed at the last commit -- session-log.md is append-only, never edit or remove a prior turn (operating-principles.md section 2)"
             }
         }
     }
 }
 
 # --- Retirement: domain Status consistency (description.md vs knowledge.md vs
-#     index.md's Status column). See MarkdownConventions.md §1 and
-#     knowledge/domains/index.md § Retiring a Domain. Only the Retired/
-#     not-Retired distinction is compared — the three non-retired values
+#     index.md's Status column). See MarkdownConventions.md section 1 and
+#     knowledge/domains/index.md section Retiring a Domain. Only the Retired/
+#     not-Retired distinction is compared -- the three non-retired values
 #     (Draft, Review Pending, Production) are legitimately independent of
 #     each other and not what this check is for. ---
 $indexDomainStatus = @{}
 $indexDomainLastUpdated = @{}
 $indexPath = Join-Path $domainsPath "index.md"
 if (Test-Path $indexPath) {
-    $indexText = Remove-CodeFences -Text (Get-Content -Path $indexPath -Raw)
+    $indexText = Remove-CodeFences -Text (Get-Content -Path $indexPath -Raw -Encoding UTF8)
     foreach ($line in ($indexText -split "`r?`n")) {
         $trimmed = $line.Trim()
         if (-not $trimmed.StartsWith("|")) { continue }
@@ -383,13 +438,13 @@ foreach ($domainDir in $domainDirs) {
     $knowledgeFilePath = Join-Path $domainDir.FullName "knowledge.md"
     $descStatus = $null
     $knowledgeStatus = $null
-    if (Test-Path $descPath) { $descStatus = Get-HeaderStatus -Text (Get-Content -Path $descPath -Raw) }
-    if (Test-Path $knowledgeFilePath) { $knowledgeStatus = Get-HeaderStatus -Text (Get-Content -Path $knowledgeFilePath -Raw) }
+    if (Test-Path $descPath) { $descStatus = Get-HeaderStatus -Text (Get-Content -Path $descPath -Raw -Encoding UTF8) }
+    if (Test-Path $knowledgeFilePath) { $knowledgeStatus = Get-HeaderStatus -Text (Get-Content -Path $knowledgeFilePath -Raw -Encoding UTF8) }
 
     $descRetired = ($descStatus -eq "Retired")
     $knowledgeRetired = ($knowledgeStatus -eq "Retired")
     if ($descStatus -and $knowledgeStatus -and ($descRetired -ne $knowledgeRetired)) {
-        Add-ValidationWarning "Domain '$($domainDir.Name)': description.md status is '$descStatus' but knowledge.md status is '$knowledgeStatus' — retirement status should match across both files"
+        Add-ValidationWarning "Domain '$($domainDir.Name)': description.md status is '$descStatus' but knowledge.md status is '$knowledgeStatus' -- retirement status should match across both files"
     }
 
     if ($indexDomainStatus.ContainsKey($domainDir.Name)) {
@@ -397,15 +452,15 @@ foreach ($domainDir in $domainDirs) {
         $indexRetired = ($indexStatus -eq "Retired")
         $filesRetired = $descRetired -or $knowledgeRetired
         if ($indexRetired -and -not $filesRetired) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)': index.md lists Status 'Retired' but description.md/knowledge.md do not — update the files or revert the index"
+            Add-ValidationWarning "Domain '$($domainDir.Name)': index.md lists Status 'Retired' but description.md/knowledge.md do not -- update the files or revert the index"
         } elseif ($filesRetired -and -not $indexRetired) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md status is 'Retired' but index.md still lists Status '$indexStatus' — update the index"
+            Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md status is 'Retired' but index.md still lists Status '$indexStatus' -- update the index"
         }
     }
 
-    # --- Last Updated staleness: index.md's own instruction (§ Registered
+    # --- Last Updated staleness: index.md's own instruction (section Registered
     #     Domains) says to update this column whenever description.md or
-    #     knowledge.md changes materially, but nothing checked it — a
+    #     knowledge.md changes materially, but nothing checked it -- a
     #     domain's own files could get edited (and their header dates
     #     bumped) every month without the separate index row ever being
     #     touched. Warning, not error: a small lag between an edit and the
@@ -413,20 +468,20 @@ foreach ($domainDir in $domainDirs) {
     #     session-log.md Turn 29. ---
     $descDate = $null
     $knowledgeDate = $null
-    if (Test-Path $descPath) { $descDate = Get-HeaderDate -Text (Get-Content -Path $descPath -Raw) }
-    if (Test-Path $knowledgeFilePath) { $knowledgeDate = Get-HeaderDate -Text (Get-Content -Path $knowledgeFilePath -Raw) }
+    if (Test-Path $descPath) { $descDate = Get-HeaderDate -Text (Get-Content -Path $descPath -Raw -Encoding UTF8) }
+    if (Test-Path $knowledgeFilePath) { $knowledgeDate = Get-HeaderDate -Text (Get-Content -Path $knowledgeFilePath -Raw -Encoding UTF8) }
     $latestFileDate = @($descDate, $knowledgeDate) | Where-Object { $_ } | Sort-Object -Descending | Select-Object -First 1
 
     if ($latestFileDate -and $indexDomainLastUpdated.ContainsKey($domainDir.Name)) {
         $indexDate = $indexDomainLastUpdated[$domainDir.Name]
         if ($latestFileDate -gt $indexDate) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md was last touched $latestFileDate but index.md's Last Updated column still says $indexDate — update the index row (knowledge/domains/index.md § Registered Domains)"
+            Add-ValidationWarning "Domain '$($domainDir.Name)': description.md/knowledge.md was last touched $latestFileDate but index.md's Last Updated column still says $indexDate -- update the index row (knowledge/domains/index.md section Registered Domains)"
         }
     }
 }
 
-# --- knowledge/domains/*/sources/ — evidentiary source manifests ---
-# See knowledge/domains/authoring-guidelines.md §9.1.
+# --- knowledge/domains/*/sources/ -- evidentiary source manifests ---
+# See knowledge/domains/authoring-guidelines.md section 9.1.
 function Get-ManifestTableFirstColumn {
     param([string]$Text)
     $values = @()
@@ -461,7 +516,7 @@ foreach ($domainDir in $domainDirs) {
         continue
     }
 
-    $manifestText = Remove-CodeFences -Text (Get-Content -Path $manifestPath -Raw)
+    $manifestText = Remove-CodeFences -Text (Get-Content -Path $manifestPath -Raw -Encoding UTF8)
     $manifestFiles = Get-ManifestTableFirstColumn -Text $manifestText
 
     $actualFiles = Get-ChildItem -Path $sourcesPath -File -ErrorAction SilentlyContinue |
@@ -480,16 +535,16 @@ foreach ($domainDir in $domainDirs) {
     }
 }
 
-# --- library/ — reference-work registry vs. stored files. Stored files
-#     live directly in library/, alongside reference-index.md itself —
+# --- library/ -- reference-work registry vs. stored files. Stored files
+#     live directly in library/, alongside reference-index.md itself --
 #     no separate subfolder, since the cornerstone bar (authoring-
-#     guidelines.md §9.3) already keeps this folder small by design. ---
-# See knowledge/domains/authoring-guidelines.md §9.2-9.3.
+#     guidelines.md section 9.3) already keeps this folder small by design. ---
+# See knowledge/domains/authoring-guidelines.md section 9.2-9.3.
 $refIndexPath = Join-Path $libraryPath "reference-index.md"
 $storedLocations = @()
 
 if (Test-Path $refIndexPath) {
-    $refText = Remove-CodeFences -Text (Get-Content -Path $refIndexPath -Raw)
+    $refText = Remove-CodeFences -Text (Get-Content -Path $refIndexPath -Raw -Encoding UTF8)
     $entryBlocks = [regex]::Split($refText, '(?m)^## ')
 
     foreach ($block in $entryBlocks) {
@@ -531,7 +586,7 @@ if (Test-Path $refIndexPath) {
 # --- Referential integrity: links from domain files into sources/ or library/reference-index.md ---
 $refIndexHeadings = @()
 if (Test-Path $refIndexPath) {
-    $refText = Remove-CodeFences -Text (Get-Content -Path $refIndexPath -Raw)
+    $refText = Remove-CodeFences -Text (Get-Content -Path $refIndexPath -Raw -Encoding UTF8)
     $refIndexHeadings = [regex]::Matches($refText, '(?m)^## (.+)$') | ForEach-Object { $_.Groups[1].Value.Trim() }
 }
 
@@ -539,7 +594,7 @@ foreach ($domainDir in $domainDirs) {
     foreach ($fileName in @("knowledge.md", "description.md")) {
         $filePath = Join-Path $domainDir.FullName $fileName
         if (-not (Test-Path $filePath)) { continue }
-        $text = Remove-CodeFences -Text (Get-Content -Path $filePath -Raw)
+        $text = Remove-CodeFences -Text (Get-Content -Path $filePath -Raw -Encoding UTF8)
 
         $linkMatches = [regex]::Matches($text, '\]\(([^)]+)\)')
         foreach ($m in $linkMatches) {
@@ -567,20 +622,20 @@ foreach ($domainDir in $domainDirs) {
 }
 
 # --- Cross-domain reference reciprocity (warning only) ---
-# See knowledge/domains/authoring-guidelines.md §5 and §8. Ground truth is
+# See knowledge/domains/authoring-guidelines.md section 5 and section 8. Ground truth is
 # the actual links inside each domain's own files, not index.md's prose
-# References column — that column is a human-authored summary and could
+# References column -- that column is a human-authored summary and could
 # itself drift from the real links.
 #
 # A one-directional link near "does NOT cover" phrasing is a genuine
-# scope-exclusion pointer (authoring-guidelines.md §5) — permanently
+# scope-exclusion pointer (authoring-guidelines.md section 5) -- permanently
 # one-way by design, not drift. Recognizing that pattern and wording its
 # warning differently is what actually fixes the reviewer toil: without
 # it, every one-directional warning looks identical, and the only way to
 # tell a confirmed-fine exclusion pointer from a real broken reference is
 # to re-open both domains' content and check by hand, every single pass.
-# Still reported either way — never fully suppressed, since the pattern
-# match is a heuristic, not a proof of intent — just distinguishable at a
+# Still reported either way -- never fully suppressed, since the pattern
+# match is a heuristic, not a proof of intent -- just distinguishable at a
 # glance. See projects/system/session-log.md Turn 27.
 $domainNames = $domainDirs | ForEach-Object { $_.Name }
 $domainLinkMap = @{}
@@ -590,7 +645,7 @@ foreach ($domainDir in $domainDirs) {
     foreach ($fileName in @("description.md", "knowledge.md")) {
         $filePath = Join-Path $domainDir.FullName $fileName
         if (-not (Test-Path $filePath)) { continue }
-        $text = Remove-CodeFences -Text (Get-Content -Path $filePath -Raw)
+        $text = Remove-CodeFences -Text (Get-Content -Path $filePath -Raw -Encoding UTF8)
 
         $siblingMatches = [regex]::Matches($text, '\]\(\.\./([a-zA-Z0-9_-]+)/')
         foreach ($m in $siblingMatches) {
@@ -616,20 +671,20 @@ foreach ($from in $domainLinkMap.Keys) {
         $backLinked = $domainLinkMap.ContainsKey($to) -and $domainLinkMap[$to].ContainsKey($from)
         if (-not $backLinked) {
             if ($domainLinkMap[$from][$to]) {
-                Add-ValidationWarning "'$from' links to '$to' near 'does NOT cover' phrasing, with no link back (likely a permanent scope-exclusion pointer, not drift — see authoring-guidelines.md §5; only re-check if '$to''s actual scope changed)"
+                Add-ValidationWarning "'$from' links to '$to' near 'does NOT cover' phrasing, with no link back (likely a permanent scope-exclusion pointer, not drift -- see authoring-guidelines.md section 5; only re-check if '$to''s actual scope changed)"
             } else {
-                Add-ValidationWarning "'$from' links to '$to', but '$to' does not link back to '$from' (one-directional cross-reference — confirm this is intentional, see authoring-guidelines.md §5)"
+                Add-ValidationWarning "'$from' links to '$to', but '$to' does not link back to '$from' (one-directional cross-reference -- confirm this is intentional, see authoring-guidelines.md section 5)"
             }
         }
     }
 }
 
 # --- Retirement: a Retired project should not still have a live routing row
-#     in ROUTING.md Step 2 — see ROUTING.md's Retirement note under Step 2. ---
+#     in ROUTING.md Step 2 -- see ROUTING.md's Retirement note under Step 2. ---
 $routingPath = Join-Path $repoRoot "ROUTING.md"
 $step2ProjectNames = @()
 if (Test-Path $routingPath) {
-    $routingText = Get-Content -Path $routingPath -Raw
+    $routingText = Get-Content -Path $routingPath -Raw -Encoding UTF8
     $step2Match = [regex]::Match($routingText, '(?s)### Step 2.*?(?=### Step 3)')
     if ($step2Match.Success) {
         $step2Text = Remove-CodeFences -Text $step2Match.Value
@@ -647,19 +702,19 @@ if (Test-Path $routingPath) {
 
 foreach ($name in $retiredProjects) {
     if ($step2ProjectNames -contains $name.ToLower()) {
-        Add-ValidationWarning "Project '$name' is marked Retired but still has a routing row in ROUTING.md Step 2 — remove the row so new work isn't routed there"
+        Add-ValidationWarning "Project '$name' is marked Retired but still has a routing row in ROUTING.md Step 2 -- remove the row so new work isn't routed there"
     }
 }
 
 # --- Version History discipline (every file that has one): header Version
 #     must match the latest row, and old rows must never be edited or
-#     removed compared to the last commit — only appended to. See
-#     MarkdownConventions.md §2. Code-fenced examples (e.g. the format
+#     removed compared to the last commit -- only appended to. See
+#     MarkdownConventions.md section 2. Code-fenced examples (e.g. the format
 #     sample inside MarkdownConventions.md itself, which literally contains
 #     a "## Version History" heading in a fence) are stripped first so
 #     they're never mistaken for a real section. The heading match allows
 #     an optional numeric prefix ("## Version History" or "## 10. Version
-#     History") — MarkdownConventions.md numbers its own final section,
+#     History") -- MarkdownConventions.md numbers its own final section,
 #     and a first version of this check silently skipped that file
 #     entirely because it didn't, missing a real header/row mismatch that
 #     shipped for over a week before a fork's sync session caught it by
@@ -691,15 +746,15 @@ function Get-VersionHistoryRows {
 $allMdFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter "*.md" -File -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch '[\\/]temp[\\/]' -and $_.FullName -notmatch '[\\/]\.git[\\/]' }
 
-# Which files MarkdownConventions.md §2's "Required in every file" actually
+# Which files MarkdownConventions.md section 2's "Required in every file" actually
 # means. Project-layer files are the deliberate exception and always have
 # been: session-log.md is append-only and versioned by turn number, TODO.md
 # is a live task list, and neither has ever carried a Version History table
 # in this template or any fork of it. .github/copilot-instructions.md is an
 # editor entry point, and incoming/ is a transient landing zone. Everything
-# else — the four root documents, all of knowledge/, all of library/ —
+# else -- the four root documents, all of knowledge/, all of library/ --
 # carries one. Scoping the check this way is what lets a missing section be
-# an actionable warning rather than noise; see §2, which now names this
+# an actionable warning rather than noise; see section 2, which now names this
 # scope so the rule and the check say the same thing.
 function Test-RequiresVersionHistory {
     param([string]$RelativePath)
@@ -711,17 +766,17 @@ function Test-RequiresVersionHistory {
 }
 
 foreach ($mdFile in $allMdFiles) {
-    $rawText = Get-Content -Path $mdFile.FullName -Raw
+    $rawText = Get-Content -Path $mdFile.FullName -Raw -Encoding UTF8
     $scanText = Remove-CodeFences -Text $rawText
-    $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
+    $relPath = Get-RepoRelativePath -FullPath $mdFile.FullName
 
     if ($scanText -notmatch '(?m)^## (?:\d+\.\s*)?Version History\s*$') {
         # A file with no Version History section used to be skipped here, which
-        # meant the one rule MarkdownConventions.md §2 states most plainly was
+        # meant the one rule MarkdownConventions.md section 2 states most plainly was
         # the one rule nothing enforced: a file omitting the section entirely
         # passed silently, while a file that had one was checked closely.
         if (Test-RequiresVersionHistory -RelativePath $relPath) {
-            Add-ValidationWarning "'$relPath' has no '## Version History' section — required in every knowledge, library, and root document (MarkdownConventions.md §2)"
+            Add-ValidationWarning "'$relPath' has no '## Version History' section -- required in every knowledge, library, and root document (MarkdownConventions.md section 2)"
         }
         continue
     }
@@ -733,7 +788,7 @@ foreach ($mdFile in $allMdFiles) {
         $lastRowCells = $rows[-1].Trim('|') -split '\|' | ForEach-Object { $_.Trim() }
         $lastRowVersion = $lastRowCells[0]
         if ($lastRowVersion -ne $headerVersion) {
-            Add-ValidationWarning "'$relPath': header Version is '$headerVersion' but the latest Version History row is '$lastRowVersion' — a version bump was likely forgotten"
+            Add-ValidationWarning "'$relPath': header Version is '$headerVersion' but the latest Version History row is '$lastRowVersion' -- a version bump was likely forgotten"
         }
     }
 
@@ -743,7 +798,7 @@ foreach ($mdFile in $allMdFiles) {
             $oldScanText = Remove-CodeFences -Text $oldRawText
             $oldRows = @(Get-VersionHistoryRows -Text $oldScanText)
             if (-not (Test-LinesAppendOnly -OldLines $oldRows -NewLines $rows)) {
-                Add-ValidationError "'$relPath': Version History rows changed compared to the last commit — never edit or remove an existing row, only append (MarkdownConventions.md §2)"
+                Add-ValidationError "'$relPath': Version History rows changed compared to the last commit -- never edit or remove an existing row, only append (MarkdownConventions.md section 2)"
             }
         }
     }
@@ -751,19 +806,19 @@ foreach ($mdFile in $allMdFiles) {
 
 # --- Index structural integrity: every file with an "## Index" section
 #     should have each Index entry resolve to a real heading in the same
-#     file (a stale entry — the section it pointed to was renamed or
+#     file (a stale entry -- the section it pointed to was renamed or
 #     removed), and every real ## section (excluding Document Purpose and
 #     Index themselves) should have a corresponding Index entry (an
-#     orphan section — added without updating the Index). This only
+#     orphan section -- added without updating the Index). This only
 #     catches structural drift. Whether an Index entry's *description*
 #     still accurately reflects a section that changed underneath it is a
-#     judgment call no script can make — that's what the Maintenance Pass
-#     (authoring-guidelines.md §8) is for. See projects/system/
+#     judgment call no script can make -- that's what the Maintenance Pass
+#     (authoring-guidelines.md section 8) is for. See projects/system/
 #     session-log.md Turn 22. ---
 function Get-GithubAnchorSlug {
     # Mirrors GitHub's actual heading-anchor algorithm closely enough for
     # this repo's headings: strip characters outside [a-z0-9 -], then
-    # replace each individual space with a hyphen (not collapsed) — GitHub
+    # replace each individual space with a hyphen (not collapsed) -- GitHub
     # does not collapse runs of whitespace, so removing punctuation that
     # sat between two spaces ("Sources & Reference" -> "Sources  Reference")
     # legitimately produces a double hyphen ("sources--reference"), not a
@@ -778,11 +833,11 @@ function Get-GithubAnchorSlug {
 }
 
 foreach ($mdFile in $allMdFiles) {
-    $rawText = Get-Content -Path $mdFile.FullName -Raw
+    $rawText = Get-Content -Path $mdFile.FullName -Raw -Encoding UTF8
     $scanText = Remove-CodeFences -Text $rawText
     if ($scanText -notmatch '(?m)^## Index\s*$') { continue }
 
-    $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
+    $relPath = Get-RepoRelativePath -FullPath $mdFile.FullName
 
     $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
     $indexLinkAnchors = @{}
@@ -793,10 +848,10 @@ foreach ($mdFile in $allMdFiles) {
     }
 
     # Structural sections, exempt from the orphan direction only. All four are
-    # mandated in fixed positions (authoring-guidelines.md §3: Document Purpose,
+    # mandated in fixed positions (authoring-guidelines.md section 3: Document Purpose,
     # Index, Executive Summary immediately after it, Version History always
     # last), so their presence is guaranteed by convention and an Index entry
-    # for them carries no routing information — the Index exists so a session
+    # for them carries no routing information -- the Index exists so a session
     # can pick which *content* sections to load. A house convention that
     # indexes only numbered content sections is therefore correct, not drift.
     # They stay in $realSlugs rather than being skipped outright, so a file
@@ -820,14 +875,14 @@ foreach ($mdFile in $allMdFiles) {
 
     foreach ($anchor in $indexLinkAnchors.Keys) {
         if (-not $realSlugs.ContainsKey($anchor)) {
-            Add-ValidationError "'$relPath': Index links to '#$anchor' but no section with that heading exists — stale Index entry"
+            Add-ValidationError "'$relPath': Index links to '#$anchor' but no section with that heading exists -- stale Index entry"
         }
     }
 
     foreach ($slug in $realSlugs.Keys) {
         if ($orphanExempt.ContainsKey($slug)) { continue }
         if (-not $indexLinkAnchors.ContainsKey($slug)) {
-            Add-ValidationWarning "'$relPath': section '$($realSlugs[$slug])' has no corresponding Index entry — orphan section"
+            Add-ValidationWarning "'$relPath': section '$($realSlugs[$slug])' has no corresponding Index entry -- orphan section"
         }
     }
 }
@@ -845,11 +900,11 @@ $statusVocabulary = @('Draft', 'Review Pending', 'Production', 'Retired')
 $projectTodoStatusVocabulary = @('Active', 'Retired')
 
 foreach ($mdFile in $allMdFiles) {
-    $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
-    $rawText = Get-Content -Path $mdFile.FullName -Raw
+    $relPath = Get-RepoRelativePath -FullPath $mdFile.FullName
+    $rawText = Get-Content -Path $mdFile.FullName -Raw -Encoding UTF8
     $scanText = Remove-CodeFences -Text $rawText
 
-    # -- Status vocabulary (MarkdownConventions.md §1). Project TODO.md files
+    # -- Status vocabulary (MarkdownConventions.md section 1). Project TODO.md files
     #    use a different, equally intentional vocabulary: this script's own
     #    Active/Retired project detection depends on it. Other project files
     #    are unconstrained. --
@@ -862,14 +917,14 @@ foreach ($mdFile in $allMdFiles) {
             $allowed = $statusVocabulary
         }
         if ($allowed -and ($allowed -notcontains $status)) {
-            Add-ValidationWarning "'$relPath': header Status is '$status', which is not in the vocabulary for this file type ($($allowed -join ', ')) — MarkdownConventions.md §1"
+            Add-ValidationWarning "'$relPath': header Status is '$status', which is not in the vocabulary for this file type ($($allowed -join ', ')) -- MarkdownConventions.md section 1"
         }
     }
 
-    # -- Index required over four sections (MarkdownConventions.md §3). Scoped
+    # -- Index required over four sections (MarkdownConventions.md section 3). Scoped
     #    to the same file classes that carry a Version History, so project
     #    session logs (whose turns are ## headings, not sections) are never
-    #    counted. Domain description.md is §3's own explicit exception. --
+    #    counted. Domain description.md is section 3's own explicit exception. --
     if ((Test-RequiresVersionHistory -RelativePath $relPath) -and ($relPath -notmatch '(^|/)description\.md$')) {
         $sectionCount = 0
         foreach ($h in [regex]::Matches($scanText, '(?m)^## (.+?)\s*$')) {
@@ -877,11 +932,11 @@ foreach ($mdFile in $allMdFiles) {
             $sectionCount++
         }
         if ($sectionCount -gt 4 -and $scanText -notmatch '(?m)^## Index\s*$') {
-            Add-ValidationWarning "'$relPath' has $sectionCount sections but no '## Index' — required over four sections (MarkdownConventions.md §3)"
+            Add-ValidationWarning "'$relPath' has $sectionCount sections but no '## Index' -- required over four sections (MarkdownConventions.md section 3)"
         }
     }
 
-    # -- Start all documents at 1.0 (MarkdownConventions.md §2). Deliberately
+    # -- Start all documents at 1.0 (MarkdownConventions.md section 2). Deliberately
     #    warns only on a first row *below* 1.0, not on any first row that
     #    isn't literally 1.0: a fork that archives old Version History rows
     #    to a sibling file legitimately has a live table starting mid-
@@ -892,19 +947,19 @@ foreach ($mdFile in $allMdFiles) {
         $firstCell = ($vhRows[0].Trim('|') -split '\|')[0].Trim()
         $firstNum = [regex]::Match($firstCell, '^(\d+)\.(\d+)')
         if ($firstNum.Success -and ([int]$firstNum.Groups[1].Value) -lt 1) {
-            Add-ValidationWarning "'$relPath': Version History starts at '$firstCell' — start all documents at 1.0 (MarkdownConventions.md §2)"
+            Add-ValidationWarning "'$relPath': Version History starts at '$firstCell' -- start all documents at 1.0 (MarkdownConventions.md section 2)"
         }
     }
 }
 
 # --- Domain "heaviness": knowledge.md files large enough to strain the
-#     Step 4 loading hierarchy (ROUTING.md) are a real cost — a session
+#     Step 4 loading hierarchy (ROUTING.md) are a real cost -- a session
 #     that defaults to a full-file load burns far more context than the
 #     hierarchy is meant to cost. These are lagging-indicator tripwires,
 #     not hard limits or errors: crossing one is a prompt to consider the
-#     authoring-guidelines.md §8 split heuristic at the next Maintenance
+#     authoring-guidelines.md section 8 split heuristic at the next Maintenance
 #     Pass. The Executive Summary gets its own, much lower threshold
-#     since Step 4 Level 3 loads it on nearly every domain query — bloat
+#     since Step 4 Level 3 loads it on nearly every domain query -- bloat
 #     there is the most expensive place for a heavy domain to hurt an
 #     ordinary session. Thresholds are deliberately generous defaults;
 #     tune them per instance if needed. See projects/system/
@@ -917,19 +972,19 @@ foreach ($domainDir in $domainDirs) {
     $knowledgeFilePath = Join-Path $domainDir.FullName "knowledge.md"
     if (-not (Test-Path $knowledgeFilePath)) { continue }
 
-    $rawText = Get-Content -Path $knowledgeFilePath -Raw
+    $rawText = Get-Content -Path $knowledgeFilePath -Raw -Encoding UTF8
     $scanText = Remove-CodeFences -Text $rawText
     $lineCount = @($rawText -split "`r?`n").Count
 
     if ($lineCount -gt $domainSizeLineWarnThreshold) {
-        Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' is $lineCount lines (over $domainSizeLineWarnThreshold) — consider whether it should split (authoring-guidelines.md §8)"
+        Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' is $lineCount lines (over $domainSizeLineWarnThreshold) -- consider whether it should split (authoring-guidelines.md section 8)"
     }
 
     $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
     if ($indexMatch.Success) {
         $entryCount = @([regex]::Matches($indexMatch.Groups[1].Value, '(?m)^\d+\.\s')).Count
         if ($entryCount -gt $domainIndexEntryWarnThreshold) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' has $entryCount Index entries (over $domainIndexEntryWarnThreshold) — consider whether it should split (authoring-guidelines.md §8)"
+            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' has $entryCount Index entries (over $domainIndexEntryWarnThreshold) -- consider whether it should split (authoring-guidelines.md section 8)"
         }
     }
 
@@ -937,7 +992,46 @@ foreach ($domainDir in $domainDirs) {
     if ($execMatch.Success) {
         $execLineCount = @($execMatch.Groups[1].Value -split "`r?`n" | Where-Object { $_.Trim() -ne "" }).Count
         if ($execLineCount -gt $executiveSummaryLineWarnThreshold) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' Executive Summary is $execLineCount non-blank lines (over $executiveSummaryLineWarnThreshold) — this is what Step 4 Level 3 loads on nearly every query; move detail into a named section instead (authoring-guidelines.md §8)"
+            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' Executive Summary is $execLineCount non-blank lines (over $executiveSummaryLineWarnThreshold) -- this is what Step 4 Level 3 loads on nearly every query; move detail into a named section instead (authoring-guidelines.md section 8)"
+        }
+    }
+}
+
+# --- Scripts and hooks must contain no non-ASCII characters.
+#
+#     WHY THIS EXISTS, because it looks like pointless pedantry and is not:
+#
+#     Every .ps1 in this repo is UTF-8 with no BOM. Windows PowerShell 5.1 -- the version
+#     built into Windows, and the only one present on some machines -- decodes a BOM-less
+#     .ps1 using the ANSI codepage, not UTF-8. An em dash then arrives as three cp1252
+#     characters ending in U+201D, and PowerShell's tokenizer accepts U+201D as a string
+#     delimiter. Strings terminate mid-line and the file will not parse. Measured on one
+#     such machine: validate.ps1 30 parse errors, sync-check.ps1 7, commit-push.ps1 7,
+#     both hook scripts unusable. All four mechanical layers this repo relies on -- the
+#     validator, the session-start sync notice, the commit guard, the branch guard --
+#     were silently inert, and the session looked normal from the inside.
+#
+#     A UTF-8 BOM would also fix it, and was rejected: PowerShell 7 writes -Encoding utf8
+#     without a BOM by default, so a session on Linux editing one of these files strips
+#     the BOM invisibly and the breakage returns on Windows only. ASCII content has no
+#     invisible state to lose, so it cannot regress that way -- and this check catches it
+#     if someone reintroduces a non-ASCII character by hand.
+#
+#     Markdown is deliberately not scanned. Prose keeps its em dashes and section signs;
+#     markdown is never parsed by PowerShell. Where a script genuinely needs a non-ASCII
+#     character in a pattern, write it as an escape (see the \u2014 turn-header regex
+#     above), not as a literal. ---
+$asciiScanRoots = @((Join-Path $repoRoot "scripts"), (Join-Path $repoRoot ".githooks"))
+foreach ($asciiScanRoot in $asciiScanRoots) {
+    if (-not (Test-Path $asciiScanRoot)) { continue }
+    foreach ($scriptFile in (Get-ChildItem -Path $asciiScanRoot -File -Recurse)) {
+        $scriptText = [System.Text.Encoding]::UTF8.GetString([System.IO.File]::ReadAllBytes($scriptFile.FullName))
+        $nonAscii = [regex]::Match($scriptText, '[^\x00-\x7F]')
+        if ($nonAscii.Success) {
+            $lineNo = ($scriptText.Substring(0, $nonAscii.Index) -split "`n").Count
+            $codePoint = "U+{0:X4}" -f [int]$nonAscii.Value[0]
+            $relScriptPath = Get-RepoRelativePath -FullPath $scriptFile.FullName
+            Add-ValidationError "'$relScriptPath' line $lineNo contains the non-ASCII character $codePoint -- scripts and hooks must be pure ASCII or they fail to parse under Windows PowerShell 5.1 (see the rationale above this check in validate.ps1)"
         }
     }
 }

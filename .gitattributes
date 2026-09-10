@@ -1,0 +1,12 @@
+# Line endings are pinned here so one checkout behaves identically on every
+# environment this repo is used from. Without this file the result depends on each
+# machine's own core.autocrlf setting, which is not tracked and not consistent
+# between them: a machine with autocrlf=false can commit CRLF into .githooks/*, and
+# a CRLF shebang makes the hook unrunnable on Linux ("bad interpreter: /bin/sh^M")
+# -- the hook then fails for a reason that looks nothing like its actual cause.
+
+* text=auto
+
+# Executed by /bin/sh, so these must be LF regardless of the committing machine.
+*.sh text eol=lf
+.githooks/* text eol=lf

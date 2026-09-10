@@ -1208,3 +1208,53 @@ STATUS: CHECKPOINT
 Completed: Built the enforcement map, closed the three cheap gaps with checks that found 33 real violations in a fork and two more in this template, and corrected §4's backslash rule from wrong to right.
 Next: Entry 5 — nothing in the template is aware of the current date.
 Waiting for: Human review of Entry 4 before Entry 5, per the agreed cadence.
+
+---
+
+## [Copilot] — Turn 39 | 2026-09-10
+
+Not an entry from the relayed queue. This session opened in VS Code + GitHub Copilot on a Windows work laptop, and ROUTING.md Step 1 could not be completed: `scripts/sync-check.ps1` would not run. Investigating that turned into the finding below, which had to be fixed before Entry 5 could be worked at all — every verification standard Turns 34–38 set ("run it, don't reason about it") was unavailable here.
+
+**Every script in this repo was inert on this machine, and the session looked normal from the inside.** All five `.ps1` files failed to parse; both git hooks were unusable; `core.hooksPath` was unset so neither hook was even wired up. That is all four mechanical layers this repo relies on — validator, session-start sync notice, commit guard, branch guard — silently absent at once.
+
+**Root cause, proven rather than inferred.** Every `.ps1` here is UTF-8 with no BOM and contains `—` and `§`. Windows PowerShell 5.1 — the version built into Windows, and the only one on this machine — decodes a BOM-less `.ps1` using the ANSI codepage. An em dash arrives as `â€"`, whose final byte is U+201D, and PowerShell's tokenizer accepts U+201D as a string delimiter: strings terminate mid-line and the file will not parse. The evidence is in the parse errors themselves, which print `â€"` and `Â§` literally. Re-reading the same bytes as UTF-8 and re-parsing gave **0 errors in all five files**, isolating encoding as the sole cause — no PowerShell 7-only syntax was involved.
+
+**A BOM would also have fixed it, and was rejected on the human's cross-environment constraint.** This repo is worked from at least three environments (Claude Code Linux containers with pwsh 7, and two Windows machines). PowerShell 7 writes `-Encoding utf8` **without** a BOM by default, so one session on Linux editing any of these files strips the BOM invisibly and the breakage returns on Windows only. ASCII content has no invisible state to lose. Scripts are now pure ASCII (151 replacements: `—` → `--`, `§` → `section`), markdown deliberately untouched, and the single load-bearing em dash — the turn-header regex that matches this very heading — is written as the escape `\u2014` rather than a literal.
+
+**Fixing the parse was necessary and not sufficient. Running the validator for the first time exposed three more Windows PowerShell 5.1 defects, and all three made it lie rather than fail.**
+
+| Defect | Effect before the fix |
+|---|---|
+| `[System.IO.Path]::GetRelativePath` does not exist on .NET Framework | 73 failures in one run; every path-dependent check silently degraded |
+| `Get-Content` defaults to the ANSI codepage for BOM-less files | Headings containing `—` produced a false stale-Index **error** against `session-log.md` |
+| PS 5.1 decodes native command stdout with the console codepage | Git output mangled, so **17 files** with an em dash in their Version History were reported as edited when nothing had been touched |
+
+Fixed with a `Get-RepoRelativePath` helper, explicit `-Encoding UTF8` on all 20 reads, and a `ProcessStartInfo` with `StandardOutputEncoding` set for `git show` (`ArgumentList` does not exist on .NET Framework either, so the argument string is quoted by hand). **The pre-fix run reported 19 errors, every one of them false.** A validator that lies is worse than one that will not start: it would have sent a session "correcting" a fully compliant repo.
+
+**Git was not on PATH here either** — only GitHub Desktop's bundled copy. `commit-push.ps1` already handled that, but with a Windows-only lookup that would fail on Linux, and it never checked PATH first. All five scripts now resolve git PATH-first, then GitHub Desktop, then Program Files, and say so loudly when none is found instead of proceeding with stale `$LASTEXITCODE` — which is exactly how the 19 false errors were produced.
+
+**Hooks assumed `pwsh` unconditionally.** `.githooks/pre-commit` and `pre-push` invoked it with no fallback and `exit $?`, so a machine without PowerShell 7 gets 127 on every commit — the same root cause Turn 34 recorded for `.claude/hooks/session-start.sh`, reached from a different direction and not specific to Claude Code. Both hooks now resolve `pwsh`, then `powershell.exe`, and fail with an explanation and the deliberate `--no-verify` bypass rather than an unexplained 127.
+
+**New check: no non-ASCII in `scripts/` or `.githooks/`.** An error, not a warning — a regression here disables everything else. Verified with a positive control (clean tree passes) and a negative control (a file containing one em dash is caught, with file, line and code point named). Its full rationale is written into `validate.ps1` above the check itself, since the next session to hit this will be reading the script, not this log.
+
+**Added `.gitattributes`.** Line endings were previously governed by each machine's untracked `core.autocrlf`; a machine with it set to `false` could commit CRLF into `.githooks/*`, and a CRLF shebang makes a hook unrunnable on Linux. Now pinned: `*.sh` and `.githooks/*` are `eol=lf`. The index was already LF throughout, so this pins existing behaviour rather than changing it.
+
+**Files changed:** `scripts/validate.ps1`, `scripts/sync-check.ps1`, `scripts/commit-push.ps1`, `scripts/pre-commit-check.ps1`, `scripts/pre-push-check.ps1`, `.githooks/pre-commit`, `.githooks/pre-push`, `.gitattributes` (new).
+
+**Verification, run rather than reasoned about.** All five scripts parse; `sync-check.ps1` ran here for the first time and reported `up to date with origin/main`; `validate.ps1` reports **0 errors, 0 warnings** after activating hooks in this clone (`git config core.hooksPath .githooks`, which the validator had correctly warned was unset).
+
+**Deliberately not done, and proposed instead:** a row in `knowledge/flow/convention-enforcement.md` registering the new check, and a note in `Architecture.md` §6 about interpreter and git resolution. Both are gated files; raising them as a proposal rather than editing them unilaterally.
+
+**Also observed, not fixed:** the relayed queue itself exists nowhere in this repo. Entries 5–13 survive only as the one-line `Next:` in Turn 38, so no new session can resume the queue from the repo alone. The hook-ordering bug and the `Architecture.md` §2 diagram drift are likewise recorded only as prose inside session-log turns, absent from `TODO.md`.
+
+### Session close
+
+Knowledge candidates: None — tooling and environment.
+Open flags: None. Two documentation updates proposed above, awaiting human approval.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Made all five scripts and both hooks run correctly on Windows PowerShell 5.1 without breaking the Linux and PowerShell 7 environments — four separate compatibility defects, three of which made the validator report false errors rather than fail. Added a check that stops the encoding half from regressing.
+Next: Entry 5 — nothing in the template is aware of the current date. The human is retrieving the queue text from `familien-boe`'s `projects/system/upstream-feedback.md`.
+Waiting for: The Entry 5 handover, and a decision on the two proposed documentation updates.
+
