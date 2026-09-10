@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.12 | 2026-09-09 | Production
+Version 1.13 | 2026-09-10 | Production
 
 ---
 
@@ -9,6 +9,8 @@ Version 1.12 | 2026-09-09 | Production
 Defines the structure, naming conventions, content rules, and versioning standards for domain knowledge documents in this context architecture. Apply these guidelines when creating or editing any `knowledge.md` file.
 
 This document covers knowledge-document-specific rules only. General markdown formatting, versioning conventions, and validity signal formats follow `MarkdownConventions.md`, which is the baseline standard for all files. Where this document and MarkdownConventions.md overlap, this document takes precedence for knowledge documents specifically.
+
+Which rules in either document are mechanically enforced and which are honour-system: `knowledge/flow/convention-enforcement.md`. Add a row there when adding a rule here.
 
 **Edit ceremony for `knowledge.md` files:** Appending new facts or sections to an existing `knowledge.md` requires a `[FLAG FOR KNOWLEDGE UPDATE]` and human confirmation — no system project entry needed. Structural changes (adding a new domain, changing a domain's scope, removing a domain, reorganising a knowledge document) route through `projects/system/` first.
 
@@ -410,3 +412,4 @@ Before submitting any knowledge document for human approval:
 | 1.10 | 2026-08-22 | §5 and §8: a one-directional cross-reference is no longer treated as uniformly suspect — split into genuine scope-exclusion pointers (permanently one-way, no action needed) versus real content dependencies (worth fixing), matching `scripts/validate.ps1`'s new differentiated warning wording. §8 also gained a checklist item for re-checking a domain's own stale "(not yet created)" placeholder prose, backstopping the new onboarding-time check in `knowledge/domains/index.md` § Adding a Domain step 7. Both relayed via `[FLAG FOR UPSTREAM]`. See `projects/system/session-log.md` Turn 27. |
 | 1.11 | 2026-09-02 | §9.1 gained "Proactive classification, every time" — the mechanics for re-running document classification on every qualifying upload for the life of a session, not just the first, plus a worked negative example (a document arriving mid-conversation, attached to an unrelated question, never classified or disclosed). Notes explicitly that no mechanical backstop is feasible here, unlike the structural-changes hook. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`. See new matching Standing Rule in `ROUTING.md` (1.19 → 1.20) and `projects/system/session-log.md` Turn 33. |
 | 1.12 | 2026-09-09 | §3 now points at the new `knowledge/domains/_template/` as the starting point for a new domain document, rather than leaving the required structure to be reproduced by hand or inherited by copying a sibling. See `projects/system/session-log.md` Turn 36. |
+| 1.13 | 2026-09-10 | Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`, which maps every rule in this document and in `MarkdownConventions.md` to whether anything actually checks it. Several rules here are labelled Judgement there — genuinely unmechanisable, which is a decision rather than an omission — and several are labelled Gap. See `projects/system/session-log.md` Turn 38. |

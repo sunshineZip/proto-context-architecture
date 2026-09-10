@@ -1156,3 +1156,55 @@ STATUS: CHECKPOINT
 Completed: Moved the Upstream Feedback Log to its own file across all four places that referenced it, choosing against the relayed entry's recommendation after finding that the upstream pattern it was built on exists only in the fork — and substituting a create-on-first-use precedent that does exist here.
 Next: Entry 4 — the enforcement map and the `MarkdownConventions.md` §4 backslash-escape rule. This is the first entry the human asked to review before I proceed.
 Waiting for: Human direction on Entry 4.
+
+---
+
+## [Claude] — Turn 38 | 2026-09-10
+
+Entry 4 of the relayed queue: no map of which stated conventions are mechanically enforced. The human directed a dedicated `knowledge/flow/` file for the map, and closing the three cheap gaps with real checks in the same change.
+
+**Built the map in the order the entry specified** — enumerate the convention documents first, then read `scripts/validate.ps1` against that list. That ordering is what surfaces gaps; doing it the other way round only confirms the coverage that already exists. Result: `knowledge/flow/convention-enforcement.md`, with every rule in `MarkdownConventions.md`, `authoring-guidelines.md`, `turn-protocol.md` and `operating-principles.md` marked **Checked** (naming the check), **Judgement** (unmechanisable, which is a decision rather than an omission), or **Gap**. It also lists the checks that map to no stated rule, so the map is complete in both directions, and ranks the remaining gaps.
+
+**Three checks added, and all three found real violations immediately.** Measured against `familien-boe`, which is what the entry's own numbers were drawn from:
+
+| New check | Convention | Violations found in the fork | Entry predicted |
+|---|---|---|---|
+| Status field vocabulary | `MarkdownConventions.md` §1 | 17 | "17 of 18 domains" |
+| Index required over four sections | §3 | 10 | "5 files, 3 template-shipped" |
+| Start all documents at 1.0 | §2 | 6 | "6 documents below 1.0" |
+
+The Index count came in higher than the entry's five because the check also reaches `library/` manifests — one of them has 24 sections and no Index — and `README.md`. Those are real, not over-reach. The three template-shipped files it names are the ones fixed in Turn 34; that fork has not synced yet, which is why they still appear there.
+
+**Two design decisions inside the checks, both to avoid false positives on correct content:**
+- **Status vocabulary is two vocabularies, not one.** Project `TODO.md` files legitimately use `Active`/`Retired` — this script's own active-versus-retired project detection depends on it — while everything else uses §1's four values. A single-vocabulary check would have flagged every correct project file in every fork. §1 never documented the project vocabulary at all, which is plausibly *why* forks reach for `Active` on domain files; it now does.
+- **Start-at-1.0 warns only on a first row below 1.0**, not on any first row that is not literally `1.0`. A fork that archives old Version History rows to a sibling file has a live table starting mid-sequence — that is correct content, and a literal check would flag it. Verified directly: the naive form flags that fork's `ROUTING.md` at 1.24 and its domain index at 1.42, both false; the implemented form flags exactly the six genuine 0.x starts and nothing else.
+
+**Ran the new Index check against this template and it found two more of our own violations** — `ROUTING.md` (six sections) and `knowledge/domains/index.md` (six sections). Fixed rather than exempted. This matters most in `ROUTING.md`: its own Hard Constraints blockquote instructs a session to re-read a specific constraint mid-session, which until now meant scrolling 250 lines with no map. That is the third and fourth self-conformance violation this session's tooling work has surfaced in the template itself.
+
+**`MarkdownConventions.md` §4 corrected — the rule was wrong, not merely unenforced.** It forbade escaping a pipe absolutely, with one UNC-path exception. Two exceptions are real:
+1. A literal pipe inside a table cell **must** be escaped. Unescaped, it ends the cell and the row silently loses columns. GitHub-flavoured markdown specifies escaping as the only way, including inside a code span.
+2. A backslash inside a code span is literal content, not an escape — `.\scripts\commit-push.ps1` appears in four shipped files, and §4's stated rationale never applied to it.
+
+**Wrote the corrected rule as a table and immediately violated it in the same sentence** — the cell explaining that an unescaped pipe ends a cell contained an unescaped pipe in a code span, which ended that cell. Rewrote the exceptions as prose so no pipe sits inside a table row, then scanned every markdown file in the repo for the same shape: no other instance. A rule that is this easy to break while writing it down is a strong argument for the check ranked sixth in the map's gap list.
+
+**Files changed:**
+- `knowledge/flow/convention-enforcement.md` (new, 1.0) — the map.
+- `scripts/validate.ps1` — three checks, placed after the Index block so the helpers they reuse are already defined.
+- `MarkdownConventions.md` (1.7 → 1.8) — §4 corrected, §1 Status row documents both vocabularies, Document Purpose points at the map.
+- `knowledge/domains/authoring-guidelines.md` (1.12 → 1.13) — Document Purpose points at the map.
+- `ROUTING.md` (1.22 → 1.23), `knowledge/domains/index.md` (1.4 → 1.5) — added the Index each now needs.
+
+**Deliberately not added to `validate.ps1`'s required-flow-files list.** Doing so would raise a hard error in every fork that has not yet synced, for a file they cannot have — a missing reference map is not a structural failure the way a missing `operating-principles.md` is. It is reachable from both convention documents instead.
+
+**Noted, not fixed:** `Architecture.md` §2's File Structure diagram lists four `knowledge/flow/` files and the folder now holds ten. That drift predates this entry and is its own small fix.
+
+### Session close
+
+Knowledge candidates: None — conventions and tooling.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Built the enforcement map, closed the three cheap gaps with checks that found 33 real violations in a fork and two more in this template, and corrected §4's backslash rule from wrong to right.
+Next: Entry 5 — nothing in the template is aware of the current date.
+Waiting for: Human review of Entry 4 before Entry 5, per the agreed cadence.

@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.22 | 2026-09-09 | Production
+Version 1.23 | 2026-09-10 | Production
 
 ---
 
@@ -9,6 +9,16 @@ Version 1.22 | 2026-09-09 | Production
 LLM routing instructions for this context architecture. Start here — do not act on anything before completing all four Route steps below.
 
 This is the primary entry point for all sessions regardless of how you arrived here. In VS Code with GitHub Copilot, this file loads automatically via `.github/copilot-instructions.md`. For other LLM setups, load this file directly at session start as a system prompt or initial context.
+
+---
+
+## Index
+
+1. [Route](#route) — Steps 1–4: sync, match the request, calibrate, load domain knowledge
+2. [Hard Constraints](#hard-constraints) — the rules that hold for the whole session regardless of what is asked
+3. [Standing Rules](#standing-rules) — apply in every session, every project type
+4. [Quick Task Guide](#quick-task-guide) — lookup table: "I want to do X" → where to go
+5. [Version History](#version-history)
 
 ---
 
@@ -272,3 +282,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.20 | 2026-09-02 | Added a Standing Rule requiring document classification (`authoring-guidelines.md` §9.1) to re-run on every qualifying upload for the life of a session, not just the first — and to disclose the outcome on both branches, including "not stored." Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, prompted by a real incident where a second qualifying document arrived mid-conversation, attached to an unrelated question, and was answered without ever being classified or the gap being disclosed. Explicitly notes no mechanical backstop is feasible here the way it is for the structural-changes hook — a git hook can only inspect what gets committed, and a skipped classification leaves no file-level trace to check against. See `projects/system/session-log.md` Turn 33. |
 | 1.21 | 2026-09-09 | Quick Task Guide and the fresh-fork setup sequence now point at the new `knowledge/domains/_template/` as the starting point for a new domain, instead of `example-domain/` or an existing sibling. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, where 18 domains were each created by copying the nearest existing one and drifted accordingly. See `projects/system/session-log.md` Turn 36. |
 | 1.22 | 2026-09-09 | Quick Task Guide now names `projects/system/upstream-feedback.md` as where a confirmed template-level finding actually lands, rather than pointing only at the procedure in `upstream-sync.md` §7 — the previous wording named the procedure but not the destination, which was itself part of why the log was hard to find. See `projects/system/session-log.md` Turn 37. |
+| 1.23 | 2026-09-10 | Added the `## Index` this file has needed since it passed four sections — it has six. Found by a new `scripts/validate.ps1` check, added the same day, for a rule `MarkdownConventions.md` §3 has always stated and nothing has ever enforced. Matters more here than in most files: the Hard Constraints blockquote instructs a session to re-read a specific constraint mid-session, which until now meant scrolling a 250-line document with no map. See `projects/system/session-log.md` Turn 38. |

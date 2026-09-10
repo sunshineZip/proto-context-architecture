@@ -832,6 +832,71 @@ foreach ($mdFile in $allMdFiles) {
     }
 }
 
+# --- Conventions that were stated but never checked. Each rule below is
+#     documented plainly in MarkdownConventions.md and had no enforcement
+#     behind it, which is how all three decayed silently in a mature fork
+#     while every session kept treating the documents as authoritative. An
+#     unenforced rule does not decay to a weaker rule, it decays to zero.
+#     knowledge/flow/convention-enforcement.md maps every stated convention
+#     to its enforcement status and is the place to record that decision
+#     when a new rule is written. ---
+
+$statusVocabulary = @('Draft', 'Review Pending', 'Production', 'Retired')
+$projectTodoStatusVocabulary = @('Active', 'Retired')
+
+foreach ($mdFile in $allMdFiles) {
+    $relPath = ([System.IO.Path]::GetRelativePath($repoRoot, $mdFile.FullName)) -replace '\\', '/'
+    $rawText = Get-Content -Path $mdFile.FullName -Raw
+    $scanText = Remove-CodeFences -Text $rawText
+
+    # -- Status vocabulary (MarkdownConventions.md §1). Project TODO.md files
+    #    use a different, equally intentional vocabulary: this script's own
+    #    Active/Retired project detection depends on it. Other project files
+    #    are unconstrained. --
+    $status = Get-HeaderStatus -Text $scanText
+    if ($status) {
+        $allowed = $null
+        if ($relPath -match '^projects/[^/]+/TODO\.md$') {
+            $allowed = $projectTodoStatusVocabulary
+        } elseif ($relPath -notmatch '^projects/') {
+            $allowed = $statusVocabulary
+        }
+        if ($allowed -and ($allowed -notcontains $status)) {
+            Add-ValidationWarning "'$relPath': header Status is '$status', which is not in the vocabulary for this file type ($($allowed -join ', ')) — MarkdownConventions.md §1"
+        }
+    }
+
+    # -- Index required over four sections (MarkdownConventions.md §3). Scoped
+    #    to the same file classes that carry a Version History, so project
+    #    session logs (whose turns are ## headings, not sections) are never
+    #    counted. Domain description.md is §3's own explicit exception. --
+    if ((Test-RequiresVersionHistory -RelativePath $relPath) -and ($relPath -notmatch '(^|/)description\.md$')) {
+        $sectionCount = 0
+        foreach ($h in [regex]::Matches($scanText, '(?m)^## (.+?)\s*$')) {
+            if ($h.Groups[1].Value.Trim() -eq 'Index') { continue }
+            $sectionCount++
+        }
+        if ($sectionCount -gt 4 -and $scanText -notmatch '(?m)^## Index\s*$') {
+            Add-ValidationWarning "'$relPath' has $sectionCount sections but no '## Index' — required over four sections (MarkdownConventions.md §3)"
+        }
+    }
+
+    # -- Start all documents at 1.0 (MarkdownConventions.md §2). Deliberately
+    #    warns only on a first row *below* 1.0, not on any first row that
+    #    isn't literally 1.0: a fork that archives old Version History rows
+    #    to a sibling file legitimately has a live table starting mid-
+    #    sequence, and flagging that would be a false positive on correct
+    #    content. Starting at 0.1 is the actual violation. --
+    $vhRows = @(Get-VersionHistoryRows -Text $scanText)
+    if ($vhRows.Count -gt 0) {
+        $firstCell = ($vhRows[0].Trim('|') -split '\|')[0].Trim()
+        $firstNum = [regex]::Match($firstCell, '^(\d+)\.(\d+)')
+        if ($firstNum.Success -and ([int]$firstNum.Groups[1].Value) -lt 1) {
+            Add-ValidationWarning "'$relPath': Version History starts at '$firstCell' — start all documents at 1.0 (MarkdownConventions.md §2)"
+        }
+    }
+}
+
 # --- Domain "heaviness": knowledge.md files large enough to strain the
 #     Step 4 loading hierarchy (ROUTING.md) are a real cost — a session
 #     that defaults to a full-file load burns far more context than the

@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.7 | 2026-09-09 | Production
+Version 1.8 | 2026-09-10 | Production
 
 ---
 
@@ -9,6 +9,8 @@ Version 1.7 | 2026-09-09 | Production
 Baseline markdown authoring standard for all files in this context architecture. Applies to every file regardless of type — conceptual documents, knowledge bases, project session logs, outputs. Both humans and the LLM are expected to follow these conventions when creating or editing any file.
 
 Document-type-specific rules (e.g. for domain knowledge documents) build on top of this baseline and do not override it.
+
+Which of these rules are mechanically enforced and which are honour-system: `knowledge/flow/convention-enforcement.md`. Check there before assuming a rule stated here is being checked — several were not, for months. When adding a rule to this file, add its row there in the same change.
 
 > **Routing check:** This file defines formatting standards. If you have not read `ROUTING.md` and completed all four Route steps, do that first before making any file changes.
 
@@ -54,7 +56,7 @@ Version [X.Y] | [YYYY-MM-DD] | [Status]
 | Title | Matches the filename (without extension and folder path). Use title case. |
 | Version | See §2. |
 | Date | ISO 8601 (`YYYY-MM-DD`) — date of the last edit, not creation. |
-| Status | `Draft`, `Review Pending`, `Production`, or `Retired`. |
+| Status | `Draft`, `Review Pending`, `Production`, or `Retired`. **Project `TODO.md` files use `Active` or `Retired` instead** — a separate, intentional vocabulary that `scripts/validate.ps1` depends on to distinguish active from retired projects. Both vocabularies are checked. |
 
 ### Document Purpose rule
 
@@ -157,9 +159,14 @@ Lead sections with the most operationally relevant information. Reserve prose fo
 
 ### No backslash escapes
 
-Do not write `\#`, `\*`, `\|`, `\_`, `\-`, `\&`, `\[`, `\]`, `` \` ``. Write the literal character directly. Backslash-escaped characters render as literal backslashes in most markdown renderers and corrupt the document.
+Default: do not write `\#`, `\*`, `\_`, `\-`, `\&`, `\[`, `\]`, `` \` ``. Write the literal character directly. A backslash before a character that did not need escaping renders as a literal backslash in most markdown renderers and corrupts the document.
 
-**Exception:** `\\` in UNC paths such as `\\server\share\path` is intentional — preserve double backslashes in those contexts.
+Two exceptions are real, and both appear in this repo's own shipped files. This rule previously forbade both with only a UNC-path carve-out, which made it wrong rather than merely strict:
+
+1. **A literal pipe inside a table cell must be escaped.** Required, not optional: an unescaped pipe ends the cell, so the row silently loses columns and the table misrenders. GitHub-flavoured markdown specifies escaping as the only way to put a pipe in a cell — including inside a code span, where the table parser consumes the backslash rather than rendering it. This applies to *this* table-heavy convention document as much as to any domain document.
+2. **A backslash inside an inline code span or fenced block is literal content, not an escape.** The rationale above does not apply to it. This covers Windows paths (`.\scripts\commit-push.ps1` appears in `ROUTING.md`, `.github/copilot-instructions.md`, `knowledge/flow/turn-protocol.md` and `projects/system/TODO.md`), UNC paths such as `\\server\share\path`, and regular expressions.
+
+Outside those two cases the default holds: write the character directly.
 
 ### No blank lines between list items (unless intentional paragraph breaks)
 
@@ -254,3 +261,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 | 1.5 | 2026-08-11 | §8 — clarified that `[SENSITIVE]` is a post-hoc documentation tag, not a gate; cross-referenced the new pause-and-ask Hard Constraint in `ROUTING.md` that governs whether sensitive content gets written down in the first place. See `projects/system/session-log.md` Turn 18. |
 | 1.6 | 2026-09-09 | §2 now names which files actually require a Version History section, instead of saying "Required in every file" — no file under `projects/` has ever carried one, so the rule as written was broader than any fork has followed and could not be enforced as stated. `scripts/validate.ps1` gained a matching check in the same change; previously a file omitting the section entirely was skipped silently while a file that had one was checked closely. See `projects/system/session-log.md` Turn 35. |
 | 1.7 | 2026-09-09 | §3 gained an explicit exception for domain `description.md`, which has six sections and so nominally required an Index it should never have — the file is capped at one page and loaded whole by design. Surfaced while building `knowledge/domains/_template/`, which forced the question; the shipped `example-domain/description.md` had been quietly violating the rule as written since creation. See `projects/system/session-log.md` Turn 36. |
+| 1.8 | 2026-09-10 | §4's no-backslash-escapes rule corrected: it forbade escaping a pipe absolutely with only a UNC-path exception, but a literal pipe inside a table cell must be escaped or the row silently loses columns, and a backslash inside a code span is literal content the rule's own rationale never covered. Both usages already existed and were correct in shipped files; nothing had ever exercised the rule against real content. §1's Status row now documents the Active/Retired vocabulary project TODO files actually use, which `scripts/validate.ps1` depends on and which §1 had never mentioned. Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`. See `projects/system/session-log.md` Turn 38. |

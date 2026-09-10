@@ -1,6 +1,6 @@
 # Domain Index
 
-Version 1.4 | 2026-09-09 | Production
+Version 1.5 | 2026-09-10 | Production
 
 ---
 
@@ -9,6 +9,16 @@ Version 1.4 | 2026-09-09 | Production
 Registry of all knowledge domains in this context architecture. Add one entry per domain. The routing table in ROUTING.md Step 2 should have a corresponding row for each domain listed here.
 
 > **Edit guard:** Adding or removing domains is system-layer work. Route to `projects/system/` and record the change in `session-log.md` before editing this file.
+
+---
+
+## Index
+
+1. [Registered Domains](#registered-domains) — the domain registry: folder, status, coverage, last updated, cross-references
+2. [Cross-Domain Query Recipes](#cross-domain-query-recipes) — named domain combinations for recurring multi-domain tasks
+3. [Adding a Domain](#adding-a-domain) — the onboarding procedure
+4. [Retiring a Domain](#retiring-a-domain) — archive-in-place procedure
+5. [Version History](#version-history)
 
 ---
 
@@ -67,3 +77,4 @@ Reactivating a retired domain reverses steps 1–2 and is logged the same way.
 | 1.2 | 2026-07-25 | Added a `Status` column (Active/Retired) to the registry and a "Retiring a Domain" procedure — archive-in-place, not delete, per `MarkdownConventions.md` §1. `scripts/validate.ps1` now checks this column stays consistent with each domain's own header Status. |
 | 1.3 | 2026-08-22 | Added step 7 to "Adding a Domain" — grep the repo for stale mentions of the new domain (scope-exclusion placeholders in sibling `description.md` files, superseded raw-file references) at onboarding time, when it's cheap. Relayed via `[FLAG FOR UPSTREAM]`. See `projects/system/session-log.md` Turn 27. |
 | 1.4 | 2026-09-09 | Adding a Domain steps 1–2 now start from the new `knowledge/domains/_template/` instead of describing files to create from scratch, which in practice meant copying the nearest sibling domain. See `projects/system/session-log.md` Turn 36. |
+| 1.5 | 2026-09-10 | Added the `## Index` required over four sections — this file has six. Found by the new `scripts/validate.ps1` check for `MarkdownConventions.md` §3. See `projects/system/session-log.md` Turn 38. |
