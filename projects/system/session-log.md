@@ -1771,6 +1771,41 @@ Completed: Entry 8, and with it the thirteen-entry queue. Stated the maintenance
 Next: Nothing queued.
 Waiting for: Direction. The queue is finished; the fork's own log still shows all thirteen as Open, since nothing carries status back downstream.
 
+---
+
+## [Copilot] — Turn 53 | 2026-09-10
+
+**Correcting a claim I made in Turn 44 and repeated twice afterwards.** Prior turns are append-only, so this is the correction rather than an edit — the mechanism `turn-protocol.md` §1 describes for exactly this.
+
+Turn 44 recorded, under "A gap in the mechanism itself": *"Nothing carries status back downstream when a fix lands upstream, and `upstream-sync.md` §7 describes only the outbound direction."*
+
+**That is wrong.** §7's Lifecycle paragraph defines the inbound direction explicitly: an entry is `Open` until the human relays it, flips to `Relayed` at that point, and is deleted once a later Check Procedure run (§4) shows the corresponding upstream commit. I asserted an absence in a section I had not read, having read the rest of §7 in Turn 37 and assumed I knew its contents. That is the same failure mode this whole queue kept finding in the relayed entries — a confident claim about what a document contains, made without opening it — committed here by the session correcting it elsewhere.
+
+**What is actually true, having now read it:**
+
+- The return path exists and is a *pull*, not a push. That is correct by design and for the same reason this session could not update the guest repo: the template has no write access to its forks, so the fork must reconcile its own log. `repo-mixing.md` §4 states the session-level version of the same boundary.
+- `familien-boe` is not following it. All thirteen entries still read `Status: Open` though every one was relayed across two sessions, so none has even reached `Relayed`. That is fork-side hygiene, not a template defect.
+
+**Three residual observations that do survive**, offered as observations rather than proposed changes, since I have just demonstrated why proposing changes to this section on my own reading deserves a second opinion:
+
+1. **The reconciliation is tied to §4, which is opportunistic.** So the return path inherits the posture just recorded in `Architecture.md` §7 — nothing prompts it, and an unreconciled log is exactly what makes a closed entry look open.
+2. **The terminal state is deletion.** Today's Turn 47 established for Version History that records get relocated, never removed, and Entry 3 moved this log to its own file specifically so its history could grow. "Delete the entry" is the opposite instinct in the same repo on the same day. Deletion also makes "was this ever raised?" unanswerable without git archaeology.
+3. **`Relayed` is described as "purely for the human's own tracking."** This session showed a *session* needs it too: I spent a turn verifying whether the document-capture entry had already been implemented, and the fork's log said `Open` while the answer was yes. A stale status is not neutral — it actively misleads the next reader.
+
+Nothing changed in the repo this turn. `validate.ps1` clean.
+
+### Session close
+
+Knowledge candidates: None.
+Open flags: None.
+Push status: Pending — pushing this correction to `main` immediately.
+
+STATUS: CHECKPOINT
+Completed: Corrected Turn 44's false claim that `upstream-sync.md` §7 has no inbound path, and replaced it with what the section actually says plus three observations that survive the correction.
+Next: Nothing queued.
+Waiting for: A decision on whether any of the three observations above is worth acting on. Updating `familien-boe`'s own log is out of scope for any session with this repo as home.
+
+
 
 
 
