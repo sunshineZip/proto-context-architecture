@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.8 | 2026-09-10 | Production
+Version 1.9 | 2026-09-10 | Production
 
 ---
 
@@ -237,6 +237,18 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 
 `[SENSITIVE]` documents a decision already made about content that has already been written — it is not the mechanism that decides whether the content should have been written down at all. That decision point is a Hard Constraint in `ROUTING.md`: pause and ask before writing a secret, credential, or third-party confidential detail into any tracked file, regardless of whether it ends up tagged.
 
+### Where a `[SENSITIVE]` claim may sit
+
+**A `[SENSITIVE]` claim belongs in a named section, never in a section the loading hierarchy reads by default.** `ROUTING.md` Step 4 Level 3 loads a domain's Executive Summary on nearly every query that touches that domain, without opening a single numbered section. A tagged claim placed there is therefore loaded by default, in sessions that had no reason to ask for it — and the care the tag exists to prompt never gets a chance to happen. The same applies to any Quick Reference, At a Glance, or similar always-loaded section a fork adds.
+
+Those sections may name the mechanism and point at the section holding the detail. "Recovery procedure is covered in §9" is routing information and belongs in an Executive Summary; the recovery codes do not.
+
+This matters most at the moment content leaves the repo. An extract, a shared summary, or a cross-fork pull built from "just the Executive Summary" is a natural request, and if severe material is sitting there it travels without anyone deciding that it should — see `knowledge/flow/repo-mixing.md` §7 for the cross-fork case.
+
+**Carve-out — a domain that is sensitive throughout.** Some domains have no ordinary part to summarise. Applying the rule literally would force an Executive Summary that says nothing useful, which defeats the routing purpose Level 3 exists for. Such a domain declares its scope once, in `description.md`'s Working Constraints, and is then exempt from the per-section rule: its whole file is treated as tagged. The declaration goes there rather than per claim because `description.md` loads at Level 1, ahead of the Executive Summary — so a session sees the declaration before it sees anything it governs.
+
+**This rule cannot be checked mechanically, and that is a finding rather than an omission.** The real instance that prompted it carried no tag at all: that domain classified sensitivity per *section*, in its own local legend, so the copy that reached its Executive Summary was untagged by construction and no scan for the tag could have seen it. Section-level classification is the deeper error — `knowledge/domains/authoring-guidelines.md` §6 requires signals at the claim level precisely so that a claim carries its own handling rules wherever it is later copied to.
+
 ---
 
 ## 9. Writing Style
@@ -262,3 +274,4 @@ Place signals immediately after the claim they qualify, in square brackets. The 
 | 1.6 | 2026-09-09 | §2 now names which files actually require a Version History section, instead of saying "Required in every file" — no file under `projects/` has ever carried one, so the rule as written was broader than any fork has followed and could not be enforced as stated. `scripts/validate.ps1` gained a matching check in the same change; previously a file omitting the section entirely was skipped silently while a file that had one was checked closely. See `projects/system/session-log.md` Turn 35. |
 | 1.7 | 2026-09-09 | §3 gained an explicit exception for domain `description.md`, which has six sections and so nominally required an Index it should never have — the file is capped at one page and loaded whole by design. Surfaced while building `knowledge/domains/_template/`, which forced the question; the shipped `example-domain/description.md` had been quietly violating the rule as written since creation. See `projects/system/session-log.md` Turn 36. |
 | 1.8 | 2026-09-10 | §4's no-backslash-escapes rule corrected: it forbade escaping a pipe absolutely with only a UNC-path exception, but a literal pipe inside a table cell must be escaped or the row silently loses columns, and a backslash inside a code span is literal content the rule's own rationale never covered. Both usages already existed and were correct in shipped files; nothing had ever exercised the rule against real content. §1's Status row now documents the Active/Retired vocabulary project TODO files actually use, which `scripts/validate.ps1` depends on and which §1 had never mentioned. Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`. See `projects/system/session-log.md` Turn 38. |
+| 1.9 | 2026-09-10 | §8 gained "Where a `[SENSITIVE]` claim may sit" — tagged content belongs in a named section, never in an Executive Summary or other section `ROUTING.md` Step 4 loads by default, with a carve-out for a domain that is sensitive throughout. Closes a gap in the interaction between §8, `authoring-guidelines.md` §6 and Step 4 Level 3 that none of the three stated on its own: nothing said a tagged claim may not sit in the one section loaded on nearly every query. Relayed from a fork whose security domain does exactly that. See `projects/system/session-log.md` Turn 42. |

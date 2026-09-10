@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.2 | 2026-09-10 | Production
+Version 1.3 | 2026-09-10 | Production
 
 ---
 
@@ -77,6 +77,7 @@ Source: `MarkdownConventions.md`.
 | Fenced code blocks with language hints | §6 | Judgement | Whether a hint helps depends on the content |
 | Internal links are relative, spaces encoded | §7 | Checked | Partially — links from domain files into sources and the reference index are resolved; other internal links are not |
 | Validity and confidence signals used correctly | §8 | Judgement | Whether a claim is verified cannot be determined from the text |
+| `[SENSITIVE]` content stays out of Executive Summaries and other always-loaded sections | §8 | Judgement | Not a gap. A scan for the tag in an Executive Summary would not have caught the instance that prompted the rule: that domain classified sensitivity per section in a local legend, so the copy reaching its Executive Summary carried no tag at all. Catching it needs a reader who knows what the content is |
 | Writing style rules | §9 | Judgement | Editorial |
 
 ---
@@ -163,3 +164,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 | 1.0 | 2026-09-10 | Initial creation. Maps every convention in `MarkdownConventions.md`, `knowledge/domains/authoring-guidelines.md`, `turn-protocol.md` and `operating-principles.md` to Checked, Judgement or Gap, lists checks with no corresponding stated rule, and ranks the open gaps. Built by enumerating the convention documents first and reading `scripts/validate.ps1` against that list, which is the ordering that surfaces gaps rather than confirming coverage. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`, where eight documented conventions had no enforcement and had silently decayed. See `projects/system/session-log.md` Turn 38. |
 | 1.1 | 2026-09-10 | §5 gained the non-ASCII check on `scripts/` and `.githooks/` — the first check registered here whose own failure mode is disabling every other check in this file. See `Architecture.md` §6 (Script portability) and `projects/system/session-log.md` Turn 39. |
 | 1.2 | 2026-09-10 | §5 gained the two date checks that compare repo content against today rather than against other repo dates — future-dated header and Version History rows, and passed deadlines in open items. §6 gained the deliberately deferred aged-`[TIME-SENSITIVE]` check as gap 8, with the reason it cannot be calibrated here. See `projects/system/session-log.md` Turn 41. |
+| 1.3 | 2026-09-10 | §2 gained `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content, recorded as Judgement rather than Gap. The distinction is load-bearing here: a check is not merely unwritten, it would have missed the founding instance, because that fork classified sensitivity per section rather than per claim and the offending copy was untagged. See `projects/system/session-log.md` Turn 42. |

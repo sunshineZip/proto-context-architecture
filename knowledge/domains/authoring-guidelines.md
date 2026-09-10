@@ -1,6 +1,6 @@
 # Domain Knowledge Authoring Guidelines
 
-Version 1.13 | 2026-09-10 | Production
+Version 1.14 | 2026-09-10 | Production
 
 ---
 
@@ -110,6 +110,8 @@ The Executive Summary gives an LLM the critical facts it needs before reading an
 - The single most important fact or constraint
 - Any critical gotchas or non-obvious behaviours
 
+Because `ROUTING.md` Step 4 Level 3 loads this section on nearly every query to the domain, a `[SENSITIVE]` claim must not appear here — name the mechanism and point at the section holding it instead. See `MarkdownConventions.md` §8, which states the rule and its one carve-out.
+
 ---
 
 ## 4. Content Rules per Section Type
@@ -203,6 +205,8 @@ Use the signals defined in `MarkdownConventions.md` §8 to qualify claims:
 | `[SENSITIVE]` | Handle with care if this document is ever shared, quoted, or copied elsewhere |
 
 Apply signals at the claim level, not the section level. A section can contain both verified and unverified claims. `[TIME-SENSITIVE]` and `[SENSITIVE]` describe a different axis than the other four and can stack with them — a claim can be both `[VERIFIED: source]` and `[TIME-SENSITIVE: source type]` at once.
+
+Claim-level tagging matters most because content gets copied. A claim tagged in place carries its handling rules with it into an Executive Summary, an extract, or another fork; a classification held at section level does not travel, and the copy arrives looking untagged. This is an observed failure, not a hypothetical one — see `MarkdownConventions.md` §8.
 
 ---
 
@@ -413,3 +417,4 @@ Before submitting any knowledge document for human approval:
 | 1.11 | 2026-09-02 | §9.1 gained "Proactive classification, every time" — the mechanics for re-running document classification on every qualifying upload for the life of a session, not just the first, plus a worked negative example (a document arriving mid-conversation, attached to an unrelated question, never classified or disclosed). Notes explicitly that no mechanical backstop is feasible here, unlike the structural-changes hook. Relayed via `[FLAG FOR UPSTREAM]` from `familien-boe`. See new matching Standing Rule in `ROUTING.md` (1.19 → 1.20) and `projects/system/session-log.md` Turn 33. |
 | 1.12 | 2026-09-09 | §3 now points at the new `knowledge/domains/_template/` as the starting point for a new domain document, rather than leaving the required structure to be reproduced by hand or inherited by copying a sibling. See `projects/system/session-log.md` Turn 36. |
 | 1.13 | 2026-09-10 | Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`, which maps every rule in this document and in `MarkdownConventions.md` to whether anything actually checks it. Several rules here are labelled Judgement there — genuinely unmechanisable, which is a decision rather than an omission — and several are labelled Gap. See `projects/system/session-log.md` Turn 38. |
+| 1.14 | 2026-09-10 | §3's Executive Summary guidance and §6's claim-level signal rule now both point at `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content. §6 also states why claim-level tagging matters: a classification held at section level does not survive being copied, so the copy arrives untagged — which is exactly how a fork's severe-tier item reached the section Step 4 loads by default. See `projects/system/session-log.md` Turn 42. |

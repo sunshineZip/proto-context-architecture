@@ -1336,5 +1336,51 @@ Completed: Entry 5. Shipped the passed-date check, calibrated 52 → 8 against a
 Next: Entry 6 — severe-tier content in always-loaded sections, folding in `repo-mixing.md` §7's dangling references. Security-adjacent, and an evaluate-and-choose entry.
 Waiting for: Nothing — the human directed continuing through the queue, stopping at judgement calls.
 
+---
+
+## [Copilot] — Turn 42 | 2026-09-10
+
+Entry 6: nothing stops severe-tier content appearing in the sections the loading hierarchy always loads. An evaluate-and-choose entry, and the shipped bug folded into it turned out to matter more than the entry itself.
+
+**The entry's central premise does not exist here.** It rests throughout on a two-tier sensitivity signal. `MarkdownConventions.md` §8 in this template defines **one** tier, `[SENSITIVE]` — no severe tier, no emoji forms, no Notation Legend, no `extraction-procedure.md`. Its proposed fix, "a short rule in §8: severe-tier content belongs in a named section," is unwritable as stated. Fifth instance of this pattern in this queue and the largest.
+
+**The bug underneath is larger than the entry describes, and it ships.** `knowledge/flow/repo-mixing.md` was generalized from that fork's mechanisms in Turn 31 but kept citing them by name: **eleven dangling references across six sections** — six to `extraction-procedure.md`, five to the severe tier and its emoji — in §1, §6, §7, §9, §12 and §13. Turn 34 found the §7 subset and deferred it here. §7 is titled *The Sensitivity Gate*, and for any fork other than the one it was drawn from it gated on a tier that does not exist and delegated its handling rules to a file that does not exist. What actually survived was its final fallback paragraph, the weakest of its three rules, reading like a footnote.
+
+**A check would not have caught the entry's own instance, and this is the finding that decided the design.** Inspecting the guest's security domain — structure only, no content pulled across, per §7's own discipline — its Executive Summary contains **no sensitivity tag at all**; the tags sit elsewhere in the file. The classification lives in a per-domain notation legend that scopes the tier to *named sections*, so the copy that reached the Executive Summary was untagged by construction. Scanning all 19 guest domains for a tag inside an Executive Summary returns zero hits. Any check keying on the tag would report that fork clean.
+
+That also identifies the deeper cause: scoping sensitivity to sections contradicts `authoring-guidelines.md` §6's existing "apply signals at the claim level, not the section level" — a rule which, until this turn, never said *why*. It now does: a claim tagged in place carries its handling rules with it when copied; a section-level classification does not travel, and the copy arrives looking clean.
+
+**Chose to write the rule against the one tier that exists rather than port the tier.**
+
+Porting `[SENSITIVE: severe]` upstream would have made the entry's fix writable verbatim and retroactively validated several other entries' citations. Rejected, for three reasons. It is the blind-port failure this queue exists to avoid, in its most tempting form — real machinery every fork inherits, added on one fork's evidence, because an entry assumed it. It would not have been sufficient: five of the eleven dangling references are the tier, the other six are a whole procedure document. And it would have been *less* protective for most forks — a one-tier rule covers everything anyone has tagged, where a severe-tier rule covers a tier most forks will never adopt. Nothing about the interaction gap requires two tiers; the gap is "a tagged claim can sit in an always-loaded section," which is equally true with one.
+
+Also rejected: writing `extraction-procedure.md` upstream, which would mean inventing an entire procedure document from a single fork's usage.
+
+**On the carve-out the entry asks about — yes, and it lands in `description.md`.** A domain with no ordinary part to summarise would otherwise be forced into an Executive Summary that says nothing useful, defeating the routing purpose Level 3 exists for. Such a domain declares its scope once and is exempt, its whole file treated as tagged. The declaration goes in `description.md` rather than per claim for a specific reason: `description.md` loads at Step 4 Level 1, ahead of the Executive Summary, so a session sees the declaration before anything it governs.
+
+**Registered as Judgement, not Gap.** That distinction is load-bearing here. A Gap means "should be checked and is not." This is "a check would have missed the founding instance," which is a different statement and worth recording as such.
+
+**Files changed:**
+- `MarkdownConventions.md` (1.8 → 1.9) — §8 gains "Where a `[SENSITIVE]` claim may sit": the placement rule, the extract/cross-fork rationale, the carve-out, and why it cannot be mechanised.
+- `knowledge/flow/repo-mixing.md` (1.2 → 1.3) — all eleven dangling references removed. §7 rewritten to state its rules inline against `[SENSITIVE]`, to warn explicitly against treating an Executive Summary as pre-cleared, and to defer to a guest fork's own stronger tier where one exists rather than assuming this template defines it.
+- `knowledge/domains/authoring-guidelines.md` (1.13 → 1.14) — §3 and §6 point at the new rule; §6 now states why claim-level tagging matters.
+- `knowledge/flow/convention-enforcement.md` (1.2 → 1.3) — §2 gains the rule as Judgement, with the reason.
+
+**Verification.** `validate.ps1` passes clean. Grepped the whole repo afterwards for `extraction-procedure`, `SENSITIVE: severe` and both emoji: the only remaining occurrences are inside Version History rows and prior session-log turns, which are append-only records of what was once true and correctly left alone. No live prose reference to a non-existent feature remains anywhere in the template.
+
+**Guest handling.** `familien-boe` read as declared guest, read-only. Only structural facts crossed into this log — heading positions and where tags sit — never content. Guest confirmed clean afterwards.
+
+### Session close
+
+Knowledge candidates: None — conventions.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Entry 6. Closed the interaction gap between §8, `authoring-guidelines.md` §6 and Step 4 Level 3 using the single sensitivity tier this template actually has, and repaired the eleven dangling references that had left `repo-mixing.md`'s sensitivity gate resolving to nothing for every fork but the one it was written from.
+Next: Entry 7 — sessions asking permission to land on the default branch every time, in harness-assigned-branch environments. Also evaluate-and-choose.
+Waiting for: Nothing.
+
+
 
 
