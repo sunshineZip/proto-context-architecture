@@ -996,7 +996,15 @@ foreach ($mdFile in $allMdFiles) {
 #     there is the most expensive place for a heavy domain to hurt an
 #     ordinary session. Thresholds are deliberately generous defaults;
 #     tune them per instance if needed. See projects/system/
-#     session-log.md Turn 22. ---
+#     session-log.md Turn 22.
+#
+#     The warning text carries section 8's actual test rather than only citing it.
+#     A comment here is invisible to whoever reads the output, and the earlier
+#     wording -- a number, a fixed-sounding "(over 600)", a bare pointer to
+#     section 8 -- read as a threshold rule. A real session working from that
+#     output proposed splitting two domains purely because they were flagged;
+#     reading section 8 and asking the human established that both splits were
+#     wrong, because those sections are genuinely interdependent. ---
 $domainSizeLineWarnThreshold = 600
 $domainIndexEntryWarnThreshold = 15
 $executiveSummaryLineWarnThreshold = 20
@@ -1010,14 +1018,14 @@ foreach ($domainDir in $domainDirs) {
     $lineCount = @($rawText -split "`r?`n").Count
 
     if ($lineCount -gt $domainSizeLineWarnThreshold) {
-        Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' is $lineCount lines (over $domainSizeLineWarnThreshold) -- consider whether it should split (authoring-guidelines.md section 8)"
+        Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' is $lineCount lines. That is a proxy, not a limit -- authoring-guidelines.md section 8 sets no size threshold. Its actual test: does a task ever need the whole document, or consistently only one part of it? A large but genuinely interdependent domain is correct as it stands."
     }
 
     $indexMatch = [regex]::Match($scanText, '(?ms)^## Index\s*\r?\n(.*?)(?:\r?\n## |\r?\n---)')
     if ($indexMatch.Success) {
         $entryCount = @([regex]::Matches($indexMatch.Groups[1].Value, '(?m)^\d+\.\s')).Count
         if ($entryCount -gt $domainIndexEntryWarnThreshold) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' has $entryCount Index entries (over $domainIndexEntryWarnThreshold) -- consider whether it should split (authoring-guidelines.md section 8)"
+            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' has $entryCount Index entries. That is a proxy, not a limit -- authoring-guidelines.md section 8 asks whether two sections are ever needed by the same task, not how many sections exist."
         }
     }
 
@@ -1025,7 +1033,7 @@ foreach ($domainDir in $domainDirs) {
     if ($execMatch.Success) {
         $execLineCount = @($execMatch.Groups[1].Value -split "`r?`n" | Where-Object { $_.Trim() -ne "" }).Count
         if ($execLineCount -gt $executiveSummaryLineWarnThreshold) {
-            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' Executive Summary is $execLineCount non-blank lines (over $executiveSummaryLineWarnThreshold) -- this is what Step 4 Level 3 loads on nearly every query; move detail into a named section instead (authoring-guidelines.md section 8)"
+            Add-ValidationWarning "Domain '$($domainDir.Name)/knowledge.md' Executive Summary is $execLineCount non-blank lines -- Step 4 Level 3 loads this on nearly every query to the domain, so detail here is paid for constantly. Move anything most sessions do not need into a named section (authoring-guidelines.md section 8). The count is a proxy; judge by content, not length."
         }
     }
 }

@@ -1457,6 +1457,42 @@ Completed: Verified the document-capture entry closed against the current text o
 Next: `validate.ps1`'s size and entry-count warnings read as hard thresholds, contradicting `authoring-guidelines.md` §8's own text — 20 of the fork's remaining 32 warnings.
 Waiting for: Nothing.
 
+---
+
+## [Copilot] — Turn 45 | 2026-09-10
+
+`scripts/validate.ps1`'s domain-heaviness warnings read as hard thresholds while the section they cite says the opposite.
+
+**Confirmed the contradiction at source before touching it.** `authoring-guidelines.md` §8's split item says, in full: "There's no fixed size threshold — judge by whether a task ever needs the whole document versus consistently needing only one part of it." The warning it cited said `is 639 lines (over 600) -- consider whether it should split (authoring-guidelines.md section 8)`. A number, a fixed-sounding "over 600", and a bare pointer to a section whose actual content contradicts the framing.
+
+**The sharpest part is that the caveat already existed and was in the wrong place.** The comment block directly above these checks has always said "These are lagging-indicator tripwires, not hard limits or errors." That comment is visible only to someone reading the script. Everyone the warning is aimed at reads the *output*. A correct rationale sitting where the audience never looks is functionally the same as no rationale — and the fork's own session, working from output alone, proposed splitting two domains purely because they were flagged. Reading §8 and asking the human established that both splits were wrong: those sections are genuinely interdependent, and splitting would have added cross-file friction for nothing.
+
+**All three warnings now carry the test rather than citing it.** The size and Index-entry warnings state that the number is a proxy and give §8's actual question. The Executive Summary warning is different in kind and was rewritten differently: its cost is concrete rather than heuristic — Step 4 Level 3 loads that section on nearly every query, so detail there is paid for constantly — but its line count is still a proxy, so it now says to judge by content rather than length.
+
+**No logic change.** The three thresholds still gate the same conditions; only the strings changed. Verified by measurement rather than by reading the diff: the fork produced exactly **20** heaviness warnings before and after, matching the count the entry itself reported.
+
+**A problem the entry does not raise, and I did not fix.** These warnings cannot be suppressed. The fork's human correctly decided both flagged domains should stay whole — and that decision is recorded nowhere the check can see, so the warnings fire on every run forever and the next session is invited to make the same wrong proposal. Rewording lowers the odds of the first misread; it does nothing about recurrence.
+
+The obvious fix is a marker in `description.md` recording that a split was assessed and declined. I did not build it, for two reasons. The entry explicitly scoped this as "a small wording change, no logic change," and overriding that on my own initiative is the failure mode this queue keeps documenting. More substantively: `description.md`'s Working Constraints would then carry three separate conventions invented in three separate turns — this one, Entry 6's sensitive-throughout declaration, and `repo-mixing.md` §6's mixing posture. Three undocumented markers in one field is its own design problem, and deciding how that field works deserves a deliberate answer rather than a third accretion. Recorded in `convention-enforcement.md` and raised to the human as a question.
+
+**Files changed:**
+- `scripts/validate.ps1` — three warning strings; the comment block now records why the text carries the rationale rather than the comment alone.
+- `knowledge/flow/convention-enforcement.md` (1.3 → 1.4) — §3's heaviness row states both the fix and the unsuppressible-recurrence problem.
+
+**Verification.** `validate.ps1` clean on this template, which ships no domain large enough to trip any of the three. Measured against the fork instead, where all 20 fire: count unchanged, text correct, and the reworded strings read as intended against real domains rather than a constructed fixture. Guest read-only throughout; nothing written to it.
+
+### Session close
+
+Knowledge candidates: None — tooling wording.
+Open flags: None. One design question raised to the human, above.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Moved §8's real split test out of a source comment nobody reads and into the warning text itself, where the audience actually is, with no change to what fires.
+Next: `turn-protocol.md` has no recovery convention for a turn-numbering slip. The fork has a live instance of it.
+Waiting for: Nothing. Two questions outstanding and not blocking — whether to record a `.branch-authorization` here, and how `description.md`'s Working Constraints field should handle its now-three conventions.
+
+
 
 
 

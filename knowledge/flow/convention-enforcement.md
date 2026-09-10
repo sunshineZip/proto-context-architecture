@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.3 | 2026-09-10 | Production
+Version 1.4 | 2026-09-10 | Production
 
 ---
 
@@ -100,7 +100,7 @@ Source: `knowledge/domains/authoring-guidelines.md`.
 | Signals applied per claim, not per section | §6 | Judgement | Same reason as §8 above |
 | Version History row names the section changed | §7 | Judgement | Editorial |
 | Maintenance Pass items | §8 | Judgement | A procedure, not a rule a file can violate |
-| Domain size and Executive Summary heaviness | §8 | Checked | Three warning thresholds, deliberately lagging indicators rather than limits |
+| Domain size and Executive Summary heaviness | §8 | Checked | Three warning thresholds, deliberately lagging indicators rather than limits. Each warning states §8's actual test in its own text, because citing §8 while printing a fixed-sounding number was read as a threshold rule and nearly caused two wrong splits. Note the warnings cannot be suppressed: a domain judged cohesive keeps being flagged, and that judgement is recorded nowhere |
 | Source manifest exists and rows resolve both ways | §9.1 | Checked | Errors for missing files, warnings for orphans |
 | Every stored source is cited from the owning document | §9.1 | Gap | A stored source cited nowhere is invisible; a fork had five |
 | Document classification runs on every qualifying upload | §9.1 | Judgement | Documented explicitly as having no mechanical backstop — a skipped classification leaves no artifact for a hook to inspect |
@@ -165,3 +165,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 | 1.1 | 2026-09-10 | §5 gained the non-ASCII check on `scripts/` and `.githooks/` — the first check registered here whose own failure mode is disabling every other check in this file. See `Architecture.md` §6 (Script portability) and `projects/system/session-log.md` Turn 39. |
 | 1.2 | 2026-09-10 | §5 gained the two date checks that compare repo content against today rather than against other repo dates — future-dated header and Version History rows, and passed deadlines in open items. §6 gained the deliberately deferred aged-`[TIME-SENSITIVE]` check as gap 8, with the reason it cannot be calibrated here. See `projects/system/session-log.md` Turn 41. |
 | 1.3 | 2026-09-10 | §2 gained `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content, recorded as Judgement rather than Gap. The distinction is load-bearing here: a check is not merely unwritten, it would have missed the founding instance, because that fork classified sensitivity per section rather than per claim and the offending copy was untagged. See `projects/system/session-log.md` Turn 42. |
+| 1.4 | 2026-09-10 | §3's domain-heaviness row records that the three warnings now carry §8's actual split test in their own text, and that a domain judged cohesive has nowhere to record that judgement, so the warning recurs indefinitely. See `projects/system/session-log.md` Turn 45. |
