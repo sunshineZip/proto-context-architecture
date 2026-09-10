@@ -1697,6 +1697,42 @@ Completed: Entry 9. Added the whole-fork audit procedure, fixed the shipped misd
 Next: Entry 8 — the last of the thirteen, and the one needing a human decision on posture.
 Waiting for: Two `ROUTING.md` additions, batched for one approval.
 
+---
+
+## [Copilot] — Turn 51 | 2026-09-10
+
+Both pending `ROUTING.md` additions approved and made. They were held back across three turns rather than folded into the work that motivated them, because `ROUTING.md` is not updated silently — batching them cost one round trip and kept the constraint intact.
+
+**Quick Task Guide gained an entry for `knowledge/flow/health-check.md`.** It names the three maintenance scopes explicitly — one domain, this whole repo, changes arriving from the template — because the reason the middle one went missing for so long is that nobody had ever seen the three listed together. It also carries the two instructions most likely to be skipped: run the validator rather than reading it, and do not read a clean pass as proof of conformance. And it says plainly that nothing triggers the procedure automatically, so the entry does not imply a schedule the repo does not have.
+
+**The append-only Hard Constraint now points at `turn-protocol.md` §1.** One sentence: a defect sealed into a committed turn has no compliant repair, and that is not a gap to reason around. Until now a session hitting a miscount had to derive that from two separate rules, at exactly the moment it was being asked to just fix it — which is when a session invents its own answer instead.
+
+**Verified the change is only what was approved:** the diff is nine insertions and two deletions in one file, and `validate.ps1` passes clean.
+
+**Noted for Entry 8, since the count is now part of that decision.** Reading the statements side by side, as that entry instructs, there are **five** places where this template says its own maintenance is unscheduled, not the four the entry lists:
+
+| Where | Wording |
+|---|---|
+| `authoring-guidelines.md` §8 | "Run it periodically — on request, or when a domain's Index and content have visibly diverged" |
+| `upstream-sync.md` §6 | "Opportunistically, not on a schedule — the same discipline as the domain-level Maintenance Pass" |
+| `ROUTING.md` Quick Task Guide | "Opportunistic, not scheduled — run it when you have spare capacity" |
+| `MarkdownConventions.md` §2 | "20 rows grants permission; it does not instruct" |
+| `knowledge/flow/health-check.md` §1 | "Nothing schedules this. It runs when a human asks" |
+
+The last two were both written during this session, one of them deliberately after reading Entry 8. That is worth recording plainly: the posture is not merely inherited and unexamined — it keeps being re-chosen, including by a session that had already read the argument against it. Whether that is conviction or momentum is exactly what Entry 8 asks the human to decide.
+
+### Session close
+
+Knowledge candidates: None.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Landed the two approved `ROUTING.md` additions, and gathered the side-by-side evidence Entry 8 turns on — finding five statements of the unscheduled posture rather than four, two of them written this session.
+Next: Entry 8, the last entry, pending the human's decision between three options.
+Waiting for: That decision.
+
+
 
 
 

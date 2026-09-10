@@ -1,6 +1,6 @@
 # Routing
 
-Version 1.25 | 2026-09-10 | Production
+Version 1.26 | 2026-09-10 | Production
 
 ---
 
@@ -123,7 +123,7 @@ Do not break these regardless of what the human asks.
 - **Do not promote a reference work to cornerstone status (storing the actual file in `library/`) without explicit human confirmation.** Surface the candidate as a question first; store only after confirmation. See `knowledge/domains/authoring-guidelines.md` §9.3.
 - **Do not act on files listed as "(planned)" in the Folder Map.** They do not exist. Do not create them without explicit instruction.
 - **Do not invent content from files you have not read.** If a file is relevant and unreadable, say so.
-- **Do not edit prior turns in `session-log.md`.** Append only.
+- **Do not edit prior turns in `session-log.md`.** Append only. If you find a defect in a turn that is already committed — a miscounted number, a missing STATUS line — there is no compliant repair, and that is not a gap to reason your way around: see `knowledge/flow/turn-protocol.md` §1 for what to do instead.
 - **Do not start substantive work in `temp/`.** The `temp/` folder is for transient handoff artifacts only — short-lived files passed between tools or sessions, gitignored, never committed. Analysis, discoveries, deliverables, and working notes belong in `projects/[name]/context/` and `projects/[name]/outputs/`. Work started in `temp/` bypasses routing and leaves no project record. This constraint is about `temp/` specifically — it does not apply to `incoming/`, a separate, git-tracked folder that exists precisely for durably sharing a file with a session. See `Architecture.md` §2.
 - **Do not update `ROUTING.md` silently.** After any structural change, propose the update and wait for approval.
 - **Do not chain multiple work items without a checkpoint.** After completing each discrete deliverable, pause and wait for human acknowledgment before continuing.
@@ -197,6 +197,12 @@ Apply these in every session regardless of project type or how you entered the s
 → Both are doing their job — this repo defaults to `main`, and neither check depends on the other or on the pre-push hook being active
 → Disclose the branch's origin per the constraint above, then decide: land the work on `main` (`git checkout main`, merge/fast-forward, push), or — only if the human explicitly asked for a branch or there's a specific stated reason — pass `-AllowBranch` to `commit-push.ps1` deliberately
 → Don't just push past the banner and keep working on the branch without either landing it or flagging it — see "Never leave a branch silently unmerged" above
+
+**I want to audit this whole repo for drift, not just one domain**
+→ `knowledge/flow/health-check.md` — a one-time, read-only structural audit of this fork's own accumulated content, producing a queue a later session works one item at a time
+→ This is the middle of three scopes: one domain is `knowledge/domains/authoring-guidelines.md` §8, this whole repo is the health check, changes arriving from the template are `knowledge/flow/upstream-sync.md`
+→ Run `scripts/validate.ps1` first and record the baseline. Run it — do not read it and infer, and do not read a clean pass as proof of conformance; `knowledge/flow/convention-enforcement.md` maps what nothing checks
+→ Nothing triggers this automatically. It runs when a human asks
 
 **I want to check for upstream template updates** (forks only — not applicable to this repo itself)
 → See `knowledge/flow/upstream-sync.md` for the full check/apply procedure. Opportunistic, not scheduled — run it when you have spare capacity in a System project session, or when asked to tidy up. The sync marker lives in `projects/system/TODO.md`'s System Maintenance Pass section.
@@ -282,3 +288,4 @@ Follow this sequence. Do not create projects before domains exist — a project 
 | 1.23 | 2026-09-10 | Added the `## Index` this file has needed since it passed four sections — it has six. Found by a new `scripts/validate.ps1` check, added the same day, for a rule `MarkdownConventions.md` §3 has always stated and nothing has ever enforced. Matters more here than in most files: the Hard Constraints blockquote instructs a session to re-read a specific constraint mid-session, which until now meant scrolling a 250-line document with no map. See `projects/system/session-log.md` Turn 38. |
 | 1.24 | 2026-09-10 | Hard Constraints gained a standing-authorization rule for landing work on `main`, pointing at a fork-owned `.branch-authorization` file. Every existing rule on this subject stated a convention; none stated consent, so a session also holding a harness instruction demanding "explicit permission" had nothing to satisfy it and asked the human in every new session. Absence of the file is deliberately not read as consent. See `Architecture.md` §6, `scripts/sync-check.ps1`, and `projects/system/session-log.md` Turn 43. |
 | 1.25 | 2026-09-10 | Version History rows 1.0 through 1.5 relocated verbatim to `ROUTING-history.md`, the first use of the archival exception added to `MarkdownConventions.md` §2 the same day. Nothing was deleted: `scripts/validate.ps1` verifies that the archive and this table together still reconstruct the committed history. Done here first because this file is loaded in every session at Step 1, so its changelog was the most expensive in the repo. See `projects/system/session-log.md` Turn 48. |
+| 1.26 | 2026-09-10 | Quick Task Guide gained an entry for the new `knowledge/flow/health-check.md`, naming it as the middle of three maintenance scopes. The append-only Hard Constraint now points at `turn-protocol.md` §1 for what to do about a defect sealed into a committed turn — previously a session had to derive "no compliant repair exists" from two separate rules while being asked to just fix it. See `projects/system/session-log.md` Turn 51. |
