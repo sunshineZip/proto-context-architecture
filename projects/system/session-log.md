@@ -1381,6 +1381,52 @@ Completed: Entry 6. Closed the interaction gap between §8, `authoring-guideline
 Next: Entry 7 — sessions asking permission to land on the default branch every time, in harness-assigned-branch environments. Also evaluate-and-choose.
 Waiting for: Nothing.
 
+---
+
+## [Copilot] — Turn 43 | 2026-09-10
+
+Entry 7: sessions ask permission to land on the default branch in every new session, in environments where a harness assigns a working branch.
+
+**The finding is precise and correct, and this is the rare entry whose premise is entirely real here.** Every rule this template has on the subject — the branch Hard Constraint, the `sync-check.ps1` banner, the Standing Rule — states a *convention*: work on `main`, land finished work there. A harness meanwhile injects a *gate*: never push to a different branch without explicit permission. A session holding both goes looking for consent, finds a convention, and asks. It is behaving correctly; the repo had simply never written a sentence that reads as permission.
+
+**Verified the entry's cost-saving diagnostic rather than taking it.** Read `scripts/pre-push-check.ps1`: it collects push refs from stdin and blocks only those where the branch is not `$defaultBranch`. So `--no-verify` is never needed to push to `main`, and the whole friction chain the fork observed — blocked push, denied bypass, question to the human — only arises when a session pushes its *assigned* branch instead of landing first. Making "land on main" unambiguous removes the chain rather than its last link.
+
+**The design decision the entry does not address, and the one that mattered most.** Entry 7 says to ship the authorization as "a clearly-marked placeholder a fork fills in during setup." Taken literally that is unsafe: a session reading the *shape* of an authorization in an unfilled template would reasonably act on it, converting "ask the human" into "assume consent" for every fork that skipped setup — worse than the problem being solved. So absence is explicitly not consent. Where no authorization exists the banner says so in as many words and tells the session to ask, which is exactly today's behaviour, now stated rather than merely resulting.
+
+**The authorization lives in a fork-owned file, not in the script.** Two reasons, both structural. The template cannot consent on a fork owner's behalf — only the person who owns a given repo can give that. And a fork editing `scripts/sync-check.ps1` to insert its owner's name would diverge from upstream permanently and conflict on every sync, for a one-line change; a separate file never conflicts. `.branch-authorization` is created on first use, reusing the precedent Entry 3 established for `upstream-feedback.md` and `repo-mixing.md` §9's mixing log rather than inventing a pattern.
+
+**Four layers shipped:**
+1. `scripts/sync-check.ps1` reads `.branch-authorization` and prints either the authorization — stating that it satisfies a harness requirement for explicit permission, that the session should not ask again, and the three things it does not cover — or an explicit statement that none is recorded. Highest leverage because this text reaches a session's context at session start, before `ROUTING.md` is read and before any harness instruction it would be weighed against.
+2. `.claude/settings.json` gained a narrow `permissions.allow` block covering exactly the land-on-`main` sequence. Deliberately not a blanket `Bash(git push:*)`, which would pre-approve force-pushes and arbitrary branches and defeat both the pre-push hook and the force-push Hard Constraint.
+3. `ROUTING.md` Hard Constraints gained the rule as consent rather than as a restatement of the convention, placed immediately after the branch constraint it completes.
+4. `.github/copilot-instructions.md` mirrors it briefly, so the VS Code entry point reaches the same conclusion without reading `ROUTING.md`.
+
+**Agreed with the entry's own rejection** of having the session-start hook check out `main` automatically. It fights the harness's branch tracking, and a hook that silently moves a session off the branch it was placed on is worse than a prompt. Developing on the assigned branch is fine; only the landing needed pre-authorization.
+
+**Folded in the hook-ordering bug** — the handover's highest-value unfixed item, and now a self-conformance failure rather than only a bug. Turn 40 wrote into `Architecture.md` §6 step 10 that hooks must be activated only once PowerShell is present; `.claude/hooks/session-start.sh` did the opposite, activating `core.hooksPath` first and installing PowerShell after, with no verification. The install is now first and non-fatal under `set -e`, activation is conditional on an interpreter actually being available, and the else branch says plainly that hooks were left inactive rather than leaving a session to discover it through a 127 on its first commit.
+
+**Two honest limitations, both stated rather than papered over.**
+- Layer 2 depends on the permission classifier honouring project-level settings, which cannot be verified from inside a repo. It is friction reduction, not a guarantee.
+- **This machine has no bash and no WSL, so `session-start.sh` could not be syntax-checked.** Reviewed by hand instead — and that review caught a real defect: my own edit had left the original sync-check block in place, duplicating it. `if`/`fi` now balance at 5/5 with one sync invocation and one `hooksPath` set. Worth recording that the one file this session could not mechanically verify is also the one where a mistake got through to review.
+
+**Not done, deliberately: this repo's own `.branch-authorization` was not created.** Writing a consent statement in someone's name is not something to infer from "go ahead with entry 7". Asking.
+
+**Files changed:** `scripts/sync-check.ps1`, `.claude/settings.json`, `.claude/hooks/session-start.sh`, `ROUTING.md` (1.23 → 1.24), `Architecture.md` (1.12 → 1.13, §6 gains step 11 and renumbers the old 11 to 12), `.github/copilot-instructions.md`.
+
+**Verification.** `validate.ps1` clean. `.claude/settings.json` parses as valid JSON. Both banner states rendered and read back — from a temporary copy of the script with a different default-branch name, so no branch was created to test a branch warning — and the throwaway authorization fixture was deleted immediately, with absence re-confirmed afterwards.
+
+### Session close
+
+Knowledge candidates: None — workflow and configuration.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Entry 7. The repo can now state consent rather than only convention, without the template ever asserting consent on a fork owner's behalf and without an unfilled placeholder being mistakable for one. Also closed the session-start hook-ordering bug, which had become a contradiction of this repo's own newly-written rule.
+Next: Entry 8 — every self-check the template defines is opportunistic, so none of them ever run. The largest and most debatable of the queue.
+Waiting for: A decision on whether to record a `.branch-authorization` for this repo itself.
+
+
 
 
 
