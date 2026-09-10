@@ -770,6 +770,26 @@ function Get-VersionHistoryRows {
 $allMdFiles = Get-ChildItem -Path $repoRoot -Recurse -Filter "*.md" -File -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notmatch '[\\/]temp[\\/]' -and $_.FullName -notmatch '[\\/]\.git[\\/]' }
 
+# --- Version History archival. MarkdownConventions.md section 2 permits rows to be
+#     MOVED verbatim into a paired <basename>-history.md, never deleted. The
+#     append-only rule is unchanged by this: what must stay append-only is the
+#     archive and the live table read together, so nothing is lost, only
+#     redistributed. These two helpers let the check below verify that. ---
+function Get-PairedArchivePath {
+    param([string]$FullPath)
+    $archiveDir = Split-Path -Parent $FullPath
+    $archiveBase = [System.IO.Path]::GetFileNameWithoutExtension($FullPath)
+    return (Join-Path $archiveDir "$archiveBase-history.md")
+}
+
+function Get-CombinedHistoryRows {
+    param([string]$LiveText, [string]$ArchiveText)
+    $combined = @()
+    if ($ArchiveText) { $combined += @(Get-VersionHistoryRows -Text (Remove-CodeFences -Text $ArchiveText)) }
+    if ($LiveText) { $combined += @(Get-VersionHistoryRows -Text (Remove-CodeFences -Text $LiveText)) }
+    return $combined
+}
+
 # Which files MarkdownConventions.md section 2's "Required in every file" actually
 # means. Project-layer files are the deliberate exception and always have
 # been: session-log.md is append-only and versioned by turn number, TODO.md
@@ -845,7 +865,22 @@ foreach ($mdFile in $allMdFiles) {
             $oldScanText = Remove-CodeFences -Text $oldRawText
             $oldRows = @(Get-VersionHistoryRows -Text $oldScanText)
             if (-not (Test-LinesAppendOnly -OldLines $oldRows -NewLines $rows)) {
-                Add-ValidationError "'$relPath': Version History rows changed compared to the last commit -- never edit or remove an existing row, only append (MarkdownConventions.md section 2)"
+                # The live table shrank or changed. Before calling that an edit, check
+                # whether it is an archival split: rows relocated to a paired history
+                # file rather than removed. Accept only if archive+live together are
+                # still append-only against archive+live at HEAD -- which is exactly
+                # "nothing lost, only moved", and which a genuine deletion cannot pass.
+                $archivePath = Get-PairedArchivePath -FullPath $mdFile.FullName
+                $archiveNowText = if (Test-Path $archivePath) { Get-Content -Path $archivePath -Raw -Encoding UTF8 } else { $null }
+                $archiveOldText = Get-GitHeadContent -RelativePath (Get-RepoRelativePath -FullPath $archivePath)
+
+                $combinedOldRows = @(Get-CombinedHistoryRows -LiveText $oldRawText -ArchiveText $archiveOldText)
+                $combinedNowRows = @(Get-CombinedHistoryRows -LiveText $rawText -ArchiveText $archiveNowText)
+                $isVerifiedSplit = $archiveNowText -and (Test-LinesAppendOnly -OldLines $combinedOldRows -NewLines $combinedNowRows)
+
+                if (-not $isVerifiedSplit) {
+                    Add-ValidationError "'$relPath': Version History rows changed compared to the last commit -- never edit or remove an existing row, only append (MarkdownConventions.md section 2). To shorten a long table, move old rows verbatim into a paired history file instead; relocation is permitted, removal is not"
+                }
             }
         }
     }

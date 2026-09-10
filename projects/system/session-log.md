@@ -1537,6 +1537,52 @@ Completed: Turned an unfixable permanent error into an accurate warning, kept th
 Next: Version History tables in frequently-loaded files need an archival mechanism — the fork-only mechanism several earlier entries wrongly assumed already existed here.
 Waiting for: Nothing blocking. Three questions now open for the human: the `.branch-authorization`, the `description.md` Working Constraints field, and the one-sentence `ROUTING.md` cross-reference above.
 
+---
+
+## [Copilot] — Turn 47 | 2026-09-10
+
+Version History archival: a documented exception letting rows be moved out of a live table rather than growing it forever. This is the mechanism Entries 2 and 3 both cited as already existing upstream when it did not — porting it makes those citations true rather than merely forgiven.
+
+**Checked whether this template actually has the problem before porting a fix for it.** It does, mildly, and in exactly one place that matters:
+
+| File | Version History rows | Share of file |
+|---|---|---|
+| `ROUTING.md` | **25** | 10% |
+| `Architecture.md` | 14 | 7% |
+
+`ROUTING.md` is already past the 20-row threshold the fork proposed, and it is the one file `ROUTING.md` Step 1 makes mandatory reading in every session — so its changelog is paid for on every load. The fork's own numbers were worse (14% and 46%), but the shape is the same and it is not hypothetical here.
+
+**Ported as relocation, never deletion.** Rows past the most recent 20 may move verbatim into a paired `<basename>-history.md` beside the file, leaving a pointer line. The archive carries a `## Version History` section and deliberately no `Version X.Y | Date | Status` header, since a pure archive has no version of its own and a header there would trip the header-versus-latest-row check for nothing.
+
+**The append-only rule is not weakened, and the check is what makes that true rather than the wording.** What must stay append-only is the archive and the live table *read together*. `validate.ps1` now, on finding a live table that shrank, looks for the paired file and accepts the change only if archive-plus-live still reconstructs the combined history at `HEAD`. Nothing lost, only redistributed.
+
+**Two properties worth stating, because both are easy to get backwards:**
+- **20 rows grants permission; it does not instruct.** No warning fires at 20, and none should — a file at 30 rows violates nothing. Adding a nag here would have recreated the unsuppressible-warning problem recorded one turn ago in Turn 45.
+- **The live table then starts mid-sequence.** That is correct, and already tolerated: Turn 38 wrote the start-at-1.0 check to warn only on a first row *below* 1.0, explicitly anticipating archival. Half the accommodation for this mechanism was already here before the mechanism was.
+
+**Verified on real content with three controls, not a fixture.** Performed an actual split on `Architecture.md` — four oldest rows relocated to a real archive file: validator clean, 0 errors 0 warnings. Then tampered with one word inside an archived row: correctly errored. Then deleted the archive entirely, so the rows were genuinely gone rather than moved: correctly errored. Both reverted; clean result returned; no stray archive file left behind.
+
+That middle control is the one that matters. A check that merely noticed "a paired file exists" would pass a repo that had archived rows and then quietly edited them, which is deletion with extra steps.
+
+**Files changed:**
+- `scripts/validate.ps1` — `Get-PairedArchivePath` and `Get-CombinedHistoryRows`; the append-only check now recognises a verified split, and its error message names relocation as the sanctioned alternative to deleting rows.
+- `MarkdownConventions.md` (1.9 → 1.10) — §2's new "Version History archival" subsection.
+- `knowledge/flow/convention-enforcement.md` (1.5 → 1.6) — §2's append-only row records what the check actually verifies.
+
+**Deliberately not done: `ROUTING.md` was not split**, although it is the file over threshold. Porting a mechanism and exercising it on the repo's most load-bearing document are separate decisions, and this one creates a new root-level file and edits `ROUTING.md`. Proposed to the human rather than taken.
+
+### Session close
+
+Knowledge candidates: None — conventions and tooling.
+Open flags: None.
+Push status: Pending — pushing to `main` immediately after this turn.
+
+STATUS: CHECKPOINT
+Completed: Ported Version History archival, verified with a real split plus two distinct failure controls, and closed the gap that made two earlier relayed entries cite an upstream mechanism that did not exist.
+Next: Entry 9 — the template should ship a reusable fork health-check procedure. Then Entry 8, which needs a human decision.
+Waiting for: Nothing blocking. Four open questions, all listed in the report.
+
+
 
 
 

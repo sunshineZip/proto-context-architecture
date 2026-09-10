@@ -1,6 +1,6 @@
 # Markdown Conventions
 
-Version 1.9 | 2026-09-10 | Production
+Version 1.10 | 2026-09-10 | Production
 
 ---
 
@@ -129,6 +129,22 @@ Format:
 | 1.0 | YYYY-MM-DD | Initial creation. [Brief description of what the file contained at creation.] |
 | 1.1 | YYYY-MM-DD | [What changed and why.] |
 ```
+
+### Version History archival
+
+"Never delete" and "never grow without limit" are both right, and for a handful of files they conflict. A few singleton documents are loaded on nearly every session — `ROUTING.md` at Step 1, `knowledge/domains/index.md` at Step 4 — and their changelog is paid for on every one of those loads while telling a live session nothing about how to behave. A fork measured its own: 14% of `ROUTING.md` and 46% of its domain index were history.
+
+So rows may be **moved, never removed**. Once a live table exceeds **20 rows**, rows older than the most recent 20 may be relocated verbatim into a paired `<basename>-history.md` in the same directory — `ROUTING-history.md` beside `ROUTING.md`. Leave a pointer line where they were:
+
+> Earlier history archived in `ROUTING-history.md`.
+
+The archive file carries a `## Version History` section holding the moved rows, and deliberately **no** `Version X.Y | Date | Status` header line: a pure archive has no meaningful version of its own, and a header there would trip the header-versus-latest-row check for no reason.
+
+The append-only rule is not weakened by this, because what must stay append-only is the archive and the live table **read together**. `scripts/validate.ps1` enforces exactly that: when a live table shrinks it looks for the paired file and accepts the change only if archive-plus-live still reconstructs everything that was there at the last commit. A genuine deletion, or an edit to an archived row, fails that test and errors as before.
+
+Two things that follow, and are easy to get wrong:
+- **20 rows is a threshold for permission, not an instruction.** Nothing warns at 20, and nothing should — a file sitting at 30 rows is not in violation of anything.
+- **The live table then starts mid-sequence**, at 1.15 rather than 1.0. That is correct, and the start-at-1.0 check already tolerates it: it warns only on a first row *below* 1.0.
 
 ---
 
@@ -275,3 +291,4 @@ This matters most at the moment content leaves the repo. An extract, a shared su
 | 1.7 | 2026-09-09 | §3 gained an explicit exception for domain `description.md`, which has six sections and so nominally required an Index it should never have — the file is capped at one page and loaded whole by design. Surfaced while building `knowledge/domains/_template/`, which forced the question; the shipped `example-domain/description.md` had been quietly violating the rule as written since creation. See `projects/system/session-log.md` Turn 36. |
 | 1.8 | 2026-09-10 | §4's no-backslash-escapes rule corrected: it forbade escaping a pipe absolutely with only a UNC-path exception, but a literal pipe inside a table cell must be escaped or the row silently loses columns, and a backslash inside a code span is literal content the rule's own rationale never covered. Both usages already existed and were correct in shipped files; nothing had ever exercised the rule against real content. §1's Status row now documents the Active/Retired vocabulary project TODO files actually use, which `scripts/validate.ps1` depends on and which §1 had never mentioned. Document Purpose now points at the new `knowledge/flow/convention-enforcement.md`. See `projects/system/session-log.md` Turn 38. |
 | 1.9 | 2026-09-10 | §8 gained "Where a `[SENSITIVE]` claim may sit" — tagged content belongs in a named section, never in an Executive Summary or other section `ROUTING.md` Step 4 loads by default, with a carve-out for a domain that is sensitive throughout. Closes a gap in the interaction between §8, `authoring-guidelines.md` §6 and Step 4 Level 3 that none of the three stated on its own: nothing said a tagged claim may not sit in the one section loaded on nearly every query. Relayed from a fork whose security domain does exactly that. See `projects/system/session-log.md` Turn 42. |
+| 1.10 | 2026-09-10 | §2 gained "Version History archival" — rows past the most recent 20 may be relocated verbatim to a paired `<basename>-history.md`, never deleted, with `scripts/validate.ps1` verifying that archive and live table together still reconstruct the committed history. Ported from a fork that built and tested it after measuring 14% of its `ROUTING.md` and 46% of its domain index as changelog loaded on nearly every session. This is also the mechanism several earlier relayed entries assumed already existed here; it now does. See `projects/system/session-log.md` Turn 47. |

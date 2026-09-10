@@ -1,6 +1,6 @@
 # Convention Enforcement
 
-Version 1.5 | 2026-09-10 | Production
+Version 1.6 | 2026-09-10 | Production
 
 ---
 
@@ -60,7 +60,7 @@ Source: `MarkdownConventions.md`.
 | Retirement sets Status and adds the blockquote | §1 | Checked | Status consistency across description, knowledge and the index is checked; blockquote presence is not |
 | Start all documents at 1.0 | §2 | Checked | Warning on a first Version History row below 1.0 |
 | Version and date updated on every edit | §2 | Checked | Indirectly — header version must match the latest Version History row |
-| Version History rows are append-only | §2 | Checked | Error, compared against the last commit |
+| Version History rows are append-only | §2 | Checked | Error, compared against the last commit. Rows relocated to a paired `<basename>-history.md` are accepted, but only when archive and live table together still reconstruct what was committed — relocation passes, deletion and edits to archived rows do not |
 | Version History required | §2 | Checked | Warning, scoped to root, knowledge and library documents |
 | Version History is always the last section | §2 | Gap | Position is not checked, only presence |
 | Index required over four sections | §3 | Checked | Warning. Domain description files are §3's own exception |
@@ -167,3 +167,4 @@ Highest value first. Ranked by whether the rule is mechanically decidable, how b
 | 1.3 | 2026-09-10 | §2 gained `MarkdownConventions.md` §8's new placement rule for `[SENSITIVE]` content, recorded as Judgement rather than Gap. The distinction is load-bearing here: a check is not merely unwritten, it would have missed the founding instance, because that fork classified sensitivity per section rather than per claim and the offending copy was untagged. See `projects/system/session-log.md` Turn 42. |
 | 1.4 | 2026-09-10 | §3's domain-heaviness row records that the three warnings now carry §8's actual split test in their own text, and that a domain judged cohesive has nowhere to record that judgement, so the warning recurs indefinitely. See `projects/system/session-log.md` Turn 45. |
 | 1.5 | 2026-09-10 | §4's turn-numbering row splits into two severities — a reused number stays an error, a skipped one becomes a warning, since append-only makes the latter uncorrectable. First case in this map where a check's severity is set by whether the finding can be acted on at all, rather than by how serious it is. See `knowledge/flow/turn-protocol.md` §1 and `projects/system/session-log.md` Turn 46. |
+| 1.6 | 2026-09-10 | §2's append-only row records the new Version History archival exception and what the check actually verifies. Deliberately no warning at the 20-row threshold: it grants permission to archive, it does not instruct anyone to. See `MarkdownConventions.md` §2 and `projects/system/session-log.md` Turn 47. |
